@@ -26,6 +26,12 @@ public class CaseService
 	public Response addCasa(Casa c)
 	{
 
+
+
+
+
+
+
 		// da controllare se non esiste gia, con un sync statement (tutto in uno)
 
 
