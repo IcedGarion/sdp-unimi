@@ -21,4 +21,13 @@ public class Casa
 	{
 		return name;
 	}
+
+	// definire meglio controllo campi...
+	public boolean equals(Casa other)
+	{
+		if(this.name.equals(other.name))
+			return true;
+
+		return false;
+	}
 }

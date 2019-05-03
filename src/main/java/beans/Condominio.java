@@ -12,7 +12,7 @@ import java.util.List;
 public class Condominio
 {
 
-	@XmlElement(name="casa")
+	@XmlElement(name = "casa")
 	private List<Casa> caseList;
 	private static Condominio instance;
 
@@ -22,13 +22,32 @@ public class Condominio
 	}
 
 	//singleton
-	public synchronized static Condominio getInstance(){
-		if(instance==null)
+	public synchronized static Condominio getInstance()
+	{
+		if(instance == null)
 			instance = new Condominio();
 		return instance;
 	}
 
-	public synchronized void  add(Casa c){
+	public synchronized void add(Casa c)
+	{
 		caseList.add(c);
+	}
+
+	// serve a getByName
+	private synchronized List<Casa> getCaselist() {
+		return new ArrayList<>(caseList);
+	}
+
+	// restituisce, dato il nome, una casa
+	// serve per check se esiste gia'
+	public Casa getByName(String name)
+	{
+		List<Casa> caseCopy = getCaselist();
+
+		for(Casa c: caseCopy)
+			if(c.getName().toLowerCase().equals(name.toLowerCase()))
+				return c;
+		return null;
 	}
 }

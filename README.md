@@ -5,11 +5,13 @@ Gestisce inserimento / cancellazione / GET di tutte le info sulle case.
 Assegnato al PATH /case
 
 - GET /case: restituisce l'elenco delle case
+  getCaseList(): non e' synchronized perche', a un livello piu' sotto, viene chiamato
+  Condominio.getInstance() ed e' gia' synchronized.
 
-
-
-
-
+- POST /case/add: permette di aggiungere una nuova casa al condominio
+  addCasa(Casa c): ha un synchronized statement che fa check se esiste gia' la stessa casa
+  nel condiminio + aggiunge (se non presente)
+  A livelli piu' bassi accede a Condominio.getInstance() e Condominio.getByName() -> Condominio.getCaseList() (synchronized)
 
 
 
