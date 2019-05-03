@@ -9,24 +9,22 @@ import java.util.List;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Case
+public class Condominio
 {
 
-	@XmlElement(name="condominio")
+	@XmlElement(name="casa")
 	private List<Casa> caseList;
-	private static Case instance;
+	private static Condominio instance;
 
-	public Case()
+	public Condominio()
 	{
 		caseList = new ArrayList<>();
-		caseList.add(new Casa());
-		caseList.add(new Casa("lol"));
 	}
 
 	//singleton
-	public synchronized static Case getInstance(){
+	public synchronized static Condominio getInstance(){
 		if(instance==null)
-			instance = new Case();
+			instance = new Condominio();
 		return instance;
 	}
 
