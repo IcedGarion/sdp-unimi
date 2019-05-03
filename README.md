@@ -1,3 +1,21 @@
+*CLASSI*
+
+**CaseService**
+Gestisce inserimento / cancellazione / GET di tutte le info sulle case.
+Assegnato al PATH /case
+
+- GET /case: restituisce l'elenco delle case
+
+
+
+
+
+
+
+
+
+
+
 **APPUNTI**
 
 
