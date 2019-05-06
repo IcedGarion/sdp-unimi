@@ -7,18 +7,19 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
 
-@XmlRootElement
+@XmlRootElement(name="Condominio")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Condominio
 {
 
-	@XmlElement(name = "casa")
+	@XmlElement(name = "Casa")
 	private List<Casa> caseList;
 	private static Condominio instance;
 
 	public Condominio()
 	{
 		caseList = new ArrayList<>();
+		caseList.add(new Casa("test"));
 	}
 
 	//singleton

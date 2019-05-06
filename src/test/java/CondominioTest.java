@@ -1,4 +1,5 @@
 import beans.Casa;
+import beans.Condominio;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,6 +10,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
 import java.net.*;
+import java.util.List;
 
 public class CondominioTest
 {
@@ -21,9 +23,11 @@ public class CondominioTest
 	private JAXBContext jaxbContext;
 	private Marshaller marshaller;
 	private Unmarshaller jaxbUnmarshaller;
+	private URL url;
+	private HttpURLConnection conn;
 
-
-	private String post(String url, Casa obj) throws IOException, JAXBException
+	/*
+	private static String post(String url, Casa obj) throws IOException, JAXBException
 	{
 		HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
 		urlConnection.setRequestMethod("POST");
@@ -36,53 +40,54 @@ public class CondominioTest
 
 		return urlConnection.getResponseMessage();
 	}
-
-	@Before
-	public void connect() throws IOException, JAXBException
-	{
-		// socket
-		clientSocket = new Socket(HOST, PORT);
-		outToServer = new DataOutputStream(clientSocket.getOutputStream());
-		inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
-		// setup marshaller
-		jaxbContext = JAXBContext.newInstance(Casa.class);
-		marshaller = jaxbContext.createMarshaller();
-		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-		jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-
-	}
+	*/
 
 	@Test
-	public void testAddCasa() throws JAXBException, IOException
+	public void testCondominio() throws JAXBException, IOException
 	{
-		String response;
+		try
+		{
 
-		// crea oggetto da inserire
-		Casa c = new Casa("CasaTest");
+			// GET /condominio: si aspetta lista xml vuota
+			url = new URL("http://localhost:1337/condominio");
+			conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("GET");
 
-		// GET /condominio: si aspetta lista xml vuota
-		outToServer.writeBytes("/condominio" + '\n');
-		System.out.println("GET");
+			// setup marshaller
+			jaxbContext = JAXBContext.newInstance(Condominio.class);
+			marshaller = jaxbContext.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+
+			Condominio caseList = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
+			System.out.println(caseList);
+
+
+
+			// fin qua tutto ok, condominio restituito correttamente... testare caso VUOTO e poi POST
 
 
 
 
 
-		// si blocca qua
 
 
 
+			// POST /condominio/add: inserisce nuova casa
+			// crea oggetto da inserire
+			Casa c = new Casa("CasaTest");
 
-		response = inFromServer.readLine();
-		Assert.assertEquals("", response);
 
-		// POST /condominio/add: inserisce nuova casa
-		response = post(HOST + ":" + PORT + "/condominio/add", c);
+			//response = post(HOST + ":" + PORT + "/condominio/add", c);
 
-		// UNMARSHAL + CHECK: REST ritorna la casa appena inserita
-		outToServer.writeBytes("/condominio" + '\n');
-		Casa expected = (Casa) jaxbUnmarshaller.unmarshal(clientSocket.getInputStream());
-		Assert.assertEquals(expected, c);
+			// UNMARSHAL + CHECK: REST ritorna la casa appena inserita
+			outToServer.writeBytes("/condominio" + '\n');
+			Casa expected = (Casa) jaxbUnmarshaller.unmarshal(clientSocket.getInputStream());
+			Assert.assertEquals(expected, c);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 }

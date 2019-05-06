@@ -18,7 +18,7 @@ public class CondominioService
 
 	// Restituisce elenco di tutte le case
 	@GET
-	@Produces({"application/json", "application/xml"})
+	@Produces({"application/xml"})
 	public Response getCaseList()
 	{
 		return Response.ok(Condominio.getInstance()).build();
