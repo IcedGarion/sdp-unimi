@@ -19,7 +19,6 @@ public class Condominio
 	public Condominio()
 	{
 		caseList = new ArrayList<>();
-		caseList.add(new Casa("test"));
 	}
 
 	//singleton
@@ -36,7 +35,7 @@ public class Condominio
 	}
 
 	// serve a getByName
-	private synchronized List<Casa> getCaselist() {
+	public synchronized List<Casa> getCaselist() {
 		return new ArrayList<>(caseList);
 	}
 

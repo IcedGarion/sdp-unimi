@@ -1,7 +1,8 @@
 import beans.Casa;
 import beans.Condominio;
-import org.junit.Assert;
-import org.junit.Before;
+
+import static org.junit.Assert.*;
+
 import org.junit.Test;
 
 import javax.xml.bind.JAXBContext;
@@ -10,6 +11,8 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CondominioTest
@@ -59,10 +62,9 @@ public class CondominioTest
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 			jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-			Condominio caseList = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
-			System.out.println(caseList);
-
-
+			Condominio c = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
+			assertEquals(0, c.getCaselist().size());
+/*
 
 			// fin qua tutto ok, condominio restituito correttamente... testare caso VUOTO e poi POST
 
@@ -75,15 +77,24 @@ public class CondominioTest
 
 			// POST /condominio/add: inserisce nuova casa
 			// crea oggetto da inserire
-			Casa c = new Casa("CasaTest");
+			Casa newCasa = new Casa("CasaTest");
 
 
 			//response = post(HOST + ":" + PORT + "/condominio/add", c);
 
 			// UNMARSHAL + CHECK: REST ritorna la casa appena inserita
 			outToServer.writeBytes("/condominio" + '\n');
-			Casa expected = (Casa) jaxbUnmarshaller.unmarshal(clientSocket.getInputStream());
-			Assert.assertEquals(expected, c);
+			c = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
+
+
+			for(Casa casa: c.getCaselist())
+			{
+				assertEquals(new Casa("test"), casa);
+			}
+
+			//Assert.assertEquals(expected, c);
+
+*/
 		}
 		catch(Exception e)
 		{
