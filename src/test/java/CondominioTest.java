@@ -4,7 +4,9 @@ import beans.Condominio;
 import static org.junit.Assert.*;
 
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -16,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CondominioTest
 {
 	private static final String URL = "http://localhost:1337";
@@ -65,12 +68,9 @@ public class CondominioTest
 			assertEquals(uniqueElements(expected).size(), uniqueElements(actual).size());
 
 			// check elemento x elemento
-			int i = 0;
 			for(Casa c : actual)
 			{
-				if(expected.contains(c))
-					i++;
-				else
+				if(!expected.contains(c))
 					return false;
 			}
 		}
@@ -83,32 +83,39 @@ public class CondominioTest
 	}
 
 	//mini-funzione per check array uguali
-	private boolean containsInAnyOrder(List<Casa> expected, List<Casa> actual)
+	private boolean containsInAnyOrder(List<Casa> bigList, List<Casa> testList)
 	{
 		try
 		{
 			// check elemento x elemento
-			int i = 0;
-			for(Casa c : actual)
+			for(Casa c : testList)
 			{
-				if(expected.contains(c))
-					i++;
-				else
+				if(!bigList.contains(c))
 					return false;
 			}
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
+			return false;
 		}
 
 		return true;
 	}
 
 
+	/* ======================================== TEST ======================================================= */
+	/* VANNO ESEGUITI TUTTI AD AVVIO SERVER (CIOE', UNA VOLTA ESEGUITO QUESTO FILE, NON SI PUO' ESEGUIRE DI
+	   NUOVO UN'ALTRA VOLTA SENZA AVER RIAVVIATO IL SERVER, ALTRIMENTI FALLISCONO (perche' rimarrebbero case)
+
+
+	    @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+	    Garantisce che i test vengono eseguiti in ordine di nome (testA..., testB..., testC)
+
+	*/
 
 	@Test
-	public void testCondominioEmpty() throws JAXBException, IOException
+	public void testA_GETCondominioEmpty() throws JAXBException, IOException
 	{
 		try
 		{
@@ -128,7 +135,7 @@ public class CondominioTest
 	}
 
 	@Test
-	public void testCondominioPost1() throws IOException, JAXBException
+	public void testB_SimplePost() throws IOException, JAXBException
 	{
 		Casa newCasa = new Casa("CasaTestPost");
 
@@ -141,13 +148,80 @@ public class CondominioTest
 
 		// invia casa come xml body
 		marshaller.marshal(newCasa, conn.getOutputStream());
+		assertEquals(conn.getResponseCode(), 200);
 
 		// GET /condominio: si aspetta 1 Casa test appena inserita
 		url = new URL(URL + "/condominio");
 		conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("GET");
+		assertEquals(conn.getResponseCode(), 200);
+
 		Condominio c = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
 
-		assertTrue(containsInAnyOrder(new ArrayList<Casa>(){{add(newCasa);}}, c.getCaselist()));
+		assertTrue(containsInAnyOrder(c.getCaselist(), new ArrayList<Casa>(){{add(newCasa);}}));
+
+
+		// aggiunge altra casa
+		// POST /condominio/add: inserisce nuova casa
+		Casa newCasa2 = new Casa("CasaTestPost2");
+		url = new URL(URL + "/condominio/add");
+		conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("POST");
+		conn.setRequestProperty("content-type", "application/xml");
+		conn.setDoOutput(true);
+
+		// invia casa come xml body
+		marshaller.marshal(newCasa2, conn.getOutputStream());
+		assertEquals(conn.getResponseCode(), 200);
+
+		// chiede case
+		url = new URL(URL + "/condominio");
+		conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("GET");
+		assertEquals(conn.getResponseCode(), 200);
+
+		// check 2 case di prima
+		c = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
+		assertTrue(containsInAnyOrder(c.getCaselist(), new ArrayList<Casa>(){{add(newCasa); add(newCasa2);}}));
+	}
+
+
+	@Test
+	public void testC_ConflictPost() throws IOException, JAXBException
+	{
+		Casa newCasa = new Casa("CasaConflictTest");
+
+		// POST /condominio/add: inserisce nuova casa
+		url = new URL(URL + "/condominio/add");
+		conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("POST");
+		conn.setRequestProperty("content-type", "application/xml");
+		conn.setDoOutput(true);
+
+		// invia casa come xml body
+		marshaller.marshal(newCasa, conn.getOutputStream());
+		assertEquals(conn.getResponseCode(), 200);
+
+		// identica post casa
+		// POST /condominio/add: inserisce nuova casa
+		url = new URL(URL + "/condominio/add");
+		conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("POST");
+		conn.setRequestProperty("content-type", "application/xml");
+		conn.setDoOutput(true);
+
+		// invia casa come xml body
+		marshaller.marshal(newCasa, conn.getOutputStream());
+		assertEquals(conn.getResponseCode(), 409);
+
+		// GET /condominio: si aspetta 1 Casa test appena inserita
+		url = new URL(URL + "/condominio");
+		conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("GET");
+		assertEquals(conn.getResponseCode(), 200);
+
+		Condominio c = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
+		assertEquals(3, c.getCaselist().size());
+		assertTrue(containsInAnyOrder(c.getCaselist(), new ArrayList<Casa>(){{add(newCasa);}}));
 	}
 }
