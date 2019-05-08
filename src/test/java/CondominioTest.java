@@ -3,6 +3,7 @@ import beans.Condominio;
 
 import static org.junit.Assert.*;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import javax.xml.bind.JAXBContext;
@@ -17,8 +18,7 @@ import java.util.List;
 
 public class CondominioTest
 {
-	private static final String HOST = "localhost";
-	private static final int PORT = 1337;
+	private static final String URL = "http://localhost:1337";
 
 	private Socket clientSocket;
 	private BufferedReader inFromServer;
@@ -28,6 +28,17 @@ public class CondominioTest
 	private Unmarshaller jaxbUnmarshaller;
 	private URL url;
 	private HttpURLConnection conn;
+
+	@Before
+	public void connections() throws JAXBException
+	{
+		// setup marshaller
+		jaxbContext = JAXBContext.newInstance(Condominio.class);
+		marshaller = jaxbContext.createMarshaller();
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+	}
+
 
 	/*
 	private static String post(String url, Casa obj) throws IOException, JAXBException
@@ -45,55 +56,87 @@ public class CondominioTest
 	}
 	*/
 
+	// serve per containsInAnyOrder
+	private ArrayList<Casa> uniqueElements(List<Casa> arg)
+	{
+		ArrayList<Casa> ret = new ArrayList<>();
+
+		for(Casa c: arg)
+		{
+			if(!ret.contains(c))
+				ret.add(c);
+		}
+
+		return ret;
+	}
+
+	//mini-funzione per check array uguali
+	private boolean containsInAnyOrder(List<Casa> expected, List<Casa> actual)
+	{
+		// check size
+		assertEquals(expected.size(), actual.size());
+		// check size elementi unici
+		assertEquals(uniqueElements(expected).size(), uniqueElements(actual).size());
+
+		// check elemento x elemento
+		int i = 0;
+		for(Casa c: actual)
+		{
+			if(expected.contains(c))
+				i++;
+			else
+				return false;
+		}
+
+		return true;
+	}
+
+
 	@Test
 	public void testCondominio() throws JAXBException, IOException
 	{
 		try
 		{
-
+/*
 			// GET /condominio: si aspetta lista xml vuota
-			url = new URL("http://localhost:1337/condominio");
+			url = new URL(URL + "/condominio");
 			conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 
-			// setup marshaller
-			jaxbContext = JAXBContext.newInstance(Condominio.class);
-			marshaller = jaxbContext.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-			jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-
 			Condominio c = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
 			assertEquals(0, c.getCaselist().size());
-/*
-
-			// fin qua tutto ok, condominio restituito correttamente... testare caso VUOTO e poi POST
 
 
 
+			HttpURLConnection urlConnection = (HttpURLConnection) new URL(URL + "/condominio/add").openConnection();
+			urlConnection.setRequestMethod("POST");
+			urlConnection.setDoOutput(true);
+			urlConnection.setRequestProperty("content-type", "application/xml");
+			marshaller.marshal(new Casa("CasaTest2"), urlConnection.getOutputStream());
 
-
-
-
+*/
+			System.out.println("asdasdasdad");
 
 			// POST /condominio/add: inserisce nuova casa
-			// crea oggetto da inserire
-			Casa newCasa = new Casa("CasaTest");
+			url = new URL(URL + "/condominio/add");
+			conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("content-type", "application/xml");
+			conn.setDoOutput(true);
 
 
-			//response = post(HOST + ":" + PORT + "/condominio/add", c);
+			marshaller.marshal(new Casa("CasaTest2"), conn.getOutputStream());
 
-			// UNMARSHAL + CHECK: REST ritorna la casa appena inserita
-			outToServer.writeBytes("/condominio" + '\n');
-			c = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
-
-
-			for(Casa casa: c.getCaselist())
-			{
-				assertEquals(new Casa("test"), casa);
-			}
-
-			//Assert.assertEquals(expected, c);
-
+			System.out.println(conn.getResponseMessage());
+			System.out.println(conn.getResponseCode());
+/*
+			// GET /condominio: si aspetta 1 Casa test appena inserita
+			url = new URL(URL + "/condominio");
+			conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("GET");
+			Condominio c = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
+			System.out.println(c);
+			assertTrue(containsInAnyOrder(new ArrayList<Casa>(){{add(new Casa("test"));}}, c.getCaselist()));
 */
 		}
 		catch(Exception e)

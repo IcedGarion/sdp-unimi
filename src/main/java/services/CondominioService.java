@@ -21,13 +21,14 @@ public class CondominioService
 	@Produces({"application/xml"})
 	public Response getCaseList()
 	{
+
 		return Response.ok(Condominio.getInstance()).build();
 	}
 
 	// Aggiunge una nuova casa (solo se non e' gia' presente)
 	@Path("add")
 	@POST
-	@Consumes({"application/json", "application/xml"})
+	@Consumes({"application/xml"})
 	public Response addCasa(Casa c)
 	{
 		synchronized(addLock)

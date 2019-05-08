@@ -19,6 +19,7 @@ public class Condominio
 	public Condominio()
 	{
 		caseList = new ArrayList<>();
+		caseList.add(new Casa("asd"));
 	}
 
 	//singleton
@@ -49,5 +50,14 @@ public class Condominio
 			if(c.getName().toLowerCase().equals(name.toLowerCase()))
 				return c;
 		return null;
+	}
+
+
+	@Override
+	public String toString()
+	{
+		return "Condominio{" +
+				"caseList=" + caseList +
+				'}';
 	}
 }
