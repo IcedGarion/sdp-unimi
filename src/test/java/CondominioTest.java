@@ -115,7 +115,7 @@ public class CondominioTest
 	*/
 
 	@Test
-	public void testA_GETCondominioEmpty() throws JAXBException, IOException
+	public void testA_SimpleGetEmpty() throws JAXBException, IOException
 	{
 		try
 		{
@@ -148,7 +148,7 @@ public class CondominioTest
 
 		// invia casa come xml body
 		marshaller.marshal(newCasa, conn.getOutputStream());
-		assertEquals(conn.getResponseCode(), 200);
+		assertEquals(conn.getResponseCode(), 201);
 
 		// GET /condominio: si aspetta 1 Casa test appena inserita
 		url = new URL(URL + "/condominio");
@@ -159,6 +159,9 @@ public class CondominioTest
 		Condominio c = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
 
 		assertTrue(containsInAnyOrder(c.getCaselist(), new ArrayList<Casa>(){{add(newCasa);}}));
+
+
+		System.out.println(conn.getResponseCode() + "\n" + conn.getResponseMessage());
 
 
 		// aggiunge altra casa
@@ -172,9 +175,9 @@ public class CondominioTest
 
 		// invia casa come xml body
 		marshaller.marshal(newCasa2, conn.getOutputStream());
-		assertEquals(conn.getResponseCode(), 200);
+		assertEquals(conn.getResponseCode(), 201);
 
-		// chiede case
+		// GET
 		url = new URL(URL + "/condominio");
 		conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("GET");
@@ -187,7 +190,7 @@ public class CondominioTest
 
 
 	@Test
-	public void testC_ConflictPost() throws IOException, JAXBException
+	public void testC_SimpleConflictPost() throws IOException, JAXBException
 	{
 		Casa newCasa = new Casa("CasaConflictTest");
 
@@ -200,7 +203,7 @@ public class CondominioTest
 
 		// invia casa come xml body
 		marshaller.marshal(newCasa, conn.getOutputStream());
-		assertEquals(conn.getResponseCode(), 200);
+		assertEquals(conn.getResponseCode(), 201);
 
 		// identica post casa
 		// POST /condominio/add: inserisce nuova casa
@@ -223,5 +226,45 @@ public class CondominioTest
 		Condominio c = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
 		assertEquals(3, c.getCaselist().size());
 		assertTrue(containsInAnyOrder(c.getCaselist(), new ArrayList<Casa>(){{add(newCasa);}}));
+	}
+
+	@Test
+	public void testD_SimpleDelete() throws IOException, JAXBException
+	{
+		// rimuove una di quelle appena aggiunte dal test su ^
+		Casa newCasa = new Casa("CasaConflictTest");
+
+		// POST /condominio/delete
+		url = new URL(URL + "/condominio/delete");
+		conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("POST");
+		conn.setRequestProperty("content-type", "application/xml");
+		conn.setDoOutput(true);
+		// invia casa come xml body
+		marshaller.marshal(newCasa, conn.getOutputStream());
+		assertEquals(conn.getResponseCode(), 204);
+
+
+		// GET solita per verificare che lo ha rimosso
+		url = new URL(URL + "/condominio");
+		conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("GET");
+		assertEquals(conn.getResponseCode(), 200);
+		// check 2 case di prima cancellazione
+		Condominio c = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
+		assertEquals(2, c.getCaselist().size());
+		assertFalse(containsInAnyOrder(c.getCaselist(), new ArrayList<Casa>(){{add(newCasa);}}));
+
+
+		// rimuove casa che non esiste piu'
+		url = new URL(URL + "/condominio/delete");
+		conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("POST");
+		conn.setRequestProperty("content-type", "application/xml");
+		conn.setDoOutput(true);
+
+		// invia casa come xml body
+		marshaller.marshal(newCasa, conn.getOutputStream());
+		assertEquals(conn.getResponseCode(), 404);
 	}
 }
