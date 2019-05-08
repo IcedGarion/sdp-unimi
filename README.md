@@ -1,20 +1,38 @@
+**DOMANDE**
+
+- ServerAmministratore (REST) e GestioneStatistiche sono 2 separati?  
+  main in cui viene lanciato rest + lanciato thread invio statistiche?
+
+- 
+
+
+
+
+
 *CLASSI*
 
-**CaseService**
-Gestisce inserimento / cancellazione / GET di tutte le info sulle case.
-Assegnato al PATH /case
+**ServerAmministratore**
+Fa partire il server REST, e lancia il thread di invio statistiche.
 
-- GET /case: restituisce l'elenco delle case
+
+**CondominioService**
+Gestisce inserimento / cancellazione / GET di tutte le info sulle case.
+Assegnato al PATH /condominio
+
+- GET /condominio: restituisce l'elenco delle case (200 OK)
   getCaseList(): non e' synchronized perche', a un livello piu' sotto, viene chiamato
   Condominio.getInstance() ed e' gia' synchronized.
 
-- POST /case/add: permette di aggiungere una nuova casa al condominio
+- POST /condominio/add: permette di aggiungere una nuova casa al condominio
+  409 conflict se esiste gia'; 201 created se ok
+
   addCasa(Casa c): ha un synchronized statement che fa check se esiste gia' la stessa casa
   nel condiminio + aggiunge (se non presente)
   A livelli piu' bassi accede a Condominio.getInstance() e Condominio.getByName() -> Condominio.getCaseList() (synchronized)
 
-
-
+- DELETE /condominio/delete: rimuove una casa dal condominio
+  404 not found se non esiste; 204 no content se ok
+  simile a POST.
 
 
 

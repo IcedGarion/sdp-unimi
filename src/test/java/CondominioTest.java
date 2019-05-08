@@ -155,14 +155,8 @@ public class CondominioTest
 		conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("GET");
 		assertEquals(conn.getResponseCode(), 200);
-
 		Condominio c = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
-
 		assertTrue(containsInAnyOrder(c.getCaselist(), new ArrayList<Casa>(){{add(newCasa);}}));
-
-
-		System.out.println(conn.getResponseCode() + "\n" + conn.getResponseMessage());
-
 
 		// aggiunge altra casa
 		// POST /condominio/add: inserisce nuova casa
