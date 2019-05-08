@@ -19,7 +19,6 @@ public class Condominio
 	public Condominio()
 	{
 		caseList = new ArrayList<>();
-		caseList.add(new Casa("asd"));
 	}
 
 	//singleton
