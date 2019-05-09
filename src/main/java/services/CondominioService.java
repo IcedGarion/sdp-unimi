@@ -36,7 +36,7 @@ public class CondominioService
 		synchronized(addLock)
 		{
 			// esiste gia'
-			if(Condominio.getInstance().getByName(c.getName()) != null)
+			if(Condominio.getInstance().getByName(c.getId()) != null)
 			{
 				return Response.status(Response.Status.CONFLICT).build();
 			}
@@ -59,7 +59,7 @@ public class CondominioService
 		synchronized(addLock)
 		{
 			// esiste: puo' rimuovere
-			if(Condominio.getInstance().getByName(c.getName()) != null)
+			if(Condominio.getInstance().getByName(c.getId()) != null)
 			{
 				Condominio.getInstance().delete(c);
 				return Response.noContent().build();

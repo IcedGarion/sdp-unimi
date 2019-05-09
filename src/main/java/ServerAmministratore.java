@@ -17,10 +17,5 @@ public class ServerAmministratore
 		server.start();
 		System.out.println("Server running!");
 		System.out.println("Server started on: http://" + HOST + ":" + PORT);
-
-
-		// lancia thread invio statistiche
-
-
 	}
 }

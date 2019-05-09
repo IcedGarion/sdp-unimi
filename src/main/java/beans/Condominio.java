@@ -51,7 +51,7 @@ public class Condominio
 		List<Casa> caseCopy = getCaselist();
 
 		for(Casa c: caseCopy)
-			if(c.getName().toLowerCase().equals(name.toLowerCase()))
+			if(c.getId().toLowerCase().equals(name.toLowerCase()))
 				return c;
 		return null;
 	}
