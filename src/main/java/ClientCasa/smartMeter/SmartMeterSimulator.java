@@ -1,4 +1,7 @@
-public class SmartMeterSimulator extends Simulator {
+package ClientCasa.smartMeter;
+
+public class SmartMeterSimulator extends Simulator
+{
 
     private final double A = 0.4;
     private final double W = 0.01;
