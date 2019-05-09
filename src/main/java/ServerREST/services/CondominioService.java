@@ -1,7 +1,7 @@
-package services;
+package ServerREST.services;
 
-import beans.Casa;
-import beans.Condominio;
+import ServerREST.beans.Casa;
+import ServerREST.beans.Condominio;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;

@@ -3,7 +3,11 @@
 - ServerAmministratore (REST) e GestioneStatistiche sono 2 separati?  
   main in cui viene lanciato rest + lanciato thread invio statistiche?
 
-- 
+- POST create casa non ritorna niente, anche se su progetto dice
+  che dovrebbe tornare l'elenco delle case (come GET), perche'
+  il metodo Response.created() accetta solo URI e non un oggetto,
+  quindi non si puo' ritornare il condominio.... a meno di cambiare
+  response code della POST da created() a ok();
 
 
 

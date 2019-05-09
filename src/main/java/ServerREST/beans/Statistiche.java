@@ -1,4 +1,4 @@
-package beans;
+package ServerREST.beans;
 
 public class Statistiche
 {

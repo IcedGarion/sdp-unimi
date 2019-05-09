@@ -1,5 +1,5 @@
-import beans.Casa;
-import beans.Condominio;
+import ServerREST.beans.Casa;
+import ServerREST.beans.Condominio;
 
 import static org.junit.Assert.*;
 
@@ -15,7 +15,6 @@ import javax.xml.bind.Unmarshaller;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

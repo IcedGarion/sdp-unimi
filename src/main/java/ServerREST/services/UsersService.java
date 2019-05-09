@@ -1,8 +1,8 @@
-package services;
+package ServerREST.services;
 
 
-import beans.User;
-import beans.Users;
+import ServerREST.beans.User;
+import ServerREST.beans.Users;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
