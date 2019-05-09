@@ -1,5 +1,7 @@
 package ClientCasa;
 
+import ClientCasa.smartMeter.SmartMeterSimulator;
+
 public class CasaApp
 {
 	private static final String SERVER_IP = "localhost";
@@ -15,7 +17,7 @@ public class CasaApp
 	public static void main(String args[])
 	{
 		// avvia thread simulatore smart meter
-		SimulatorThread simulator = new SimulatorThread(SIMULATOR_DELAY);
+		SmartMeterSimulator simulator = new SmartMeterSimulator(new SimulatorBuffer());
 		simulator.start();
 
 

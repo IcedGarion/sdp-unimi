@@ -1,3 +1,19 @@
+**TODO**
+
+- StatisticheService accetta statistiche da Casa (simile a CondominioService=
+  e le aggiunge a struttura Statistiche (forse serve anche classe Measurement in beans?)
+
+- SimulatorBuffer.addMeasurement() fa chiamate REST a StatisticheService
+  per aggiungere queste statistiche
+
+- Measure andrebbe new Beans: da definire con le annotations tutti i suoi campi
+  per poi fargli fare lo stesso lavoro XML jaxb tipo Casa
+
+  Statistiche = Condominio.
+  Measure = Casa.
+
+
+
 **DOMANDE**
 
 - ServerAmministratore (REST) e GestioneStatistiche sono 2 separati?  
@@ -9,7 +25,12 @@
   quindi non si puo' ritornare il condominio.... a meno di cambiare
   response code della POST da created() a ok();
 
+- Buffer simulatore va gestito con sync??? In realta' ogni thread ha il suo... (quindi no?)
 
+- Questione Statistiche, media e sliding window...
+
+
+[ - Codice simulatore e' stato modificato aggiungendo dichiarazione di package. ]
 
 
 
@@ -38,6 +59,15 @@ Assegnato al PATH /condominio
   404 not found se non esiste; 204 no content se ok
   simile a POST.
 
+
+
+**CasaApp**
+Fa partire SmartMeterSimulator; si registra al server amministratore (a condominio); chiede elenco case da salvarsi;
+gestisce rete p2p; ha interfaccia per power boost e per uscire da Condominio.
+
+- SmartMeterSimulator periodicamente chiama SimulatorBuffer.addMeasurement().
+  Questo metodo si salva in un buffer interno le misurazioni; inoltre dialoga col server REST per inviare queste
+  statistiche.
 
 
 **APPUNTI**
