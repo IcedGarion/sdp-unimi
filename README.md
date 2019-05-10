@@ -1,10 +1,16 @@
 **TODO**
 
+- thread media (CASA) che periodicamente calcola media buffer,
+  ( = SimulatorBuffer SYNC) 
+
+  -- addMeasurement() aggiunge sempre in coda al buffer
+  -- thread media prende i primi 24 in testa, calcola media, rimuove i primi 12 in testa
+
+
+  (QUA SOTTO: decidere struttura REST statistiche)
+
 - StatisticheService accetta statistiche da Casa (simile a CondominioService=
   e le aggiunge a struttura Statistiche (forse serve anche classe Measurement in beans?)
-
-- SimulatorBuffer.addMeasurement() fa chiamate REST a StatisticheService
-  per aggiungere queste statistiche
 
 - Measure andrebbe new Beans: da definire con le annotations tutti i suoi campi
   per poi fargli fare lo stesso lavoro XML jaxb tipo Casa
@@ -14,24 +20,65 @@
 
 
 
+**SLIDING WINDOW**
+- all'inizio riempi buffer fino a 24 misurazioni
+A) poi calcoli la media con le 24
+- non butti via tutte le precedenti ma tieni le ultime 12
+- torni a riempire fino a 24
+- goto A)
+
+
+Quando si inviano statistiche va guardato bene il timestamp:
+devono essere sempre progressivi 
+
+
+**STATISTICHE**
+vanno separate locali e globali: classi diverse o comunque lock diversi!
+per inserire locali non devi bloccare locali e viceversa.
+poi XML non contiene tutto insieme (condominio+globali + case+locali)
+ma separa: condominio resta com'era, tutto a posto.
+Statistiche xml ha: globale + <id casa + lista locali>, <id casa + lista locali>....
+cosi' mantieni scollegate le 2 cose.
+
+
+*GLOBALI*
+diverse soluzioni: (va evitata ridondanza)
+- chiedi lock distribuito e chi lo ottiene manda lui le statistiche 
+- elezione coordinatore (e se esce? nuova elezione)
+
+
+
+
+**CORRENTE EXTRA**
+TOKEN RING
+con wait e notify va gestita una coda di attesa:
+tanti richiedono BOOST ma solo 2 alla volta possono usarlo.
+Quando uno finisce, rilascia lock e entra il prossimo
+(Syncro per chiamare localmente un metodo)
+
+
+=================================================================================================
+
 **DOMANDE**
 
-- ServerAmministratore (REST) e GestioneStatistiche sono 2 separati?  
-  main in cui viene lanciato rest + lanciato thread invio statistiche?
 
+**ESAME**
+- schema architettura da spiegare, con anche casi limite
+- esecuzione per vedere se va tutto
+- guarda codice, parti sync
+
+
+==================================================================================================
+**DOCUMENTAZIONE**
+
+*APPUNTI / SCELTE*
 - POST create casa non ritorna niente, anche se su progetto dice
   che dovrebbe tornare l'elenco delle case (come GET), perche'
   il metodo Response.created() accetta solo URI e non un oggetto,
   quindi non si puo' ritornare il condominio.... a meno di cambiare
   response code della POST da created() a ok();
 
-- Buffer simulatore va gestito con sync??? In realta' ogni thread ha il suo... (quindi no?)
-
-- Questione Statistiche, media e sliding window...
-
-
-[ - Codice simulatore e' stato modificato aggiungendo dichiarazione di package. ]
-
+- Codice simulatore e' stato modificato aggiungendo dichiarazione di package
 
 
 *CLASSI*

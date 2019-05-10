@@ -6,15 +6,6 @@ import ClientCasa.smartMeter.Measurement;
 import java.util.ArrayList;
 import java.util.List;
 
-// unica classe da toccare per gestire le misurazioni
-// simulator thread chiama addMeasurement qua sotto;
-// questa le aggiunge al BUFFER e poi dialoga col server REST aggiungendo medie...
-
-
-
-
-// da gestire tutto con sync? (vedi Condominio)
-// forse non serve sync perche' ogni thread casa hai il suo buffer e nessuno glielo tocca
 public class SimulatorBuffer implements Buffer
 {
 	// struttura dati da gestire con tutti i problemi di sincronizzazione
@@ -26,16 +17,40 @@ public class SimulatorBuffer implements Buffer
 		theBuffer = new ArrayList<>();
 	}
 
-	// metodo sync, o comunque sync statement ?????
+	public synchronized int size()
+	{
+		return theBuffer.size();
+	}
+
+	// ritorna i primi 24 (calcolo media)
+	public synchronized List<Measurement> get24()
+	{
+		List<Measurement> ret = new ArrayList<>();
+		int i = 0;
+
+		for(Measurement m: theBuffer)
+		{
+			if(i >= 24 || i >= theBuffer.size())
+				break;
+
+			ret.add(m);
+			i++;
+		}
+
+		return ret	;
+	}
+
+	// rimuove i primi 12 (calcolo media)
+	public synchronized void remove12()
+	{
+		for(int i = 0; i < 12 && i < theBuffer.size(); i++)
+			theBuffer.remove(0);
+	}
+
+	// chiamato dal simulatore smart meter vero e proprio: aggiunge sempre al buffer e basta
 	@Override
-	public void addMeasurement(Measurement m)
+	public synchronized void addMeasurement(Measurement m)
 	{
 		theBuffer.add(m);
-
-		System.out.println(m);
-
-
-		// chiamate REST per aggiungere statistiche
-
 	}
 }

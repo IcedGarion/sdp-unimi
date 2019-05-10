@@ -17,10 +17,13 @@ public class CasaApp
 	public static void main(String args[])
 	{
 		// avvia thread simulatore smart meter
-		SmartMeterSimulator simulator = new SmartMeterSimulator(new SimulatorBuffer());
+		SimulatorBuffer myBuffer = new SimulatorBuffer();
+		SmartMeterSimulator simulator = new SmartMeterSimulator(myBuffer);
 		simulator.start();
 
-
+		// avvia thread che invia periodicamente le medie
+		MeanThread mean = new MeanThread(myBuffer, CASA_ID);
+		mean.start();
 
 		// si registra al server amministratore
 
