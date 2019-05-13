@@ -1,22 +1,25 @@
 **TODO**
 
-- thread media (CASA) che periodicamente calcola media buffer,
-  ( = SimulatorBuffer SYNC) 
+- Controllare se a livello XML (REST GET StatisticheLocali) la HashMap visualizza correttamente.
 
-  -- addMeasurement() aggiunge sempre in coda al buffer
-  -- thread media prende i primi 24 in testa, calcola media, rimuove i primi 12 in testa
+- MeanThread manda statistica locale a StatisticheService.
+  StatisticheService crea CasaMeasurement (in realta' da creare quando Casa si registra).
+  -- data una MeanMeasurement ricevuta da MeanThread: StatisticheService cerca nella sua lista
+  di misure CasaMeasurement un elemento con ID_CASA corrispondente a quello segnato da MeanThread,
+  e aggiunge in coda alla lista CasaMeasurement.MeanMeasurement la nuova Measurement ricevuta.
 
-
-  (QUA SOTTO: decidere struttura REST statistiche)
+  Cosi' si ha:
+  <idCasa>
+    <MeanMeasurement> ... </>
+    <MeanMeasurement> ... </>
+  </idCasa>
+ 
+  <idCasa>
+  ... ecc
 
 - StatisticheService accetta statistiche da Casa (simile a CondominioService=
   e le aggiunge a struttura Statistiche (forse serve anche classe Measurement in beans?)
 
-- Measure andrebbe new Beans: da definire con le annotations tutti i suoi campi
-  per poi fargli fare lo stesso lavoro XML jaxb tipo Casa
-
-  Statistiche = Condominio.
-  Measure = Casa.
 
 
 
@@ -33,7 +36,7 @@ devono essere sempre progressivi
 
 
 **STATISTICHE**
-vanno separate locali e globali: classi diverse o comunque lock diversi!
+Vanno separate locali e globali: classi diverse o comunque lock diversi!
 per inserire locali non devi bloccare locali e viceversa.
 poi XML non contiene tutto insieme (condominio+globali + case+locali)
 ma separa: condominio resta com'era, tutto a posto.
@@ -116,6 +119,33 @@ gestisce rete p2p; ha interfaccia per power boost e per uscire da Condominio.
   Questo metodo si salva in un buffer interno le misurazioni; inoltre dialoga col server REST per inviare queste
   statistiche.
 
+
+**STATISTICHE**
+MeanThread lanciato da CasaApp calcola periodicamente la media di 24 misurazioni, (cancella le prime 12)
+e invia a StatisticheLocali la media calcolata, con timestamp minore e maggiore fra i 24 considerati.
+
+- MeanThread manda statistica locale a StatisticheService.
+  StatisticheService crea CasaMeasurement (in realta' creato mapping vuoto quando Casa si registra).
+  -- data una MeanMeasurement ricevuta da MeanThread: StatisticheService cerca nella sua lista / HashMap
+  di misure CasaMeasurement un elemento con ID_CASA corrispondente a quello segnato da MeanThread,
+  e aggiunge in coda alla lista CasaMeasurement.MeanMeasurement la nuova Measurement ricevuta.
+
+  Cosi' si ha:
+  <idCasa>
+    <MeanMeasurement> ... </>
+    <MeanMeasurement> ... </>
+  </idCasa>
+ 
+  <idCasa>
+  ... ecc
+
+
+**StatisticheLocali**
+Come Condominio, e' il contenitore (singleton) per accedere alle statistiche locali delle varie case.
+Contiene una lista di CasaMeasurement: ogni elemento di questo oggetto ha un ID casa e poi una lista
+di MeanMeasurement, cioe' una lista di medie calcolate. (Calcolo fatto da CasaApp - MeanThread)
+
+(Vedi variante HashMap)
 
 **APPUNTI**
 

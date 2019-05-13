@@ -13,8 +13,8 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
-    <!-- https://mvnrepository.com/artifact/com.sun.jersey/jersey-server -->
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/com.sun.jersey/jersey-server -->
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-server</artifactId>

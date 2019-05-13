@@ -1,5 +1,7 @@
 package ServerREST.services;
 
+import ServerREST.beans.MeanMeasurement;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -18,5 +20,9 @@ public class StatisticheService
 	{
 		return Response.ok("statistiche").build();
 	}
+
+
+	aggiunta nuova statistica: riceve ID_CASA + MeanMeasurement da MeanThread;
+	chiama StatisticheLocali.addMeanMeasurement
 
 }

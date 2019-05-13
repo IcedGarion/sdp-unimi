@@ -2,6 +2,7 @@ package ServerREST.services;
 
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
+import ServerREST.beans.MeanMeasurement;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -47,6 +48,10 @@ public class CondominioService
 				return Response.created(new URI("")).build();
 			}
 		}
+
+		creata la casa, chiede il lock per le statistiche locali (da aggiungere)
+		crea un nuovo mapping, nella hashmap StatisticheLocali.caseMeasurements con ID della nuova casa appena insreita,
+			e la corrispondente lista MeanMeasurement vuota.
 	}
 
 	// Aggiunge una nuova casa (solo se non e' gia' presente)

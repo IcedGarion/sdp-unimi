@@ -1,5 +1,12 @@
 package ClientCasa;
 
+import ClientCasa.smartMeter.Measurement;
+import ServerREST.beans.MeanMeasurement;
+import ServerREST.beans.StatisticheLocali;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class MeanThread extends Thread
 {
 	private SimulatorBuffer buffer;
@@ -16,18 +23,46 @@ public class MeanThread extends Thread
 	@Override
 	public void run()
 	{
-		if(buffer.size() >= 24)
+		List<Measurement> sensorData;
+		Measurement element;
+		MeanMeasurement computedMeasure;
+		double mean;
+		long timestampMin, timestampMax;
+
+		while(true)
 		{
-			// calcola media
-			vedi metodi buffer.get24() e buffer.remove12() per calcolo media
+			// all'inizio aspetta finche' il buffer si riempie
+			if(buffer.size() >= 24)
+			{
+				// prende i primi 24
+				sensorData = buffer.getTopBuffer();
 
-			// rimuove i primi 12
+				element = sensorData.get(0);
+				timestampMax = timestampMin = element.getTimestamp();
+				mean = element.getValue();
 
+				// calcola media e intanto prende il timestamp MIN + MAX
+				for(Measurement m: sensorData)
+				{
+					mean += m.getValue();
 
+					if(m.getTimestamp() < timestampMin)
+					{
+						timestampMin = m.getTimestamp();
+					}
+					else if(m.getTimestamp() > timestampMax)
+					{
+						timestampMax = m.getTimestamp();
+					}
+				}
 
-			// chiamate REST per aggiungere statistiche
-			// usa casaId e la media appena calcolata
+				// crea oggetto da mandare a REST
+				mean = mean / sensorData.size();
+				computedMeasure = new MeanMeasurement(mean, timestampMin, timestampMax);
+
+				//chiamata REST a StatisticheService passando ID_CASA + MeanMeasurement
+				POST("http://StatisticheLocali", computedMeasure);
+			}
 		}
-
 	}
 }

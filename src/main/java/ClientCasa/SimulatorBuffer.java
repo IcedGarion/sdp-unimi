@@ -11,6 +11,8 @@ public class SimulatorBuffer implements Buffer
 	// struttura dati da gestire con tutti i problemi di sincronizzazione
 	// vedi tipo aggiunta nuova casa, in CondominioService
 	private List<Measurement> theBuffer;
+	private final int WINDOW_SIZE = 24;
+	private final double OVERLAPPING = WINDOW_SIZE*0.5;
 
 	public SimulatorBuffer()
 	{
@@ -23,28 +25,28 @@ public class SimulatorBuffer implements Buffer
 	}
 
 	// ritorna i primi 24 (calcolo media)
-	public synchronized List<Measurement> get24()
+	public synchronized List<Measurement> getTopBuffer()
 	{
 		List<Measurement> ret = new ArrayList<>();
-		int i = 0;
 
-		for(Measurement m: theBuffer)
+		for(int i=0; i < WINDOW_SIZE && i < theBuffer.size(); i++)
 		{
-			if(i >= 24 || i >= theBuffer.size())
-				break;
-
-			ret.add(m);
-			i++;
+			ret.add(theBuffer.get(i));
 		}
 
-		return ret	;
+		// dopo aver preso i primi 24, cancella i primi 12
+		removeTopBuffer();
+
+		return ret;
 	}
 
 	// rimuove i primi 12 (calcolo media)
-	public synchronized void remove12()
+	private synchronized void removeTopBuffer()
 	{
-		for(int i = 0; i < 12 && i < theBuffer.size(); i++)
+		for(int i = 0; i < OVERLAPPING && i < theBuffer.size(); i++)
+		{
 			theBuffer.remove(0);
+		}
 	}
 
 	// chiamato dal simulatore smart meter vero e proprio: aggiunge sempre al buffer e basta
