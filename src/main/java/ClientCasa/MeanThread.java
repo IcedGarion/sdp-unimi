@@ -61,6 +61,8 @@ public class MeanThread extends Thread
 				computedMeasure = new MeanMeasurement(mean, timestampMin, timestampMax);
 
 				//chiamata REST a StatisticheService passando ID_CASA + MeanMeasurement
+
+				passa come parametro URL id CASA e come POST BODY la measurement
 				POST("http://StatisticheLocali", computedMeasure);
 			}
 		}

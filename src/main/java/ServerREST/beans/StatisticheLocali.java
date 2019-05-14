@@ -32,13 +32,22 @@ public class StatisticheLocali
 	}
 
 	// riceve una misurazione: deve inserirla in coda alla lista misure sotto la casa giusta
-	public synchronized void addMeanMeasurement(String casaId, MeanMeasurement m)
+	public synchronized boolean addMeanMeasurement(String casaId, MeanMeasurement m)
 	{
-		// check se non esiste?
-		casaMeasurements.get(casaId).add(m);
+		List<MeanMeasurement> l = casaMeasurements.get(casaId);
+
+		// check se non esiste
+		if(l != null)
+		{
+			l.add(m);
+			return true;
+		}
+		else
+			return false;
 	}
 
 	//public synchronized List<MeanMeasurement> getMeasurelist() {
 	//	return new ArrayList<>(casaMeasurements);
 	//}
+
 }

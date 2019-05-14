@@ -15,9 +15,6 @@ public class CondominioService
 	// LOCKS
 	public static Object addLock = new Object();
 
-	// altre eventuali variabili per i lock
-	// public static volatile int someCount = 0;
-
 
 	// Restituisce elenco di tutte le case
 	@GET

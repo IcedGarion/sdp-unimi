@@ -1,26 +1,10 @@
 **TODO**
 
 - Controllare se a livello XML (REST GET StatisticheLocali) la HashMap visualizza correttamente.
+  (StatisticheLocali in generale)
 
-- MeanThread manda statistica locale a StatisticheService.
-  StatisticheService crea CasaMeasurement (in realta' da creare quando Casa si registra).
-  -- data una MeanMeasurement ricevuta da MeanThread: StatisticheService cerca nella sua lista
-  di misure CasaMeasurement un elemento con ID_CASA corrispondente a quello segnato da MeanThread,
-  e aggiunge in coda alla lista CasaMeasurement.MeanMeasurement la nuova Measurement ricevuta.
-
-  Cosi' si ha:
-  <idCasa>
-    <MeanMeasurement> ... </>
-    <MeanMeasurement> ... </>
-  </idCasa>
- 
-  <idCasa>
-  ... ecc
-
-- StatisticheService accetta statistiche da Casa (simile a CondominioService=
-  e le aggiunge a struttura Statistiche (forse serve anche classe Measurement in beans?)
-
-
+- SYNCHRONIZED da aggiungere in posti (es. in services)
+  Metodi sync invece che sync statement nei services? anche nelle letture?
 
 
 **SLIDING WINDOW**
