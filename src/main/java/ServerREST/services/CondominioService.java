@@ -49,6 +49,24 @@ public class CondominioService
 		creata la casa, chiede il lock per le statistiche locali (da aggiungere)
 		crea un nuovo mapping, nella hashmap StatisticheLocali.caseMeasurements con ID della nuova casa appena insreita,
 			e la corrispondente lista MeanMeasurement vuota.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	}
 
 	// Aggiunge una nuova casa (solo se non e' gia' presente)

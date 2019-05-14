@@ -1,7 +1,17 @@
 **TODO**
 
-- Controllare se a livello XML (REST GET StatisticheLocali) la HashMap visualizza correttamente.
-  (StatisticheLocali in generale)
+- Testare StatisticheLocali - casaApp
+
+- CondominioService deve aggiungere lista vuota statistiche (vedi classe)
+
+
+
+
+
+- Avanti con CasaApp e POI AdminApp
+
+- Aggiungi LOG ovunque (Service e Apps)
+
 
 - SYNCHRONIZED da aggiungere in posti (es. in services)
   Metodi sync invece che sync statement nei services? anche nelle letture?
