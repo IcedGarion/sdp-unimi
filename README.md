@@ -4,15 +4,12 @@
 
 - CondominioService deve aggiungere lista vuota statistiche (vedi classe)
 
-
-
-
-
+- Status code migliori per Statistiche.addMeasure()?
 - Avanti con CasaApp e POI AdminApp
 
+
 - Aggiungi LOG ovunque (Service e Apps)
-
-
+- Togli eventuali System.out.println()
 - SYNCHRONIZED da aggiungere in posti (es. in services)
   Metodi sync invece che sync statement nei services? anche nelle letture?
 

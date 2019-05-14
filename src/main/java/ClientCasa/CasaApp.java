@@ -11,7 +11,7 @@ public class CasaApp
 	private static final String SERVER_IP = "localhost";
 	private static final int SERVER_PORT = 1337;
 
-	private static final String CASA_ID = "CasaApp1";
+	private static final String CASA_ID = "CASA_ID_123123";
 	private static final String CASA_IP = "localhost";
 	private static final int CASA_PORT = 8081;
 

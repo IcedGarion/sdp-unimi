@@ -41,27 +41,21 @@ public class StatisticheService
 	@Consumes({"application/xml"})
 	public Response addStatistica(@PathParam("casaId") String casaId, MeanMeasurement m) throws URISyntaxException
 	{
-		LOGGER.log(Level.INFO, "statistiche/locali/add/" + casaId);
-
-		System.out.println(casaId);
-		System.out.println(m);
-		System.out.flush();
-
-
-		non stampa!
+		LOGGER.log(Level.INFO, "POST statistiche/locali/add/" + casaId);
 
 		synchronized(addLock)
 		{
-			// Casa esiste gia: inserisce
+			// Casa esiste gia: inserisce aggiornando la lista delle misurazioni per quella casa
 			if(StatisticheLocali.getInstance().addMeanMeasurement(casaId, m))
 			{
 				return Response.created(new URI("")).build();
 			}
-			// Casa non esiste
+			// Casa non esiste: crea lista vuota corrispondente al suo ID
 			else
 			{
 				return Response.status(Response.Status.NOT_FOUND).build();
 			}
 		}
 	}
+
 }

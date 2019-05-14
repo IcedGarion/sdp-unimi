@@ -96,8 +96,6 @@ public class MeanThread extends Thread
 					// invia casa come xml body
 					marshaller.marshal(computedMeasure, conn.getOutputStream());
 					LOGGER.log(Level.INFO, "{ " + casaId + " } Statistic sent");
-
-					non da errori nell'invio pero' poi non stampa sul server! test invece funziona!
 				}
 			}
 		}
