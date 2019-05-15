@@ -2,7 +2,6 @@ package ServerREST.services;
 
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
-import ServerREST.beans.MeanMeasurement;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -13,7 +12,7 @@ import java.net.URISyntaxException;
 public class CondominioService
 {
 	// LOCKS
-	public static Object addLock = new Object();
+	public static Object condominioLock = new Object();
 
 
 	// Restituisce elenco di tutte le case
@@ -21,7 +20,10 @@ public class CondominioService
 	@Produces({"application/xml"})
 	public Response getCaseList()
 	{
-		return Response.ok(Condominio.getInstance()).build();
+		synchronized(condominioLock)
+		{
+			return Response.ok(Condominio.getInstance()).build();
+		}
 	}
 
 	// Aggiunge una nuova casa (solo se non e' gia' presente)
@@ -31,7 +33,7 @@ public class CondominioService
 	@Consumes({"application/xml"})
 	public Response addCasa(Casa c) throws URISyntaxException
 	{
-		synchronized(addLock)
+		synchronized(condominioLock)
 		{
 			// esiste gia'
 			if(Condominio.getInstance().getByName(c.getId()) != null)
@@ -54,7 +56,7 @@ public class CondominioService
 	@Consumes({"application/xml"})
 	public Response removeCasa(Casa c)
 	{
-		synchronized(addLock)
+		synchronized(condominioLock)
 		{
 			// esiste: puo' rimuovere
 			if(Condominio.getInstance().getByName(c.getId()) != null)

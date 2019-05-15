@@ -56,7 +56,7 @@ public class StatisticheLocaliTest
 		assertEquals(201, conn.getResponseCode());
 
 		// check se, ritornando tutte le statistiche, ritrova oggetto di partenza
-		url = new URL(URL + "/statisticheLocali/get/0");
+		url = new URL(URL + "/statisticheLocali/get/0/10");
 		conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("GET");
 		assertEquals(conn.getResponseCode(), 200);

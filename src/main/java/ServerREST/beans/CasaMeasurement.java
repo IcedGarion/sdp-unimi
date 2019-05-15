@@ -12,6 +12,8 @@ import java.util.List;
 // e' solo una classe contenitore di lista<MeanMeasurement>
 // serviva per unmarshal StatisticheLocali (Al posto di HashMap<String, List<MeanMeasurement>>, usa HashMap<String, CasaMeasurement>)
 
+// non serve synchronized perche' ci si accede solo da StatisticheLocali, gia' sync
+
 @XmlRootElement(name="CasaMeasurement")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CasaMeasurement

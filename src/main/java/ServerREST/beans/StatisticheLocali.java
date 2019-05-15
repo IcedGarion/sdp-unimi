@@ -1,20 +1,13 @@
 package ServerREST.beans;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 
-//@XmlRootElement(name="Statistche")
-//@XmlAccessorType(XmlAccessType.FIELD)
+// Simile a condominio ma senza annotazioni perch' non viene mai ritornato intero come oggetto da REST (/jaxb)
+// invece si accede solo al metodo getLastN, che torna CasaMeasurement: e' quello l'oggetto da annotare
+
 public class StatisticheLocali
 {
 	// Hashmap ID_CASA: <Lista di misure medie>
-//	@XmlElement(name = "CasaMeasurements")
 	private HashMap<String, CasaMeasurement> casaMeasurements;
 
 	private static StatisticheLocali instance;
@@ -53,9 +46,9 @@ public class StatisticheLocali
 	}
 
 	// interfaccia admin: ritorna le ultime n statistiche di una certa casa
-	public synchronized CasaMeasurement getLastN(String casaId, int n)
+	public synchronized CasaMeasurement getLastN(String casaId, String n)
 	{
 		// prende l'elemento corrispondente a casaId e aggiunge in coda (chiama metodo di CasaMeasurement) (= list)
-		return casaMeasurements.get(casaId).getLastN(n);
+		return casaMeasurements.get(casaId).getLastN(Integer.parseInt(n));
 	}
 }

@@ -1,37 +1,37 @@
 package ServerREST.services;
 
-import ClientCasa.MeanThread;
-import ServerREST.beans.Casa;
-import ServerREST.beans.Condominio;
 import ServerREST.beans.MeanMeasurement;
 import ServerREST.beans.StatisticheLocali;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-// aggiunta nuove statistiche da parte delle singole case (o a livello condominio)
-// locali / globali
+// aggiunta nuove statistiche da parte delle singole case (locali)
 // + interfaccia admin per leggere ultime n statistiche
 
 @Path("statisticheLocali")
 public class StatisticheService
 {
 	private static final Logger LOGGER = Logger.getLogger(StatisticheService.class.getName());
-	public static Object addLock = new Object();
+	public static Object localStatLock = new Object();
 
 	// Admin interface: ritorna le ultime n statistiche relative ad una casaId
 	// Ritorna CasaMeasurement, una lista di MeanMeasurement
-	@Path("get/{casaId}")
+	@Path("get/{casaId}/{n}")
 	@GET
 	@Produces({"application/xml"})
-	public Response getNStatistiche(@PathParam("casaId") String casaId)
+	public Response getNStatistiche(@PathParam("casaId") String casaId, @PathParam("n") String n)
 	{
-		return Response.ok(StatisticheLocali.getInstance().getLastN(casaId, 10)).build();
+		LOGGER.log(Level.INFO, "GET statistiche/locali/get/" + casaId + "/" + n + "\n");
+
+		synchronized(localStatLock)
+		{
+			return Response.ok(StatisticheLocali.getInstance().getLastN(casaId, n)).build();
+		}
 	}
 
 
@@ -43,9 +43,9 @@ public class StatisticheService
 	@Consumes({"application/xml"})
 	public Response addStatistica(@PathParam("casaId") String casaId, MeanMeasurement m) throws URISyntaxException
 	{
-		LOGGER.log(Level.INFO, "POST statistiche/locali/add/" + casaId);
+		LOGGER.log(Level.INFO, "POST statistiche/locali/add/" + casaId + "\n");
 
-		synchronized(addLock)
+		synchronized(localStatLock)
 		{
 			// Casa esiste gia: inserisce aggiornando la lista delle misurazioni per quella casa
 			if(StatisticheLocali.getInstance().addMeanMeasurement(casaId, m))
