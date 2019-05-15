@@ -25,11 +25,12 @@ public class StatisticheService
 	public static Object addLock = new Object();
 
 	// Admin interface: ritorna le statistiche
+	@Path("get/{casaId}")
 	@GET
 	@Produces({"application/xml"})
-	public Response getStatistiche()
+	public Response getNStatistiche(@PathParam("casaId") String casaId)
 	{
-		return Response.ok(StatisticheLocali.getInstance()).build();
+		return Response.ok(StatisticheLocali.getInstance().getLastN(casaId, 10)).build();
 	}
 
 
