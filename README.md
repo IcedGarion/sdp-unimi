@@ -2,9 +2,6 @@
 
 - Testare StatisticheLocali - casaApp
 
-- CondominioService deve aggiungere lista vuota statistiche (vedi classe)
-
-- Status code migliori per Statistiche.addMeasure()?
 - Avanti con CasaApp e POI AdminApp
 
 
@@ -116,10 +113,8 @@ MeanThread lanciato da CasaApp calcola periodicamente la media di 24 misurazioni
 e invia a StatisticheLocali la media calcolata, con timestamp minore e maggiore fra i 24 considerati.
 
 - MeanThread manda statistica locale a StatisticheService.
-  StatisticheService crea CasaMeasurement (in realta' creato mapping vuoto quando Casa si registra).
-  -- data una MeanMeasurement ricevuta da MeanThread: StatisticheService cerca nella sua lista / HashMap
-  di misure CasaMeasurement un elemento con ID_CASA corrispondente a quello segnato da MeanThread,
-  e aggiunge in coda alla lista CasaMeasurement.MeanMeasurement la nuova Measurement ricevuta.
+  Se e' la prima volta (StatisticheLocali non ha in memoria id casa), crea mapping vuoto fra id casa e lista MeanMeasurement.
+  Altrimenti aggiunge in coda alla lista (MAP) MeanMeasurement la nuova Measurement ricevuta.
 
   Cosi' si ha:
   <idCasa>

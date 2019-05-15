@@ -29,12 +29,18 @@ public class CasaApp
 		simulator.start();
 		LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Smart meted launched");
 
+
+		// si registra al server amministratore
+
+
+
+
+
+
 		// avvia thread che invia periodicamente le medie
 		MeanThread mean = new MeanThread(myBuffer, CASA_ID);
 		mean.start();
 		LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Local statistic thread launched");
-
-		// si registra al server amministratore
 
 		// chiede elenco case
 

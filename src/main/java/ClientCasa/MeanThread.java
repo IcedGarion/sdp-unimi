@@ -6,6 +6,8 @@ import ServerREST.beans.MeanMeasurement;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
@@ -96,6 +98,9 @@ public class MeanThread extends Thread
 					// invia casa come xml body
 					marshaller.marshal(computedMeasure, conn.getOutputStream());
 					LOGGER.log(Level.INFO, "{ " + casaId + " } Statistic sent");
+
+					BufferedReader t = new BufferedReader(new InputStreamReader(System.in));
+					t.readLine();
 				}
 			}
 		}

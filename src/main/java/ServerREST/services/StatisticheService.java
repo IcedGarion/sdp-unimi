@@ -35,7 +35,7 @@ public class StatisticheService
 
 	// Aggiunta nuova statistica locale media: riceve ID_CASA + MeanMeasurement da MeanThread;
 	// chiama Statistiche_Locali.addMeanMeasurement
-	// 404 NOT FOUND se la casa non si e' ancora registrata; 201 CREATED se ok
+	// 201 CREATED se la casa non si era ancora registrata (crea lista vuota); 204 NO CONTENT se ok
 	@Path("add/{casaId}")
 	@POST
 	@Consumes({"application/xml"})
@@ -48,12 +48,13 @@ public class StatisticheService
 			// Casa esiste gia: inserisce aggiornando la lista delle misurazioni per quella casa
 			if(StatisticheLocali.getInstance().addMeanMeasurement(casaId, m))
 			{
-				return Response.created(new URI("")).build();
+				return Response.noContent().build();
 			}
 			// Casa non esiste: crea lista vuota corrispondente al suo ID
 			else
 			{
-				return Response.status(Response.Status.NOT_FOUND).build();
+				StatisticheLocali.getInstance().addNewCasa(casaId);
+				return Response.created(new URI("")).build();
 			}
 		}
 	}

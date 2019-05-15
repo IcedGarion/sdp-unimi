@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -31,12 +32,17 @@ public class StatisticheLocali
 		return instance;
 	}
 
+	public synchronized void addNewCasa(String casaId)
+	{
+		casaMeasurements.put(casaId, new ArrayList<>());
+	}
+
 	// riceve una misurazione: deve inserirla in coda alla lista misure sotto la casa giusta
 	public synchronized boolean addMeanMeasurement(String casaId, MeanMeasurement m)
 	{
 		List<MeanMeasurement> l = casaMeasurements.get(casaId);
 
-		// check se non esiste
+		// check se esiste + inserisce
 		if(l != null)
 		{
 			l.add(m);
@@ -46,8 +52,24 @@ public class StatisticheLocali
 			return false;
 	}
 
-	//public synchronized List<MeanMeasurement> getMeasurelist() {
-	//	return new ArrayList<>(casaMeasurements);
-	//}
+	// interfaccia admin: ritorna le ultime n statistiche di una certa casa
+	public synchronized List<MeanMeasurement> getLastN(String casaId, int n)
+	{
+		// crea copia lista inversa e inserisce i primi n in lista ret
+		List<MeanMeasurement> ret = new ArrayList<>();
+		List<MeanMeasurement> reverseMeasures = new ArrayList<>(casaMeasurements.get(casaId));
+		Collections.reverse(reverseMeasures);
 
+		int i = 0;
+		for(MeanMeasurement m: reverseMeasures)
+		{
+			if(i > n)
+				break;
+
+			ret.add(m);
+			i++;
+		}
+
+		return ret;
+	}
 }
