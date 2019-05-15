@@ -1,6 +1,14 @@
 **TODO**
 
+- Doppio parametro per StatisticheService.getNStatistiche: casaId e N
+- Sistema il casino di commenti CasaMeasurement
+- Avanti coi Test statistiche
+
 - Testare StatisticheLocali - casaApp
+
+  
+
+
 
 - Avanti con CasaApp e POI AdminApp
 

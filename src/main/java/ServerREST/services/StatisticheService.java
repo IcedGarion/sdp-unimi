@@ -24,7 +24,8 @@ public class StatisticheService
 	private static final Logger LOGGER = Logger.getLogger(StatisticheService.class.getName());
 	public static Object addLock = new Object();
 
-	// Admin interface: ritorna le statistiche
+	// Admin interface: ritorna le ultime n statistiche relative ad una casaId
+	// Ritorna CasaMeasurement, una lista di MeanMeasurement
 	@Path("get/{casaId}")
 	@GET
 	@Produces({"application/xml"})

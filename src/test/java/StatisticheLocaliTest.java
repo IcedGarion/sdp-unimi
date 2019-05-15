@@ -1,3 +1,4 @@
+import ServerREST.beans.CasaMeasurement;
 import ServerREST.beans.Condominio;
 import ServerREST.beans.MeanMeasurement;
 import org.junit.Before;
@@ -31,7 +32,7 @@ public class StatisticheLocaliTest
 	public void connections() throws JAXBException
 	{
 		// setup marshaller
-		jaxbContext = JAXBContext.newInstance(MeanMeasurement.class);
+		jaxbContext = JAXBContext.newInstance(CasaMeasurement.class);
 		marshaller = jaxbContext.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 		jaxbUnmarshaller = jaxbContext.createUnmarshaller();
@@ -43,6 +44,7 @@ public class StatisticheLocaliTest
 		// manda una nuova misurazione per una casa che non esiste ancora
 		MeanMeasurement computedMeasure = new MeanMeasurement(0, 1, 2);
 		MeanMeasurement retrievedMeasure;
+		CasaMeasurement retrievedMeasurements;
 
 		url = new URL(URL + "/statisticheLocali/add/0");
 		conn = (HttpURLConnection) url.openConnection();
@@ -54,21 +56,18 @@ public class StatisticheLocaliTest
 		assertEquals(201, conn.getResponseCode());
 
 		// check se, ritornando tutte le statistiche, ritrova oggetto di partenza
-
-		casino per unmarshalling list (non è nei beans! non sa come fare)
-		dovresti ritornare tutto statisticheLocali
-
-
-
 		url = new URL(URL + "/statisticheLocali/get/0");
 		conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("GET");
 		assertEquals(conn.getResponseCode(), 200);
 
-		retrievedMeasure = (MeanMeasurement) jaxbUnmarshaller.unmarshal(conn.getInputStream());
-		assertEquals(computedMeasure.getMean(), retrievedMeasure.getMean());
-		assertEquals(computedMeasure.getBeginTimestamp(), retrievedMeasure.getBeginTimestamp());
-		assertEquals(computedMeasure.getEndTimestamp(), retrievedMeasure.getEndTimestamp());
+		retrievedMeasurements = (CasaMeasurement) jaxbUnmarshaller.unmarshal(conn.getInputStream());
+		for(MeanMeasurement m: retrievedMeasurements.getMeasurementList())
+		{
+			assertEquals(computedMeasure.getMean(), m.getMean());
+			assertEquals(computedMeasure.getBeginTimestamp(), m.getBeginTimestamp());
+			assertEquals(computedMeasure.getEndTimestamp(), m.getEndTimestamp());
+		}
 	}
 
 

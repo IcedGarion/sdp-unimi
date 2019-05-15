@@ -9,13 +9,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-@XmlRootElement(name="Statistche")
-@XmlAccessorType(XmlAccessType.FIELD)
+//@XmlRootElement(name="Statistche")
+//@XmlAccessorType(XmlAccessType.FIELD)
 public class StatisticheLocali
 {
 	// Hashmap ID_CASA: <Lista di misure medie>
-	@XmlElement(name = "CasaMeasurements")
-	private HashMap<String, List<MeanMeasurement>> casaMeasurements;
+//	@XmlElement(name = "CasaMeasurements")
+	private HashMap<String, CasaMeasurement> casaMeasurements;
 
 	private static StatisticheLocali instance;
 
@@ -34,13 +34,13 @@ public class StatisticheLocali
 
 	public synchronized void addNewCasa(String casaId)
 	{
-		casaMeasurements.put(casaId, new ArrayList<>());
+		casaMeasurements.put(casaId, new CasaMeasurement());
 	}
 
 	// riceve una misurazione: deve inserirla in coda alla lista misure sotto la casa giusta
 	public synchronized boolean addMeanMeasurement(String casaId, MeanMeasurement m)
 	{
-		List<MeanMeasurement> l = casaMeasurements.get(casaId);
+		CasaMeasurement l = casaMeasurements.get(casaId);
 
 		// check se esiste + inserisce
 		if(l != null)
@@ -53,23 +53,9 @@ public class StatisticheLocali
 	}
 
 	// interfaccia admin: ritorna le ultime n statistiche di una certa casa
-	public synchronized List<MeanMeasurement> getLastN(String casaId, int n)
+	public synchronized CasaMeasurement getLastN(String casaId, int n)
 	{
-		// crea copia lista inversa e inserisce i primi n in lista ret
-		List<MeanMeasurement> ret = new ArrayList<>();
-		List<MeanMeasurement> reverseMeasures = new ArrayList<>(casaMeasurements.get(casaId));
-		Collections.reverse(reverseMeasures);
-
-		int i = 0;
-		for(MeanMeasurement m: reverseMeasures)
-		{
-			if(i > n)
-				break;
-
-			ret.add(m);
-			i++;
-		}
-
-		return ret;
+		// prende l'elemento corrispondente a casaId e aggiunge in coda (chiama metodo di CasaMeasurement) (= list)
+		return casaMeasurements.get(casaId).getLastN(n);
 	}
 }
