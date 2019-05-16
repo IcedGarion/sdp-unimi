@@ -48,7 +48,16 @@ public class StatisticheLocali
 	// interfaccia admin: ritorna le ultime n statistiche di una certa casa
 	public synchronized CasaMeasurement getLastN(String casaId, String n)
 	{
+		CasaMeasurement casa = casaMeasurements.get(casaId);
+
 		// prende l'elemento corrispondente a casaId e aggiunge in coda (chiama metodo di CasaMeasurement) (= list)
-		return casaMeasurements.get(casaId).getLastN(Integer.parseInt(n));
+		if(casa == null)
+		{
+			return null;
+		}
+		else
+		{
+			return casaMeasurements.get(casaId).getLastN(Integer.parseInt(n));
+		}
 	}
 }

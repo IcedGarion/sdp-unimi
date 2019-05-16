@@ -97,10 +97,9 @@ public class MeanThread extends Thread
 
 					// invia casa come xml body
 					marshaller.marshal(computedMeasure, conn.getOutputStream());
-					LOGGER.log(Level.INFO, "{ " + casaId + " } Statistic sent");
 
-					BufferedReader t = new BufferedReader(new InputStreamReader(System.in));
-					t.readLine();
+					assert conn.getResponseCode() == 201 || conn.getResponseCode() == 204: "MeanThread: Send statistics failed ( " + conn.getResponseCode() + " " + conn.getResponseMessage() + " )";
+					LOGGER.log(Level.INFO, "{ " + casaId + " } Statistic sent");
 				}
 			}
 		}

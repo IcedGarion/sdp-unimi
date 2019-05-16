@@ -1,5 +1,6 @@
 package ServerREST.services;
 
+import ServerREST.beans.CasaMeasurement;
 import ServerREST.beans.MeanMeasurement;
 import ServerREST.beans.StatisticheLocali;
 
@@ -19,18 +20,27 @@ public class StatisticheService
 	private static final Logger LOGGER = Logger.getLogger(StatisticheService.class.getName());
 	public static Object localStatLock = new Object();
 
-	// Admin interface: ritorna le ultime n statistiche relative ad una casaId
-	// Ritorna CasaMeasurement, una lista di MeanMeasurement
+	// Ritorna le ultime n statistiche relative ad una casaId (CasaMeasurement, una lista di MeanMeasurement)
+	// 404 NOT FOUND se non esistono ancora statistiche associate a casaID; 200 OK altrimenti
 	@Path("get/{casaId}/{n}")
 	@GET
 	@Produces({"application/xml"})
 	public Response getNStatistiche(@PathParam("casaId") String casaId, @PathParam("n") String n)
 	{
-		LOGGER.log(Level.INFO, "GET statistiche/locali/get/" + casaId + "/" + n + "\n");
+		LOGGER.log(Level.INFO, "GET statisticheLocali/get/" + casaId + "/" + n + "\n");
+		CasaMeasurement stats;
 
 		synchronized(localStatLock)
 		{
-			return Response.ok(StatisticheLocali.getInstance().getLastN(casaId, n)).build();
+			stats = StatisticheLocali.getInstance().getLastN(casaId, n);
+			if(stats == null)
+			{
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}
+			else
+			{
+				return Response.ok(stats).build();
+			}
 		}
 	}
 
@@ -43,7 +53,7 @@ public class StatisticheService
 	@Consumes({"application/xml"})
 	public Response addStatistica(@PathParam("casaId") String casaId, MeanMeasurement m) throws URISyntaxException
 	{
-		LOGGER.log(Level.INFO, "POST statistiche/locali/add/" + casaId + "\n");
+		LOGGER.log(Level.INFO, "POST statisticheLocali/add/" + casaId + "\n");
 
 		synchronized(localStatLock)
 		{

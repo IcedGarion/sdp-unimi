@@ -12,10 +12,7 @@ import javax.xml.bind.Unmarshaller;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.ProtocolException;
-import java.net.Socket;
-import java.net.URL;
+import java.net.*;
 
 import static org.junit.Assert.assertEquals;
 
@@ -39,7 +36,7 @@ public class StatisticheLocaliTest
 		jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 	}
 
-	//@Test
+	@Test
 	public void simpleEmptyStatisticheTest() throws IOException, JAXBException
 	{
 		// manda una nuova misurazione per una casa che non esiste ancora
@@ -149,5 +146,15 @@ public class StatisticheLocaliTest
 		assertEquals(computedMeasure2.getMean(), retrievedMeasurements.getMeasurementList().get(1).getMean(), 0.01);
 		assertEquals(computedMeasure2.getBeginTimestamp(), retrievedMeasurements.getMeasurementList().get(1).getBeginTimestamp());
 		assertEquals(computedMeasure2.getEndTimestamp(), retrievedMeasurements.getMeasurementList().get(1).getEndTimestamp());
+	}
+
+	@Test
+	public void EmptyStatsTest() throws IOException, JAXBException
+	{
+		// chiede stats per una casa che non esiste
+		url = new URL(URL + "/statisticheLocali/get/CasaCheNonEsiste/10");
+		conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("GET");
+		assertEquals(conn.getResponseCode(), 404);
 	}
 }

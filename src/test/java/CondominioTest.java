@@ -22,9 +22,6 @@ public class CondominioTest
 {
 	private static final String URL = "http://localhost:1337";
 
-	private Socket clientSocket;
-	private BufferedReader inFromServer;
-	private DataOutputStream outToServer;
 	private JAXBContext jaxbContext;
 	private Marshaller marshaller;
 	private Unmarshaller jaxbUnmarshaller;

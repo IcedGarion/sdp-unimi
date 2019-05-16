@@ -1,21 +1,28 @@
 **TODO**
 
-- SORT lista MeanMeasurement (CasaMEasure) prima di restituirla? basata su timestamp
-- Avanti coi Test statistiche
-
-- Testare StatisticheLocali - casaApp
-
-  
+- Testare StatisticheLocali - casaApp  
 
 
+- Admin APP
+- Avanti con CasaApp (rete p2p)
 
-- Avanti con CasaApp e POI AdminApp
 
-
+**REFACTOR**
 - Aggiungi LOG ovunque (Service e Apps)
 - Togli eventuali System.out.println()
 - SYNCHRONIZED da aggiungere in posti (es. in services)
   Metodi sync invece che sync statement nei services? anche nelle letture?
+
+- FILE CONFIG
+
+
+
+** NBBBBBB **
+Quando mandi una richiesta al server, se non leggi la risposta
+(conn.getResponseMessage / Code) e' come se non l'avessi inviata... va ignorata boh
+
+
+
 
 
 **SLIDING WINDOW**
