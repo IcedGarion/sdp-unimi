@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -54,6 +55,25 @@ public class CasaMeasurement
 			ret.add(m);
 			i++;
 		}
+
+		// ordina la lista in base ai timestamp di fine, prima di ritornarla
+		Collections.sort(ret, new Comparator<MeanMeasurement>()
+		{
+			@Override
+			public int compare(MeanMeasurement o1, MeanMeasurement o2)
+			{
+				long time1 = o1.getEndTimestamp(), time2 = o2.getEndTimestamp();
+				if(time1 < time2)
+				{
+					return -1;
+				}
+				else if(time1 > time2)
+				{
+					return 1;
+				}
+				else return 0;
+			}
+		});
 
 		return new CasaMeasurement(ret);
 	}

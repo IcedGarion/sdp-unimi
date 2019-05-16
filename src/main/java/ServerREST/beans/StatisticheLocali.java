@@ -1,5 +1,6 @@
 package ServerREST.beans;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 // Simile a condominio ma senza annotazioni perch' non viene mai ritornato intero come oggetto da REST (/jaxb)
@@ -25,11 +26,6 @@ public class StatisticheLocali
 		return instance;
 	}
 
-	public synchronized void addNewCasa(String casaId)
-	{
-		casaMeasurements.put(casaId, new CasaMeasurement());
-	}
-
 	// riceve una misurazione: deve inserirla in coda alla lista misure sotto la casa giusta
 	public synchronized boolean addMeanMeasurement(String casaId, MeanMeasurement m)
 	{
@@ -41,8 +37,12 @@ public class StatisticheLocali
 			l.add(m);
 			return true;
 		}
+		// se non esiste prima crea vuoto e poi inserisce
 		else
+		{
+			casaMeasurements.put(casaId, new CasaMeasurement(new ArrayList<MeanMeasurement>(){{ add(m);}}));
 			return false;
+		}
 	}
 
 	// interfaccia admin: ritorna le ultime n statistiche di una certa casa

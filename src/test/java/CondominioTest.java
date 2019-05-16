@@ -41,46 +41,6 @@ public class CondominioTest
 		jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 	}
 
-
-	// serve per containsInAnyOrder
-	private ArrayList<Casa> uniqueElements(List<Casa> arg)
-	{
-		ArrayList<Casa> ret = new ArrayList<>();
-
-		for(Casa c: arg)
-		{
-			if(!ret.contains(c))
-				ret.add(c);
-		}
-
-		return ret;
-	}
-
-	//mini-funzione per check array uguali
-	private boolean containsExactlyInAnyOrder(List<Casa> expected, List<Casa> actual)
-	{
-		try
-		{
-			// check size
-			assertEquals(expected.size(), actual.size());
-			// check size elementi unici
-			assertEquals(uniqueElements(expected).size(), uniqueElements(actual).size());
-
-			// check elemento x elemento
-			for(Casa c : actual)
-			{
-				if(!expected.contains(c))
-					return false;
-			}
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-
-		return true;
-	}
-
 	//mini-funzione per check array uguali
 	private boolean containsInAnyOrder(List<Casa> bigList, List<Casa> testList)
 	{

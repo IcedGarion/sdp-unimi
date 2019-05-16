@@ -1,7 +1,6 @@
 **TODO**
 
-- Doppio parametro per StatisticheService.getNStatistiche: casaId e N
-- Sistema il casino di commenti CasaMeasurement
+- SORT lista MeanMeasurement (CasaMEasure) prima di restituirla? basata su timestamp
 - Avanti coi Test statistiche
 
 - Testare StatisticheLocali - casaApp

@@ -52,10 +52,9 @@ public class StatisticheService
 			{
 				return Response.noContent().build();
 			}
-			// Casa non esiste: crea lista vuota corrispondente al suo ID
+			// Casa non esiste: messaggio di risposta differente
 			else
 			{
-				StatisticheLocali.getInstance().addNewCasa(casaId);
 				return Response.created(new URI("")).build();
 			}
 		}
