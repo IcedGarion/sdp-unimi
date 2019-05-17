@@ -27,7 +27,6 @@ public class CasaApp
 	private static final int CASA_PORT = 8081;
 
 	private static final int RETRY_TIMEOUT = 250;
-	private static final int SIMULATOR_DELAY = 500;
 	private static final Logger LOGGER = Logger.getLogger(CasaApp.class.getName());
 
 
@@ -35,7 +34,8 @@ public class CasaApp
 	{
 		LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Started Casa Application with ID " + CASA_ID);
 
-		// setup
+		//////////////
+		/*	SETUP	*/
 		JAXBContext jaxbContext = JAXBContext.newInstance(Condominio.class);
 		Marshaller marshaller = jaxbContext.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
@@ -43,7 +43,9 @@ public class CasaApp
 		URL url;
 		HttpURLConnection conn;
 
-		// avvia thread simulatore smart meter
+
+		///////////////////////////////////////////////////////////
+		/*	AVVIA THREAD SIMULATORE / SMART METER + MEAN THREAD	*/
 		SimulatorBuffer myBuffer = new SimulatorBuffer();
 		SmartMeterSimulator simulator = new SmartMeterSimulator(myBuffer);
 		simulator.start();
@@ -55,8 +57,9 @@ public class CasaApp
 		LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Local statistic thread launched");
 
 
-		// si registra al server amministratore
-		Casa newCasa = new Casa(CASA_ID, CASA_IP, CASA_PORT);
+		///////////////////////////////////////////////////
+		/*	REGISTRA LA CASA AL SERVER AMMINISTRATORE	*/
+		Casa myCasa = new Casa(CASA_ID, CASA_IP, CASA_PORT);
 
 		// POST /condominio/add: inserisce nuova casa
 		// continua a tentare di connettersi al server, se non riesce riprova
@@ -71,7 +74,7 @@ public class CasaApp
 				conn.setDoOutput(true);
 
 				// invia casa come xml body
-				marshaller.marshal(newCasa, conn.getOutputStream());
+				marshaller.marshal(myCasa, conn.getOutputStream());
 
 				assert conn.getResponseCode() == 201: "CasaApp: Condominio register failed ( " + conn.getResponseCode() + " " + conn.getResponseMessage() + " )";
 				LOGGER.log(Level.INFO, "Casa registered to Admin Server with code: " + conn.getResponseCode() + " " + conn.getResponseMessage());
@@ -85,7 +88,8 @@ public class CasaApp
 		}
 
 
-		// Richiede elenco case
+		///////////////////////////////
+		/*	RICHIEDE ELENCO CASE	*/
 		Condominio condominio;
 		while(true)
 		{
@@ -114,8 +118,10 @@ public class CasaApp
 		// lancia nuovo thread che si occupa delle statistiche globali
 
 
+
+
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		// interfaccia cli per power boost + uscita
+		/*	INTERFACCIA CLI BOOST + EXIT	*/
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 		String choice;
 		while(true)
@@ -123,17 +129,28 @@ public class CasaApp
 			System.out.println("0) POWER BOOST\n1) EXIT\n");
 			choice = input.readLine();
 
-			if(choice.equals("0"))
+			// EXIT
+			// termina tutti i thread + informa il server che la casa sta per uscire
+			if(choice.equals("1"))
 			{
-				// TODO: to be implemented (power boost)
-				System.out.println("To be implemented");
-			}
-			// termina tutti i thread; informa il serverr che la casa sta per uscire
-			else if(choice.equals("1"))
-			{
+				// post per cancellare la casa
+				url = new URL(SERVER_URL + "/condominio/delete");
+				conn = (HttpURLConnection) url.openConnection();
+				conn.setRequestMethod("POST");
+				conn.setRequestProperty("content-type", "application/xml");
+				conn.setDoOutput(true);
+				marshaller.marshal(myCasa, conn.getOutputStream());
+				assert conn.getResponseCode()== 204: "Error in removing casa " + CASA_ID;
+
+				// termina i suoi thread
 				mean.interrupt();
 				simulator.interrupt();
 				break;
+			}
+			else if(choice.equals("0"))
+			{
+				// TODO: to be implemented (power boost)
+				System.out.println("To be implemented");
 			}
 			else
 			{

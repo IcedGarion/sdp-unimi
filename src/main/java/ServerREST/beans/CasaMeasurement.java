@@ -49,7 +49,7 @@ public class CasaMeasurement
 		int i = 0;
 		for(MeanMeasurement m: reverseMeasures)
 		{
-			if(i > n)
+			if(i >= n)
 				break;
 
 			ret.add(m);
