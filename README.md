@@ -1,7 +1,6 @@
 **TODO**
 
 (- Thread P2P puo' funzionare?)
-- Condominio DELETE!
 
 - ADMIN AAAAAPPPPPPP
 
