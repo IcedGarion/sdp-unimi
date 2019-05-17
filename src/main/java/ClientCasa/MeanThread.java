@@ -100,6 +100,14 @@ public class MeanThread extends Thread
 
 					assert conn.getResponseCode() == 201 || conn.getResponseCode() == 204: "MeanThread: Send statistics failed ( " + conn.getResponseCode() + " " + conn.getResponseMessage() + " )";
 					LOGGER.log(Level.INFO, "{ " + casaId + " } Statistic sent");
+
+
+					// check TERMINAZIONE
+					if(interrupted())
+					{
+						LOGGER.log(Level.INFO, "{ " + casaId + " } Stopping MeanThread... ");
+						return;
+					}
 				}
 			}
 		}

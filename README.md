@@ -1,9 +1,11 @@
 **TODO**
 
-- Testare StatisticheLocali - casaApp  
+(- Thread P2P puo' funzionare?)
+- Condominio DELETE!
+
+- ADMIN AAAAAPPPPPPP
 
 
-- Admin APP
 - Avanti con CasaApp (rete p2p)
 
 

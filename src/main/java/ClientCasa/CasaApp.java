@@ -10,7 +10,9 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.logging.Level;
@@ -41,12 +43,16 @@ public class CasaApp
 		URL url;
 		HttpURLConnection conn;
 
-
 		// avvia thread simulatore smart meter
 		SimulatorBuffer myBuffer = new SimulatorBuffer();
 		SmartMeterSimulator simulator = new SmartMeterSimulator(myBuffer);
 		simulator.start();
 		LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Smart meted launched");
+
+		// avvia thread che invia periodicamente le medie
+		MeanThread mean = new MeanThread(myBuffer, CASA_ID);
+		mean.start();
+		LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Local statistic thread launched");
 
 
 		// si registra al server amministratore
@@ -67,8 +73,8 @@ public class CasaApp
 				// invia casa come xml body
 				marshaller.marshal(newCasa, conn.getOutputStream());
 
-				LOGGER.log(Level.INFO, "Casa registered to Admin Server with code: " + conn.getResponseCode() + " " + conn.getResponseMessage());
 				assert conn.getResponseCode() == 201: "CasaApp: Condominio register failed ( " + conn.getResponseCode() + " " + conn.getResponseMessage() + " )";
+				LOGGER.log(Level.INFO, "Casa registered to Admin Server with code: " + conn.getResponseCode() + " " + conn.getResponseMessage());
 				break;
 			}
 			catch(Exception e)
@@ -103,18 +109,41 @@ public class CasaApp
 		}
 
 
-		// avvia thread che invia periodicamente le medie
-		MeanThread mean = new MeanThread(myBuffer, CASA_ID);
-		mean.start();
-		LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Local statistic thread launched");
-
-		
-
-		// lancia thread che aspetta input per eventuale uscita casa
-
 
 		// parte rete p2p
+		// lancia nuovo thread che si occupa delle statistiche globali
 
-		// interfaccia cli per power boost
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// interfaccia cli per power boost + uscita
+		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+		String choice;
+		while(true)
+		{
+			System.out.println("0) POWER BOOST\n1) EXIT\n");
+			choice = input.readLine();
+
+			if(choice.equals("0"))
+			{
+				// TODO: to be implemented (power boost)
+				System.out.println("To be implemented");
+			}
+			// termina tutti i thread; informa il serverr che la casa sta per uscire
+			else if(choice.equals("1"))
+			{
+				mean.interrupt();
+				simulator.interrupt();
+				break;
+			}
+			else
+			{
+				System.out.println("Please insert 1 or 0");
+			}
+		}
+
+		// se esce dal loop del menu', finisce il programma. Terminano anche tutti i thread lanciati,
+		// quindi SmartMeterSimulator, MeanThread, e P2pThread
+		System.exit(0);
+		return;
 	}
 }
