@@ -22,11 +22,12 @@ public class CasaApp
 {
 	private static final String SERVER_URL = "http://localhost:1337";
 
-	private static final String CASA_ID = "CASA_ID_123123";
+	private static final String CASA_ID = "casa";
 	private static final String CASA_IP = "localhost";
 	private static final int CASA_PORT = 8081;
 
 	private static final int RETRY_TIMEOUT = 250;
+	private static final int SIMULATOR_DELAY = 250;
 	private static final Logger LOGGER = Logger.getLogger(CasaApp.class.getName());
 
 
@@ -52,7 +53,7 @@ public class CasaApp
 		LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Smart meted launched");
 
 		// avvia thread che invia periodicamente le medie
-		MeanThread mean = new MeanThread(myBuffer, CASA_ID);
+		MeanThread mean = new MeanThread(myBuffer, CASA_ID, SIMULATOR_DELAY);
 		mean.start();
 		LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Local statistic thread launched");
 
@@ -154,7 +155,7 @@ public class CasaApp
 			}
 			else
 			{
-				System.out.println("Please insert 1 or 0");
+				System.out.println("Inserire 0/1");
 			}
 		}
 

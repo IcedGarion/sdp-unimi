@@ -24,11 +24,13 @@ public class MeanThread extends Thread
 	private String casaId;
 	private JAXBContext jaxbContext;
 	private Marshaller marshaller;
+	private int delay;
 
-	public MeanThread(SimulatorBuffer buffer, String casaId) throws JAXBException
+	public MeanThread(SimulatorBuffer buffer, String casaId, int delay) throws JAXBException
 	{
 		this.buffer = buffer;
 		this.casaId = casaId;
+		this.delay = delay;
 
 		// setup marshaller per invio statistiche
 		jaxbContext = JAXBContext.newInstance(MeanMeasurement.class);
@@ -108,6 +110,7 @@ public class MeanThread extends Thread
 						LOGGER.log(Level.INFO, "{ " + casaId + " } Stopping MeanThread... ");
 						return;
 					}
+					sleep(delay);
 				}
 			}
 		}

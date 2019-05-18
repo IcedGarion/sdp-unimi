@@ -1,11 +1,13 @@
 **TODO**
-
-(- Thread P2P puo' funzionare?)
-
-- ADMIN AAAAAPPPPPPP
-
-
 - Avanti con CasaApp (rete p2p)
+  : Thread P2P puo' funzionare?
+
+
+[
+- ADMIN AAAAAPPPPPPP
+  : in 1-4 va anche calcolato Min e Max timestamp? controlla testo progetto
+  : i timestamp sono un po' fuori (un'ora avanti; 1970 ??)
+]
 
 
 **REFACTOR**
