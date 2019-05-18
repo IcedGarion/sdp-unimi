@@ -7,7 +7,9 @@
 - ADMIN AAAAAPPPPPPP
   : in 1-4 va anche calcolato Min e Max timestamp? controlla testo progetto
   : i timestamp sono un po' fuori (un'ora avanti; 1970 ??)
+  : check input: parametri inseriti (tipo n) deve essere int, per esempio
 ]
+
 
 
 **REFACTOR**

@@ -2,9 +2,7 @@ package ClientCasa;
 
 import ClientCasa.smartMeter.SmartMeterSimulator;
 import ServerREST.beans.Casa;
-import ServerREST.beans.CasaMeasurement;
 import ServerREST.beans.Condominio;
-import ServerREST.beans.MeanMeasurement;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;

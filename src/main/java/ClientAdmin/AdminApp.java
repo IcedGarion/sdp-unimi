@@ -5,7 +5,9 @@ import ServerREST.beans.CasaMeasurement;
 import ServerREST.beans.Condominio;
 import ServerREST.beans.MeanMeasurement;
 
-import javax.xml.bind.*;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,13 +15,17 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AdminApp
 {
 	private static final String SERVER_URL = "http://localhost:1337";
+	private static final int RETRY_TIMEOUT = 250;
+	private static final Logger LOGGER = Logger.getLogger(AdminApp.class.getName());
 
 	// funzioni per calcolo media / deviazione standard
-	private static final double getMean(List<MeanMeasurement> misure)
+	private static double getMean(List<MeanMeasurement> misure)
 	{
 		double sum = 0;
 
@@ -45,7 +51,7 @@ public class AdminApp
 	}
 
 	// MAIN interfaccia admin
-	public static void main(String args[]) throws IOException, JAXBException
+	public static void main(String[] args) throws IOException, JAXBException, InterruptedException
 	{
 		JAXBContext jaxbContextCondominio = JAXBContext.newInstance(Condominio.class);
 		Unmarshaller jaxbUnmarshallerCondominio = jaxbContextCondominio.createUnmarshaller();
@@ -56,6 +62,8 @@ public class AdminApp
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		String choice, n, casaId;
 		double mean;
+		Condominio c = new Condominio();
+		CasaMeasurement misure = new CasaMeasurement();
 
 		while(true)
 		{
@@ -72,69 +80,142 @@ public class AdminApp
 			choice = in.readLine();
 
 			// Elenco case
-			if(choice.equals("0"))
+			switch(choice)
 			{
-				url = new URL(SERVER_URL + "/condominio");
-				conn = (HttpURLConnection) url.openConnection();
-				conn.setRequestMethod("GET");
-				Condominio c = (Condominio) jaxbUnmarshallerCondominio.unmarshal(conn.getInputStream());
-
-				System.out.println("Elenco case presenti nella rete");
-				for(Casa casa: c.getCaselist())
+				case "0":
 				{
-					System.out.println("ID casa: " + casa.getId() + "\nIP casa: " + casa.getIp() + ", PORT: " + casa.getPort() + "\n");
+					try
+					{
+						url = new URL(SERVER_URL + "/condominio");
+						conn = (HttpURLConnection) url.openConnection();
+						conn.setRequestMethod("GET");
+						c = (Condominio) jaxbUnmarshallerCondominio.unmarshal(conn.getInputStream());
+					}
+					catch(Exception e)
+					{
+						LOGGER.log(Level.WARNING, "Failed to connect to Admin Server ( GET " + SERVER_URL + "/condominio )");
+						break;
+					}
+
+					if(c.getCaselist().size() == 0)
+					{
+						System.out.println("Nessuna casa registrata!");
+						break;
+					}
+
+					System.out.println("Elenco case presenti nella rete:");
+					for(Casa casa : c.getCaselist())
+					{
+						System.out.println("ID casa: " + casa.getId() + "\nIP casa: " + casa.getIp() + ", PORT: " + casa.getPort() + "\n");
+					}
+
+					break;
 				}
-			}
-			// Ultime n statistiche casa
-			else if(choice.equals("1"))
-			{
-				System.out.println("Ultime <n> statistiche relative ad una specifica <casa>\nInserire parametro <n>... ");
-				n = in.readLine();
-				System.out.println("Inserire parametro <casa> (ID di una casa)");
-				casaId = in.readLine();
-
-				url = new URL(SERVER_URL + "/statisticheLocali/get/" + casaId + "/" + n);
-				conn = (HttpURLConnection) url.openConnection();
-				conn.setRequestMethod("GET");
-				CasaMeasurement misure = (CasaMeasurement) jaxbUnmarshallerStatLocali.unmarshal(conn.getInputStream());
-
-				System.out.println("Ultime " + n + " statistiche relative alla casa " + casaId);
-				for(MeanMeasurement m: misure.getMeasurementList())
+				// Ultime n statistiche casa
+				case "1":
 				{
-					System.out.println("Media: " + m.getMean() + " (da " + new Timestamp(m.getBeginTimestamp()) + " a " + new Timestamp(m.getEndTimestamp()) + ")");
+					System.out.println("Ultime <n> statistiche relative ad una specifica <casa>");
+					while(true)
+					{
+						try
+						{
+							System.out.println("Inserire parametro <n>... ");
+							n = in.readLine();
+							Integer.parseInt(n);
+							break;
+						}
+						catch(Exception e)
+						{
+							System.out.println("Inserire un intero!");
+						}
+					}
+
+					System.out.println("Inserire parametro <casa> (ID di una casa)");
+					casaId = in.readLine();
+
+					try
+					{
+						url = new URL(SERVER_URL + "/statisticheLocali/get/" + casaId + "/" + n);
+						conn = (HttpURLConnection) url.openConnection();
+						conn.setRequestMethod("GET");
+						misure = (CasaMeasurement) jaxbUnmarshallerStatLocali.unmarshal(conn.getInputStream());
+					}
+					catch(Exception e)
+					{
+						System.out.println("La casa '" + casaId + "' non esiste!");
+						break;
+					}
+
+					System.out.println("Ultime " + n + " statistiche relative alla casa " + casaId);
+					for(MeanMeasurement m : misure.getMeasurementList())
+					{
+						System.out.println("Media: " + m.getMean() + " (da " + new Timestamp(m.getBeginTimestamp()) + " a " + new Timestamp(m.getEndTimestamp()) + ")");
+					}
+
+					break;
 				}
-			}
-			// ultime n statistiche condominiali
-			else if(choice.equals("2"))
-			{
-				// TODO
-				System.out.println("To be implemented!");
-			}
-			// deviazione e media casa
-			else if(choice.equals("3"))
-			{
-				System.out.println("Deviazione standard e media delle ultime <n> statistiche prodotte da una specifica <casa>\nInserire parametro <n>... ");
-				n = in.readLine();
-				System.out.println("Inserire parametro <casa> (ID di una casa)");
-				casaId = in.readLine();
+				// ultime n statistiche condominiali
+				case "2":
+				{
+					// TODO
+					System.out.println("To be implemented!");
 
-				url = new URL(SERVER_URL + "/statisticheLocali/get/" + casaId + "/" + n);
-				conn = (HttpURLConnection) url.openConnection();
-				conn.setRequestMethod("GET");
-				CasaMeasurement misure = (CasaMeasurement) jaxbUnmarshallerStatLocali.unmarshal(conn.getInputStream());
+					break;
+				}
+				// deviazione e media casa
+				case "3":
+				{
+					System.out.println("Deviazione standard e media delle ultime <n> statistiche prodotte da una specifica <casa>");
+					while(true)
+					{
+						try
+						{
+							System.out.println("Inserire parametro <n>... ");
+							n = in.readLine();
+							Integer.parseInt(n);
+							break;
+						}
+						catch(Exception e)
+						{
+							System.out.println("Inserire un intero!");
+						}
+					}
 
-				mean = getMean(misure.getMeasurementList());
-				System.out.println("Media: " + mean + ", Deviazione std: " + getStdev(misure.getMeasurementList(), mean));
-			}
-			// deviazione e media condominiali
-			else if(choice.equals("4"))
-			{
-				// TODO
-				System.out.println("To be implemented!");
-			}
-			else
-			{
-				System.out.println("Inserire 0/1/2/3/4");
+					System.out.println("Inserire parametro <casa> (ID di una casa)");
+					casaId = in.readLine();
+
+					try
+					{
+						url = new URL(SERVER_URL + "/statisticheLocali/get/" + casaId + "/" + n);
+						conn = (HttpURLConnection) url.openConnection();
+						conn.setRequestMethod("GET");
+						misure = (CasaMeasurement) jaxbUnmarshallerStatLocali.unmarshal(conn.getInputStream());
+					}
+					catch(Exception e)
+					{
+						System.out.println("La casa '" + casaId + "' non esiste!");
+						break;
+					}
+
+					mean = getMean(misure.getMeasurementList());
+					System.out.println("Media: " + mean + ", Deviazione std: " + getStdev(misure.getMeasurementList(), mean));
+
+					break;
+				}
+				// deviazione e media condominiali
+				case "4":
+				{
+					// TODO
+					System.out.println("To be implemented!");
+
+					break;
+				}
+				default:
+				{
+					System.out.println("Inserire 0/1/2/3/4");
+
+					break;
+				}
 			}
 		}
 	}

@@ -116,7 +116,7 @@ public class MeanThread extends Thread
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE, "{ " + casaId + " } Lost connection with server!");
 		}
 	}
 }
