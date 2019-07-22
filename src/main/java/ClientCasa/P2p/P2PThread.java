@@ -1,6 +1,7 @@
 package ClientCasa.P2p;
 
 import ClientCasa.CasaApp;
+import ClientCasa.P2p.Statistics.StatsReceiverServerThread;
 import ServerREST.beans.Condominio;
 
 import java.util.logging.Logger;
@@ -31,7 +32,7 @@ public class P2PThread extends Thread
 			Condominio condominio = CasaApp.getCondominio();
 
 			// lancia thread che riceve le statistiche
-			StatsReceiverThread statsReceiver = new StatsReceiverThread(casaId, casaIp, casaStatsPort);
+			StatsReceiverServerThread statsReceiver = new StatsReceiverServerThread(casaId, casaStatsPort);
 			statsReceiver.start();
 
 

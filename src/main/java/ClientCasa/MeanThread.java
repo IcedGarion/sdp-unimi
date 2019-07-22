@@ -113,7 +113,7 @@ public class MeanThread extends Thread
 					// crea e lancia thread che invia, per ogni casa
 					for(Casa c: condominio.getCaselist())
 					{
-						if(! c.getId().equals(casaId))
+						//TODO: remove this comment:       if(! c.getId().equals(casaId))
 						{
 							localStatSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getPort(), computedMeasure);
 							localStatSender.start();

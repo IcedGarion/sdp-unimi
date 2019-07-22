@@ -40,7 +40,7 @@ public class StatisticheLocaliTest
 	public void simpleEmptyStatisticheTest() throws IOException, JAXBException
 	{
 		// manda una nuova misurazione per una casa che non esiste ancora
-		MeanMeasurement computedMeasure = new MeanMeasurement(0, 1, 2);
+		MeanMeasurement computedMeasure = new MeanMeasurement("casa0", 0, 1, 2);
 		CasaMeasurement retrievedMeasurements;
 
 		url = new URL(URL + "/statisticheLocali/add/0");
@@ -94,7 +94,7 @@ public class StatisticheLocaliTest
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 		jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-		MeanMeasurement computedMeasure = new MeanMeasurement(1, 1, 1);
+		MeanMeasurement computedMeasure = new MeanMeasurement("CasaTestStatisticheLocali", 1, 1, 1);
 		CasaMeasurement retrievedMeasurements;
 
 		url = new URL(URL + "/statisticheLocali/add/CasaTestStatisticheLocali");
@@ -121,7 +121,7 @@ public class StatisticheLocaliTest
 		}
 
 		// aggiunge altre statistiche alla stessa casa
-		MeanMeasurement computedMeasure2 = new MeanMeasurement(200, 200, 200);
+		MeanMeasurement computedMeasure2 = new MeanMeasurement("CasaTestStatisticheLocali", 200, 200, 200);
 
 		url = new URL(URL + "/statisticheLocali/add/CasaTestStatisticheLocali");
 		conn = (HttpURLConnection) url.openConnection();

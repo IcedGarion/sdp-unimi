@@ -9,7 +9,9 @@ inoltre la stessa non deve contribuire piu volte.... COSA FARE DI QUELLE CHE NON
  
   quando ci sono tutte le statistiche, stampa il consumo globale
 
-CHECK RICEZIONE STATISTICHE (StatsReceiverThread)
+
+CHECK RICEZIONE STATISTICHE (StatsReceiverThread):
+	RICEVE SOLO UNA VOLTA
 SERVER DEVE ESSERE CONCORRENTEEEE (StatsReceiverThread)
 
 
