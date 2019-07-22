@@ -1,13 +1,14 @@
 package ClientCasa;
 
+import ClientCasa.P2p.MessageSenderThread;
 import ClientCasa.smartMeter.Measurement;
+import ServerREST.beans.Casa;
+import ServerREST.beans.Condominio;
 import ServerREST.beans.MeanMeasurement;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
@@ -87,7 +88,8 @@ public class MeanThread extends Thread
 					computedMeasure = new MeanMeasurement(mean, timestampMin, timestampMax);
 
 
-					//chiamata REST a StatisticheService passando ID_CASA + MeanMeasurement
+					/*	AGGIUNGE STATISICA LOCALE AL SERVER	*/
+					// chiamata REST a StatisticheService passando ID_CASA + MeanMeasurement
 					// POST /condominio/add: inserisce nuova casa
 					LOGGER.log(Level.INFO, "{ "  +casaId + " } Sending computed statistic to Server...");
 
@@ -101,7 +103,22 @@ public class MeanThread extends Thread
 					marshaller.marshal(computedMeasure, conn.getOutputStream());
 
 					assert conn.getResponseCode() == 201 || conn.getResponseCode() == 204: "MeanThread: Send statistics failed ( " + conn.getResponseCode() + " " + conn.getResponseMessage() + " )";
-					LOGGER.log(Level.INFO, "{ " + casaId + " } Statistic sent");
+					LOGGER.log(Level.INFO, "{ " + casaId + " } Statistic sent to server");
+
+
+					/*	MANDA STATISTICA LOCALE ALLE ALTRE CASE	(~BROADCAST)*/
+					// Per ogni casa nel condiminio (eccetto se stessa), lancia thread che invia
+					MessageSenderThread localStatSender;
+					Condominio condominio = CasaApp.getCondominio();
+					// crea e lancia thread che invia, per ogni casa
+					for(Casa c: condominio.getCaselist())
+					{
+						if(! c.getId().equals(casaId))
+						{
+							localStatSender = new MessageSenderThread(casaId, c.getIp(), c.getPort(), computedMeasure);
+							localStatSender.start();
+						}
+					}
 
 
 					// check TERMINAZIONE

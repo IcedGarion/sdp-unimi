@@ -1,5 +1,6 @@
 package ClientCasa;
 
+import ClientCasa.P2p.P2PThread;
 import ClientCasa.smartMeter.SmartMeterSimulator;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
@@ -20,16 +21,50 @@ public class CasaApp
 {
 	private static final String SERVER_URL = "http://localhost:1337";
 
-	private static final String CASA_ID = "casa";
+	private static final String CASA_ID = "casa0";
 	private static final String CASA_IP = "localhost";
-	private static final int CASA_PORT = 8081;
+	private static final int CASA_STATS_PORT = 8081;
 
 	private static final int RETRY_TIMEOUT = 250;
 	private static final int SIMULATOR_DELAY = 250;
 	private static final Logger LOGGER = Logger.getLogger(CasaApp.class.getName());
 
 
-	public static void main(String args[]) throws JAXBException, InterruptedException, IOException
+	/*	RICHIEDE ELENCO CASE	*/
+	public static synchronized Condominio getCondominio() throws JAXBException, InterruptedException
+	{
+		JAXBContext jaxbContext = JAXBContext.newInstance(Condominio.class);
+		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+		URL url;
+		HttpURLConnection conn;
+
+		Condominio condominio;
+		while(true)
+		{
+			try
+			{
+				// GET /condominio: si aspetta lista xml vuota
+				url = new URL(SERVER_URL + "/condominio");
+				conn = (HttpURLConnection) url.openConnection();
+				conn.setRequestMethod("GET");
+				condominio = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
+
+				LOGGER.log(Level.INFO, "Requested Condominio (Case list) from server with code: " + conn.getResponseCode() + " " + conn.getResponseMessage());
+				assert conn.getResponseCode() == 200;
+				break;
+			}
+			catch(Exception e)
+			{
+				LOGGER.log(Level.WARNING, "Failed to connect to Admin Server ( GET " + SERVER_URL + "/condominio )");
+				Thread.sleep(RETRY_TIMEOUT);
+			}
+		}
+
+		return condominio;
+	}
+
+
+	public static void main(String[] args) throws JAXBException, InterruptedException, IOException
 	{
 		LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Started Casa Application with ID " + CASA_ID);
 
@@ -58,7 +93,7 @@ public class CasaApp
 
 		///////////////////////////////////////////////////
 		/*	REGISTRA LA CASA AL SERVER AMMINISTRATORE	*/
-		Casa myCasa = new Casa(CASA_ID, CASA_IP, CASA_PORT);
+		Casa myCasa = new Casa(CASA_ID, CASA_IP, CASA_STATS_PORT);
 
 		// POST /condominio/add: inserisce nuova casa
 		// continua a tentare di connettersi al server, se non riesce riprova
@@ -87,35 +122,10 @@ public class CasaApp
 		}
 
 
-		///////////////////////////////
-		/*	RICHIEDE ELENCO CASE	*/
-		Condominio condominio;
-		while(true)
-		{
-			try
-			{
-				// GET /condominio: si aspetta lista xml vuota
-				url = new URL(SERVER_URL + "/condominio");
-				conn = (HttpURLConnection) url.openConnection();
-				conn.setRequestMethod("GET");
-				condominio = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
-
-				LOGGER.log(Level.INFO, "Requested Condominio (Case list) from server with code: " + conn.getResponseCode() + " " + conn.getResponseMessage());
-				assert conn.getResponseCode() == 200;
-				break;
-			}
-			catch(Exception e)
-			{
-				LOGGER.log(Level.WARNING, "Failed to connect to Admin Server ( GET " + SERVER_URL + "/condominio )");
-				Thread.sleep(RETRY_TIMEOUT);
-			}
-		}
-
-
-
 		// parte rete p2p
 		// lancia nuovo thread che si occupa delle statistiche globali
-
+		P2PThread p2p = new P2PThread(CASA_ID, CASA_IP, CASA_STATS_PORT);
+		p2p.start();
 
 
 
@@ -157,9 +167,7 @@ public class CasaApp
 			}
 		}
 
-		// se esce dal loop del menu', finisce il programma. Terminano anche tutti i thread lanciati,
-		// quindi SmartMeterSimulator, MeanThread, e P2pThread
+		// Terminano anche tutti i thread lanciati: SmartMeterSimulator, MeanThread, e P2pThread
 		System.exit(0);
-		return;
 	}
 }

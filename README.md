@@ -1,13 +1,74 @@
+# TODO vero
+- P2PThread, StatsReceiverThread e MeanThread:
+  MeanT manda a tutte le case la sua statistica locale calcolata. (SOCKET + JAXB!!)
+  StatsReceiver ascolta e riceve queste statistiche da tutte le case: aspetta finche' non le riceve da TUTTO il condominio
+      inventa cosa fare se ne manca qualcuna.
+
+
+CHECK RICEZIONE STATISTICHE (StatsReceiverThread)
+SERVER DEVE ESSERE CONCORRENTEEEE (StatsReceiverThread)
+
+
+
+  - poi avanti con p2pthread e elezione! (se non eletto termini electionThread, atrimenti l'eletto manda sempre statistica media globale)
+
+
+Comunicazioni in broadcast non devono mai essere sequenziali! lancia thread che invia, ogni volta
+
+
+# DOMANDE FATTE
+- pool di thread opzionale, non serve per forza
+- bully algo va bene per elezione, tanto uscite sono controllate:
+  nel caso di uscita, avvisa il server e tutte le case (che si scaricano di nuovo la lista)
+  
+  MA POI VA RI-INDETTA ELEZIONE!
+
+
+DOPPIA (O TRIPLA) PORTA PER OGNI CASA!!!
+QUANDO SI REGISTRA COMUNICA PIU' DI UNA PORTA
+UNA PER PARLARSI CON LE ALTRE CASE SULLE STATISTICHE
+UNA PER ELEZIONE
+UNA PER POWER BOOST
+
+
+ocio che devi inviare statisiche solo quando tutte le case te la mandano; (mapping casa_x - ha mandato a sto turno)
+inoltre la stessa non deve contribuire piu volte.... COSA FARE DI QUELLE CHE NON ARRIVANO? LE BUTTI?
+
+
+- invece per power boost va usato algoritmo mutua esclusione distribuita (ricart&agrawala) o ring
+- state ok per casa
+
+
+
+(
 **TODO**
-- Avanti con CasaApp (rete p2p)
-  : Thread P2P puo' funzionare?
+- CasaApp rete p2p
+  -- lancia thread p2p
+  -- Questo ha un altro thread, "StatisticheGlobali" che ascolta sempre: riceve le misurazioni dalle altre case
+     e le mette in un buffer CONDIVISO (condiviso solo fra i thread della stessa casa, non "globale")
+  -- Questo thread server e' come i server visti concorrenti: pool di thread e lancia thread per ogni connessione in arrivo
+  POI
+  -- MeanThread manda le sue misurazioni locali a tutte le case della rete, e il thread di cui sopra riceve
+     queste misurazioni da tutto il resto della rete e le mette nel buffer.
+     Come succedeva per le statistiche locali, c'e' un thread aggiuntivo (Tipo MeanThread) che invece continua a svuotare
+     buffer e calcolare la media globale (+ stampa).
+  -- un altro thread, P2Pcoord, che invece si coordina con gli altri P2Pcoord della rete: indice "elezione" o meccanismo simile
+     per decidere chi invia le statistiche al serverAmministratore. STATE?
+     Poi, una volta deciso coordinatore, lui invia la statistica al server.
+     STATE perche' ci sara' credo un loop in cui periodicamente, a seconda dello stato in cui si e', si eseguono diverse azioni:
+     <elezione> sai che devi indire elezione
+     <coord> sai che sei il coord e devi mandare info
+     <stato_particolare_in_mezzo_a_elezione> sai cosa devi fare.
+
+Ogni casa stampa a schermo il consumo complessivo del condominio.
+)
+
 
 
 [
-- ADMIN AAAAAPPPPPPP
+- ADMIN APP
   : in 1-4 va anche calcolato Min e Max timestamp? controlla testo progetto
-  : i timestamp sono un po' fuori (un'ora avanti; 1970 ??)
-  : check input: parametri inseriti (tipo n) deve essere int, per esempio
+  : taglia i timestamp, stampa solo le ore (no data)
 ]
 
 
@@ -18,28 +79,18 @@
 - SYNCHRONIZED da aggiungere in posti (es. in services)
   Metodi sync invece che sync statement nei services? anche nelle letture?
 
-- FILE CONFIG
+- FILE CONFIG (tipo SERVER_URL in giro ovunque)
 
 
 
 ** NBBBBBB **
 Quando mandi una richiesta al server, se non leggi la risposta
 (conn.getResponseMessage / Code) e' come se non l'avessi inviata... va ignorata boh
+Quando sei in debug, alcune richieste non arrivano a chi ascolta.
 
 
 
 
-
-**SLIDING WINDOW**
-- all'inizio riempi buffer fino a 24 misurazioni
-A) poi calcoli la media con le 24
-- non butti via tutte le precedenti ma tieni le ultime 12
-- torni a riempire fino a 24
-- goto A)
-
-
-Quando si inviano statistiche va guardato bene il timestamp:
-devono essere sempre progressivi 
 
 
 **STATISTICHE**
