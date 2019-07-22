@@ -85,7 +85,7 @@ public class MeanThread extends Thread
 
 					// crea oggetto da mandare a REST
 					mean = mean / sensorData.size();
-					computedMeasure = new MeanMeasurement(mean, timestampMin, timestampMax);
+					computedMeasure = new MeanMeasurement(casaId, mean, timestampMin, timestampMax);
 
 
 					/*	AGGIUNGE STATISICA LOCALE AL SERVER	*/
@@ -115,7 +115,7 @@ public class MeanThread extends Thread
 					{
 						if(! c.getId().equals(casaId))
 						{
-							localStatSender = new MessageSenderThread(casaId, c.getIp(), c.getPort(), computedMeasure);
+							localStatSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getPort(), computedMeasure);
 							localStatSender.start();
 						}
 					}

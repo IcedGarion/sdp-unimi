@@ -45,7 +45,7 @@ public class StatsReceiverThread extends Thread
 
 			message = (MeanMeasurement) unmarshaller.unmarshal(connectionSocket.getInputStream());
 
-			LOGGER.log(Level.INFO, "{ " + casaId + " } Statistic received from " + connectionSocket.getInetAddress() + ": " + connectionSocket.getPort() + "\nMean: " + message.getMean());
+			LOGGER.log(Level.INFO, "{ " + casaId + " } Statistic received from " + message.getCasaId() + "\nMean: " + message.getMean());
 			System.out.flush();
 			System.err.flush();
 		}

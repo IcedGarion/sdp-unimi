@@ -16,14 +16,16 @@ public class MessageSenderThread extends Thread
 
 	private String ip;
 	private String senderId;
+	private String destId;
 	private int port;
 	private MeanMeasurement message;
 	private JAXBContext jaxbContext;
 	private Marshaller marshaller;
 
-	public MessageSenderThread(String senderId, String ip, int port, MeanMeasurement message) throws JAXBException
+	public MessageSenderThread(String senderId, String destId, String ip, int port, MeanMeasurement message) throws JAXBException
 	{
 		this.senderId = senderId;
+		this.destId = destId;
 		this.ip = ip;
 		this.port = port;
 		this.message = message;
@@ -47,7 +49,7 @@ public class MessageSenderThread extends Thread
 
 			// assert socket.getResponseCode() == 200 : "MessageSender: Send statistics failed ( " + conn.getResponseCode() + " " + conn.getResponseMessage() + " )";
 
-			LOGGER.log(Level.INFO, "{ " + senderId + " } Statistic sent to " + ip + ": " + port );
+			LOGGER.log(Level.INFO, "{ " + senderId + " } Statistic sent to " + senderId + " (" + ip + ": " + port + ")");
 		}
 		catch(Exception e)
 		{

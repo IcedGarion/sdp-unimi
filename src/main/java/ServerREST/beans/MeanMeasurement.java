@@ -9,6 +9,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class MeanMeasurement
 {
+	@XmlElement(name = "casaId")
+	private String casaId;
 	@XmlElement(name = "mean")
 	private double mean;
 	@XmlElement(name = "beginTimestamp")
@@ -18,11 +20,17 @@ public class MeanMeasurement
 
 	public MeanMeasurement() {}
 
-	public MeanMeasurement(double mean, long begin, long end)
+	public MeanMeasurement(String casaId, double mean, long begin, long end)
 	{
+		this.casaId = casaId;
 		this.mean = mean;
 		this.beginTimestamp = begin;
 		this.endTimestamp = end;
+	}
+
+	public String getCasaId()
+	{
+		return casaId;
 	}
 
 	public double getMean()

@@ -4,6 +4,10 @@
   StatsReceiver ascolta e riceve queste statistiche da tutte le case: aspetta finche' non le riceve da TUTTO il condominio
       inventa cosa fare se ne manca qualcuna.
 
+ocio che devi inviare statisiche solo quando tutte le case te la mandano; (mapping casa_x - ha mandato a sto turno)
+inoltre la stessa non deve contribuire piu volte.... COSA FARE DI QUELLE CHE NON ARRIVANO? LE BUTTI?
+ 
+  quando ci sono tutte le statistiche, stampa il consumo globale
 
 CHECK RICEZIONE STATISTICHE (StatsReceiverThread)
 SERVER DEVE ESSERE CONCORRENTEEEE (StatsReceiverThread)
@@ -31,8 +35,6 @@ UNA PER ELEZIONE
 UNA PER POWER BOOST
 
 
-ocio che devi inviare statisiche solo quando tutte le case te la mandano; (mapping casa_x - ha mandato a sto turno)
-inoltre la stessa non deve contribuire piu volte.... COSA FARE DI QUELLE CHE NON ARRIVANO? LE BUTTI?
 
 
 - invece per power boost va usato algoritmo mutua esclusione distribuita (ricart&agrawala) o ring
