@@ -110,15 +110,16 @@ public class MeanThread extends Thread
 					// Per ogni casa nel condiminio, lancia thread che invia
 					MessageSenderThread localStatSender;
 
-					// TODO: prenditelo da solo il condominio, senza passare per CasaApp! (come in StatsReceiverServerThread)
+					// scarica condominio
+					LOGGER.log(Level.INFO, "{ " + casaId + " } Requesting condominio...");
 					Condominio condominio = CasaApp.getCondominio();
-					// crea e lancia thread che invia, per ogni casa
+
+					// BROADCAST: crea e lancia thread che invia messaggio statistica a ogni casa
 					for(Casa c: condominio.getCaselist())
 					{
 						localStatSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getPort(), computedMeasure);
 						localStatSender.start();
 					}
-
 
 					// check TERMINAZIONE
 					if(interrupted())

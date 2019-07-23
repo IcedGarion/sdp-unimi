@@ -79,9 +79,9 @@ public class AdminApp
 
 			choice = in.readLine();
 
-			// Elenco case
 			switch(choice)
 			{
+				// Elenco case
 				case "0":
 				{
 					try

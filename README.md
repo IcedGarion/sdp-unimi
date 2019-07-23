@@ -1,21 +1,21 @@
 # TODO
+- StatsReceiverServerThread: 
+  una volta calcolato il consumo globale, qualcuno deve mandarlo al server.
+  indice elezione la prima volta; se sei l'eletto invii tu; se non sei l'eletto non fai niente.
+  Se e' la prima volta (chissa' come capirlo?) devi indire elezione...
+  Tutto nel StatsReceiver di seguito? o lancia altro thread elezione? in oni caso p2pthread e' inutile
 
-CHECK RICEZIONE STATISTICHE (StatsReceiverThread):
+BULLY
 
-
-ocio che devi inviare statisiche solo quando tutte le case te la mandano; (mapping casa_x - ha mandato a sto turno)
-inoltre la stessa non deve contribuire piu volte.... COSA FARE DI QUELLE CHE NON ARRIVANO? LE BUTTI?
-quando ci sono tutte le statistiche, stampa il consumo globale
-
-
-
-
-
-  - poi avanti con p2pthread e elezione! (se non eletto termini electionThread, atrimenti l'eletto manda sempre statistica media globale)
-
-
-Comunicazioni in broadcast non devono mai essere sequenziali! lancia thread che invia, ogni volta
-
+( vecchia idea da guardare: 
+  -- [un altro thread, P2Pcoord], che invece si coordina con gli altri P2Pcoord della rete: indice "elezione" o meccanismo simile
+     per decidere chi invia le statistiche al serverAmministratore. STATE?
+     Poi, una volta deciso coordinatore, lui invia la statistica al server.
+     STATE perche' ci sara' credo un loop in cui periodicamente, a seconda dello stato in cui si e', si eseguono diverse azioni:
+     <elezione> sai che devi indire elezione
+     <coord> sai che sei il coord e devi mandare info
+     <stato_particolare_in_mezzo_a_elezione> sai cosa devi fare.
+)
 
 # DOMANDE FATTE / COSE DA SISTEMARE POI
 - pool di thread opzionale, non serve per forza
@@ -24,9 +24,10 @@ Comunicazioni in broadcast non devono mai essere sequenziali! lancia thread che 
   
   MA POI VA RI-INDETTA ELEZIONE!
 
-  QUANDO CASA ESCE, CHE SUCCEDE A STATS SENDER/ RECEIVER? CONTINUA A FUNZIONARE OPPURE SI BLOCCA IN ATTESA DELL'ULTIMA CASA
-  CHE NON MANDERA' MAI LA SUA STATISTICA?? -> ANDREBBE TOLTA LA CASA ANCHE DALL'OGGETTO CONDIVISO (HASHMAP)
-  ANDREBBE RI-AGGIORNATO IL CONDOMINIO E PASSATO AL STATSRECEIVER (seno' crede che ci sia ancora una casa in piu)
+  ( QUANDO CASA ESCE, CHE SUCCEDE A STATS SENDER/ RECEIVER? CONTINUA A FUNZIONARE OPPURE SI BLOCCA IN ATTESA DELL'ULTIMA CASA
+  ( CHE NON MANDERA' MAI LA SUA STATISTICA?? -> ANDREBBE TOLTA LA CASA ANCHE DALL'OGGETTO CONDIVISO (HASHMAP)
+  ( ANDREBBE RI-AGGIORNATO IL CONDOMINIO E PASSATO AL STATSRECEIVER (seno' crede che ci sia ancora una casa in piu)
+   -> dovrebbe essere ok questa parte, perche' si scarica condominio gia' di suo ogni volta che manda / riceve stats
 
 DOPPIA (O TRIPLA) PORTA PER OGNI CASA!!!
 QUANDO SI REGISTRA COMUNICA PIU' DI UNA PORTA
@@ -34,80 +35,29 @@ UNA PER PARLARSI CON LE ALTRE CASE SULLE STATISTICHE
 UNA PER ELEZIONE
 UNA PER POWER BOOST
 
-
-
-
 - invece per power boost va usato algoritmo mutua esclusione distribuita (ricart&agrawala) o ring
 - state ok per casa
 
 
 
-(
-**TODO**
-- CasaApp rete p2p
-  -- lancia thread p2p
-  -- Questo ha un altro thread, "StatisticheGlobali" che ascolta sempre: riceve le misurazioni dalle altre case
-     e le mette in un buffer CONDIVISO (condiviso solo fra i thread della stessa casa, non "globale")
-  -- Questo thread server e' come i server visti concorrenti: pool di thread e lancia thread per ogni connessione in arrivo
-  POI
-  -- MeanThread manda le sue misurazioni locali a tutte le case della rete, e il thread di cui sopra riceve
-     queste misurazioni da tutto il resto della rete e le mette nel buffer.
-     Come succedeva per le statistiche locali, c'e' un thread aggiuntivo (Tipo MeanThread) che invece continua a svuotare
-     buffer e calcolare la media globale (+ stampa).
-  -- un altro thread, P2Pcoord, che invece si coordina con gli altri P2Pcoord della rete: indice "elezione" o meccanismo simile
-     per decidere chi invia le statistiche al serverAmministratore. STATE?
-     Poi, una volta deciso coordinatore, lui invia la statistica al server.
-     STATE perche' ci sara' credo un loop in cui periodicamente, a seconda dello stato in cui si e', si eseguono diverse azioni:
-     <elezione> sai che devi indire elezione
-     <coord> sai che sei il coord e devi mandare info
-     <stato_particolare_in_mezzo_a_elezione> sai cosa devi fare.
-
-Ogni casa stampa a schermo il consumo complessivo del condominio.
-)
+# COSE DA TENERE SEMPRE A MENTE
+- Quando mandi una richiesta al server, se non leggi la risposta (url-rest)
+(conn.getResponseMessage / Code) e' come se non l'avessi inviata... va ignorata boh
+- Quando sei in debug, alcune richieste non arrivano a chi ascolta.
+- marshalling con socket deve chiudere la socket... altrimenti unmarshaller si blocca senza dire niente
+- Comunicazioni in broadcast non devono mai essere sequenziali! lancia thread che invia, ogni volta
 
 
-
-[
-- ADMIN APP
-  : in 1-4 va anche calcolato Min e Max timestamp? controlla testo progetto
-  : taglia i timestamp, stampa solo le ore (no data)
-]
-
-
-
-**REFACTOR**
+# REFACTOR
 - Aggiungi LOG ovunque (Service e Apps)
 - Togli eventuali System.out.println()
 - SYNCHRONIZED da aggiungere in posti (es. in services)
   Metodi sync invece che sync statement nei services? anche nelle letture?
-
 - FILE CONFIG (tipo SERVER_URL in giro ovunque)
+- TOGLI / CONTROLLA i TODO e FIXME
+- suppress log per esame
 
 
-
-** NBBBBBB **
-Quando mandi una richiesta al server, se non leggi la risposta
-(conn.getResponseMessage / Code) e' come se non l'avessi inviata... va ignorata boh
-Quando sei in debug, alcune richieste non arrivano a chi ascolta.
-
-
-
-
-
-
-**STATISTICHE**
-Vanno separate locali e globali: classi diverse o comunque lock diversi!
-per inserire locali non devi bloccare locali e viceversa.
-poi XML non contiene tutto insieme (condominio+globali + case+locali)
-ma separa: condominio resta com'era, tutto a posto.
-Statistiche xml ha: globale + <id casa + lista locali>, <id casa + lista locali>....
-cosi' mantieni scollegate le 2 cose.
-
-
-*GLOBALI*
-diverse soluzioni: (va evitata ridondanza)
-- chiedi lock distribuito e chi lo ottiene manda lui le statistiche 
-- elezione coordinatore (e se esce? nuova elezione)
 
 
 

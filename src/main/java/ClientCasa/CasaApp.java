@@ -26,7 +26,7 @@ public class CasaApp
 	private static final int CASA_STATS_PORT = 8082;
 
 	private static final int RETRY_TIMEOUT = 250;
-	private static final int SIMULATOR_DELAY = 250;
+	private static final int SIMULATOR_DELAY = 100;
 	private static final Logger LOGGER = Logger.getLogger(CasaApp.class.getName());
 
 
@@ -49,7 +49,6 @@ public class CasaApp
 				conn.setRequestMethod("GET");
 				condominio = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
 
-				LOGGER.log(Level.INFO, "Requested Condominio (Case list) from server with code: " + conn.getResponseCode() + " " + conn.getResponseMessage());
 				assert conn.getResponseCode() == 200;
 				break;
 			}

@@ -3,7 +3,7 @@ package ServerREST.beans;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-// Simile a condominio ma senza annotazioni perch' non viene mai ritornato intero come oggetto da REST (/jaxb)
+// Simile a condominio ma senza annotazioni perche' non viene mai ritornato intero come oggetto da REST (/jaxb)
 // invece si accede solo al metodo getLastN, che torna CasaMeasurement: e' quello l'oggetto da annotare
 
 public class StatisticheLocali

@@ -68,12 +68,8 @@ public class StatsReceiverServerThread extends Thread
 
 				// check se sono arrivate le statistiche da tutte le case
 				// scarica condominio
-				url = new URL(CasaApp.SERVER_URL + "/condominio");
-				conn = (HttpURLConnection) url.openConnection();
-				conn.setRequestMethod("GET");
-				condominio = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
-				LOGGER.log(Level.INFO, "Requested Condominio (Case list) from server with code: " + conn.getResponseCode() + " " + conn.getResponseMessage());
-				assert conn.getResponseCode() == 200;
+				LOGGER.log(Level.INFO, "{ " + casaId + " } Requesting condominio...");
+				condominio = CasaApp.getCondominio();
 
 				// confronta le stat ricevute fin ora con le case registrate (ci sono tutte per questo giro?)
 				if(condominio.getCaselist().size() == condominioStats.size())
@@ -121,7 +117,7 @@ public class StatsReceiverServerThread extends Thread
 				}
 				// se manca ancora qualche casa a questo giro di loop, attende il prossimo (non fa niente)
 
-				// TODO: e se dopo molti giri ancora manca qualche casa? (qua andrebbe avanti all'infinito...)
+				// FIXME: e se dopo molti giri ancora manca qualche casa? (qua andrebbe avanti all'infinito...)
 				// fare qualche prova per vedere se non si intoppa; volendo si puo' aggiungere qua un timeout tipo...
 			}
 		}
