@@ -19,11 +19,11 @@ import java.util.logging.Logger;
 
 public class CasaApp
 {
-	private static final String SERVER_URL = "http://localhost:1337";
+	public static final String SERVER_URL = "http://localhost:1337";
 
 	private static final String CASA_ID = "casa2";
 	private static final String CASA_IP = "localhost";
-	private static final int CASA_STATS_PORT = 8081;
+	private static final int CASA_STATS_PORT = 8082;
 
 	private static final int RETRY_TIMEOUT = 250;
 	private static final int SIMULATOR_DELAY = 250;
@@ -116,7 +116,7 @@ public class CasaApp
 			}
 			catch(Exception e)
 			{
-				LOGGER.log(Level.WARNING, "Failed to connect to Admin Server ( POST " + SERVER_URL + "/condominio/add )");
+				LOGGER.log(Level.SEVERE, "Failed to connect to Admin Server ( POST " + SERVER_URL + "/condominio/add )");
 				Thread.sleep(RETRY_TIMEOUT);
 			}
 		}

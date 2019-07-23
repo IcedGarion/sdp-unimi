@@ -17,11 +17,13 @@ public class StatsReceiverThread extends Thread
 	private Unmarshaller unmarshaller;
 	private Socket listenSocket;
 	private String casaId;
+	private CondominioStats condominioStats;
 
-	public StatsReceiverThread(Socket listenSocket, String casaId) throws JAXBException
+	public StatsReceiverThread(Socket listenSocket, String casaId, CondominioStats condominioStats) throws JAXBException
 	{
 		this.listenSocket = listenSocket;
 		this.casaId = casaId;
+		this.condominioStats = condominioStats;
 
 		jaxbContext = JAXBContext.newInstance(MeanMeasurement.class);
 		unmarshaller = jaxbContext.createUnmarshaller();
@@ -29,18 +31,20 @@ public class StatsReceiverThread extends Thread
 
 	public void run()
 	{
-		// TODO: riceve statistiche locali da TUTTE le case, calcola consumo globale e stampa
-		// ricevere le statistiche locali da ogni casa usando socket + jaxb
+		// ricevere le statistiche locali da una casa (usando socket + jaxb) e le salva nell'ggetto condiviso CondominioStats
 
 		try
 		{
 			message = (MeanMeasurement) unmarshaller.unmarshal(listenSocket.getInputStream());
 			listenSocket.close();
-			LOGGER.log(Level.INFO, "{ " + casaId + " } Statistic received from " + message.getCasaId() + "\nMean: " + message.getMean());
+			LOGGER.log(Level.INFO, "{ " + casaId + " } Statistic received from " + message.getCasaId());
+
+			// salva la statistica appena ricevuta in un oggetto condiviso, così StatsReceiverServerThread poi le legge
+			condominioStats.addCasaStat(message);
 		}
 		catch(Exception e)
 		{
-			LOGGER.log(Level.INFO, "{ " + casaId + " } Error while receiving stats");
+			LOGGER.log(Level.SEVERE, "{ " + casaId + " } Error while receiving stats");
 			e.printStackTrace();
 		}
 

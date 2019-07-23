@@ -1,9 +1,4 @@
 # TODO
-- P2PThread, StatsReceiverThread e MeanThread:
-  MeanT manda a tutte le case la sua statistica locale calcolata. (SOCKET + JAXB!!)
-  StatsReceiver ascolta e riceve queste statistiche da tutte le case: aspetta finche' non le riceve da TUTTO il condominio
-      inventa cosa fare se ne manca qualcuna.
-
 
 CHECK RICEZIONE STATISTICHE (StatsReceiverThread):
 
@@ -22,13 +17,16 @@ quando ci sono tutte le statistiche, stampa il consumo globale
 Comunicazioni in broadcast non devono mai essere sequenziali! lancia thread che invia, ogni volta
 
 
-# DOMANDE FATTE
+# DOMANDE FATTE / COSE DA SISTEMARE POI
 - pool di thread opzionale, non serve per forza
 - bully algo va bene per elezione, tanto uscite sono controllate:
   nel caso di uscita, avvisa il server e tutte le case (che si scaricano di nuovo la lista)
   
   MA POI VA RI-INDETTA ELEZIONE!
 
+  QUANDO CASA ESCE, CHE SUCCEDE A STATS SENDER/ RECEIVER? CONTINUA A FUNZIONARE OPPURE SI BLOCCA IN ATTESA DELL'ULTIMA CASA
+  CHE NON MANDERA' MAI LA SUA STATISTICA?? -> ANDREBBE TOLTA LA CASA ANCHE DALL'OGGETTO CONDIVISO (HASHMAP)
+  ANDREBBE RI-AGGIORNATO IL CONDOMINIO E PASSATO AL STATSRECEIVER (seno' crede che ci sia ancora una casa in piu)
 
 DOPPIA (O TRIPLA) PORTA PER OGNI CASA!!!
 QUANDO SI REGISTRA COMUNICA PIU' DI UNA PORTA
@@ -207,8 +205,22 @@ di MeanMeasurement, cioe' una lista di medie calcolate. (Calcolo fatto da CasaAp
 
 (Vedi variante HashMap)
 
-**APPUNTI**
 
+**Scambio Statistiche fra case (Statistiche Globali)
+- P2PThread, StatsReceiverThread e MeanThread:
+  MeanT manda a tutte le case la sua statistica locale calcolata.
+  StatsReceiver ascolta e riceve queste statistiche da tutte le case: aspetta finche' non le riceve da TUTTO il condominio:
+    - StatsRceiverThread riceve e basta; poi salva la statistica in un oggetto condiviso con StatsReceiverServer
+    - StatsReceiverServer tira le somme: controlla questo oggetto dopo ogni richiesta ricevuta e si assicura che ci siano
+         stat da tutte le case... Poi, quando succede, stampa il consumo globale e "azzera" l'oggetto condiviso, per ricominciare
+    - E se non arrivano tutte le case per bene ma, mentre aspetti l'ultima, arriva di nuovo stat di qualcun altra???
+      -> la ignora e aspetta il ritardatario, che tanto prima o poi arriva
+
+
+
+
+======================================================================================================================================
+**APPUNTI**
 
 
 (segue le slide lab5)

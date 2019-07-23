@@ -4,6 +4,7 @@ import ClientCasa.CasaApp;
 import ClientCasa.P2p.Statistics.StatsReceiverServerThread;
 import ServerREST.beans.Condominio;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class P2PThread extends Thread
@@ -27,10 +28,6 @@ public class P2PThread extends Thread
 	{
 		try
 		{
-			///////////////////////////////
-			/*	RICHIEDE ELENCO CASE	*/
-			Condominio condominio = CasaApp.getCondominio();
-
 			// lancia thread che riceve le statistiche
 			StatsReceiverServerThread statsReceiver = new StatsReceiverServerThread(casaId, casaStatsPort);
 			statsReceiver.start();
@@ -41,6 +38,7 @@ public class P2PThread extends Thread
 		}
 		catch(Exception e)
 		{
+			LOGGER.log(Level.SEVERE, "{ " + casaId + " } Error");
 			e.printStackTrace();
 		}
 	}

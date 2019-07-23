@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+// Thread per mandare messaggi; per ora fa marshal solo di MeanMeasurement; ma potrebbe essere riutilizzato per altri msg
 public class MessageSenderThread extends Thread
 {
 	private static final Logger LOGGER = Logger.getLogger(MessageSenderThread.class.getName());
