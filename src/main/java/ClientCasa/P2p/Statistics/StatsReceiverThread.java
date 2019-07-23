@@ -5,7 +5,6 @@ import ServerREST.beans.MeanMeasurement;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import java.io.IOException;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,6 +35,7 @@ public class StatsReceiverThread extends Thread
 		try
 		{
 			message = (MeanMeasurement) unmarshaller.unmarshal(listenSocket.getInputStream());
+			listenSocket.close();
 			LOGGER.log(Level.INFO, "{ " + casaId + " } Statistic received from " + message.getCasaId() + "\nMean: " + message.getMean());
 		}
 		catch(Exception e)

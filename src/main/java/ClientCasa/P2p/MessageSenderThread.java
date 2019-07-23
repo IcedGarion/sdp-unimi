@@ -5,7 +5,6 @@ import ServerREST.beans.MeanMeasurement;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import java.io.IOException;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,8 +45,7 @@ public class MessageSenderThread extends Thread
 		{
 			socket = new Socket(ip, port);
 			marshaller.marshal(message, socket.getOutputStream());
-
-			// assert socket.getResponseCode() == 200 : "MessageSender: Send statistics failed ( " + conn.getResponseCode() + " " + conn.getResponseMessage() + " )";
+			socket.close();
 
 			LOGGER.log(Level.INFO, "{ " + senderId + " } Statistic sent to " + senderId + " (" + ip + ": " + port + ")");
 		}
@@ -56,8 +54,5 @@ public class MessageSenderThread extends Thread
 			LOGGER.log(Level.SEVERE, "{ " + senderId + " } Unable to connect to " + ip + ": " + port);
 			e.printStackTrace();
 		}
-
-
-
 	}
 }

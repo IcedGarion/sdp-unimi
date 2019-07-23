@@ -1,18 +1,18 @@
-# TODO vero
+# TODO
 - P2PThread, StatsReceiverThread e MeanThread:
   MeanT manda a tutte le case la sua statistica locale calcolata. (SOCKET + JAXB!!)
   StatsReceiver ascolta e riceve queste statistiche da tutte le case: aspetta finche' non le riceve da TUTTO il condominio
       inventa cosa fare se ne manca qualcuna.
 
-ocio che devi inviare statisiche solo quando tutte le case te la mandano; (mapping casa_x - ha mandato a sto turno)
-inoltre la stessa non deve contribuire piu volte.... COSA FARE DI QUELLE CHE NON ARRIVANO? LE BUTTI?
- 
-  quando ci sono tutte le statistiche, stampa il consumo globale
-
 
 CHECK RICEZIONE STATISTICHE (StatsReceiverThread):
-	RICEVE SOLO UNA VOLTA
-SERVER DEVE ESSERE CONCORRENTEEEE (StatsReceiverThread)
+
+
+ocio che devi inviare statisiche solo quando tutte le case te la mandano; (mapping casa_x - ha mandato a sto turno)
+inoltre la stessa non deve contribuire piu volte.... COSA FARE DI QUELLE CHE NON ARRIVANO? LE BUTTI?
+quando ci sono tutte le statistiche, stampa il consumo globale
+
+
 
 
 
