@@ -76,7 +76,7 @@ public class StatisticheLocaliTest
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 		jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-		Casa newCasa = new Casa("CasaTestStatisticheLocali", "127.0.0.1", 8081);
+		Casa newCasa = new Casa("CasaTestStatisticheLocali", "127.0.0.1", 8081, 8082);
 
 		url = new URL(URL + "/condominio/add");
 		conn = (HttpURLConnection) url.openConnection();

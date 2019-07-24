@@ -7,7 +7,7 @@
 
 BULLY
 
-( vecchia idea da guardare: 
+( vecchia idea da guardare per election: 
   -- [un altro thread, P2Pcoord], che invece si coordina con gli altri P2Pcoord della rete: indice "elezione" o meccanismo simile
      per decidere chi invia le statistiche al serverAmministratore. STATE?
      Poi, una volta deciso coordinatore, lui invia la statistica al server.
@@ -17,12 +17,18 @@ BULLY
      <stato_particolare_in_mezzo_a_elezione> sai cosa devi fare.
 )
 
+
+- crea spazio nel server rest per poter aggiungere stat globali
+
+
 # DOMANDE FATTE / COSE DA SISTEMARE POI
 - pool di thread opzionale, non serve per forza
 - bully algo va bene per elezione, tanto uscite sono controllate:
   nel caso di uscita, avvisa il server e tutte le case (che si scaricano di nuovo la lista)
   
-  MA POI VA RI-INDETTA ELEZIONE!
+  MA POI VA RI-INDETTA ELEZIONE! 
+  DEVONO CAPIRE CHE SI E' IN "NEED_ELECTION" QUANDO UNO ESCE.... TIMEOUT SE NON RISPONDE NESSUN COORD? VEDI BULLY  
+
 
   ( QUANDO CASA ESCE, CHE SUCCEDE A STATS SENDER/ RECEIVER? CONTINUA A FUNZIONARE OPPURE SI BLOCCA IN ATTESA DELL'ULTIMA CASA
   ( CHE NON MANDERA' MAI LA SUA STATISTICA?? -> ANDREBBE TOLTA LA CASA ANCHE DALL'OGGETTO CONDIVISO (HASHMAP)

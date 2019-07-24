@@ -24,6 +24,7 @@ public class CasaApp
 	private static final String CASA_ID = "casa2";
 	private static final String CASA_IP = "localhost";
 	private static final int CASA_STATS_PORT = 8082;
+	private static final int CASA_ELECTION_PORT = 8090;
 
 	private static final int RETRY_TIMEOUT = 250;
 	private static final int SIMULATOR_DELAY = 100;
@@ -92,7 +93,7 @@ public class CasaApp
 
 		///////////////////////////////////////////////////
 		/*	REGISTRA LA CASA AL SERVER AMMINISTRATORE	*/
-		Casa myCasa = new Casa(CASA_ID, CASA_IP, CASA_STATS_PORT);
+		Casa myCasa = new Casa(CASA_ID, CASA_IP, CASA_STATS_PORT, CASA_ELECTION_PORT);
 
 		// POST /condominio/add: inserisce nuova casa
 		// continua a tentare di connettersi al server, se non riesce riprova
