@@ -9,6 +9,12 @@
 
 - Election: fare elezione BULLY
 
+- SERVER CONCORRENTE ANCHE PER QUESTO? (ElectionListener)
+  STESSSA ROBA DI STATSRECEIVER: SERVE OGGETTO CONDIVISO...
+- TESTARE ANCHE CASO IN CUI C'E' UNA SOLA CASA: COORD LEI SUBITO!
+
+
+
 ( vecchia idea da guardare per election: 
   -- [un altro thread, P2Pcoord], che invece si coordina con gli altri P2Pcoord della rete: indice "elezione" o meccanismo simile
      per decidere chi invia le statistiche al serverAmministratore. STATE?
@@ -30,6 +36,8 @@
   
   MA POI VA RI-INDETTA ELEZIONE! 
   DEVONO CAPIRE CHE SI E' IN "NEED_ELECTION" QUANDO UNO ESCE.... TIMEOUT SE NON RISPONDE NESSUN COORD? VEDI BULLY  
+	DA IMPLEMENTARE IN UN RAMO DI STATSRECEIVERSERVERTHREAD: se non sei coord (ma neanche in need_election, perche' c'e' gia' stata),
+	dovresti comunque cercare di pingare il coord per ssapere se indirne una nuova
 
 
   ( QUANDO CASA ESCE, CHE SUCCEDE A STATS SENDER/ RECEIVER? CONTINUA A FUNZIONARE OPPURE SI BLOCCA IN ATTESA DELL'ULTIMA CASA

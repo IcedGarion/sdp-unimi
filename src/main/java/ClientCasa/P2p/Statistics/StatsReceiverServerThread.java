@@ -28,7 +28,7 @@ public class StatsReceiverServerThread extends Thread
 	// stato elezione:
 	// all'inizio nessun coordinatore eletto -> "NEED_ELECTION"
 	// dopo una elezione uno puo' essere -> "COORD" / "NOT_COORD"
-	private Election.ElectionStatus electionStatus;
+	private Election.ElectionOutcome electionOutcome;
 
 	private static final Logger LOGGER = Logger.getLogger(StatsReceiverServerThread.class.getName());
 	private static final int DELAY = 100;
@@ -39,7 +39,7 @@ public class StatsReceiverServerThread extends Thread
 	{
 		this.casaId = casaId;
 		this.statsPort = statsPort;
-		this.electionStatus = Election.ElectionStatus.NEED_ELECTION;
+		this.electionOutcome = Election.ElectionOutcome.NEED_ELECTION;
 	}
 
 	// server concorrente
@@ -124,15 +124,15 @@ public class StatsReceiverServerThread extends Thread
 
 						//	ELEZIONE / INVIO STATISTICHE GLOBALI AL SERVER
 						// inizialmente non c'e' nessun coordinatore e si indice elezione
-						if(electionStatus.equals(Election.ElectionStatus.NEED_ELECTION))
+						if(electionOutcome.equals(Election.ElectionOutcome.NEED_ELECTION))
 						{
-							electionStatus = Election.elect(casaId);
+							electionOutcome = Election.elect(casaId);
 
-							System.out.println("Elezione terminata: " + casaId + " ha ottenuto ruolo: " + electionStatus);
-
-
+							System.out.println("Elezione terminata: " + casaId + " ha ottenuto ruolo: " + electionOutcome);
 
 
+
+							// TODO: qua vanno comunque sistemati questi 3 rami: accorgersi che c'e bisogno coord / pingarlo / rispondere se sei coord
 
 
 
@@ -146,7 +146,7 @@ public class StatsReceiverServerThread extends Thread
 
 						}
 						// se c'e gia'/appena stata elezione e sei tu coord, invia le statistiche al server
-						if(electionStatus.equals(Election.ElectionStatus.COORD))
+						if(electionOutcome.equals(Election.ElectionOutcome.COORD))
 						{
 
 

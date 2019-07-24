@@ -47,8 +47,5 @@ public class StatsReceiverThread extends Thread
 			LOGGER.log(Level.SEVERE, "{ " + casaId + " } Error while receiving stats");
 			e.printStackTrace();
 		}
-
-
-
 	}
 }

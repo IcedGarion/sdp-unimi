@@ -124,7 +124,7 @@ public class CasaApp
 
 		// parte rete p2p
 		// lancia nuovo thread che si occupa delle statistiche globali
-		P2PThread p2p = new P2PThread(CASA_ID, CASA_IP, CASA_STATS_PORT);
+		P2PThread p2p = new P2PThread(CASA_ID, CASA_IP, CASA_STATS_PORT, CASA_ELECTION_PORT);
 		p2p.start();
 
 
