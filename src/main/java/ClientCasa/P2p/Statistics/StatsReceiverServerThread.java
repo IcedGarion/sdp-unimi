@@ -1,6 +1,7 @@
 package ClientCasa.P2p.Statistics;
 
 import ClientCasa.CasaApp;
+import ClientCasa.P2p.Statistics.Election.Election;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 import ServerREST.beans.MeanMeasurement;
@@ -135,7 +136,7 @@ public class StatsReceiverServerThread extends Thread
 
 
 
-							// -> prova
+							//prova cosa viene fuori da elezione
 
 
 
@@ -158,13 +159,12 @@ public class StatsReceiverServerThread extends Thread
 
 
 
-							// -> si mette in ascolto per ricevere i ping da tutti e dire che è vivo (ramo else qua sotto)
+							//si mette in ascolto per ricevere i ping da tutti e dire che è vivo (ramo else qua sotto)
 
-							// poi manda al server global stat
+							//poi manda al server global stat
 
 
-							// TODO: invia statistica globale globalComsumption al server rest
-							// TODO: crea spazio apposta nel server rest per tenere stat globali
+							//crea spazio apposta nel server rest per tenere stat globali
 
 						}
 						// se invece non e' il primo giro (need election) e in teoria c'e' gia' un coordinatore,
@@ -182,7 +182,7 @@ public class StatsReceiverServerThread extends Thread
 
 
 
-							// -> contatta il coordinatore per sapere se è vivo o se serve nuova elezione
+							//pinga il coordinatore per sapere se è vivo o se serve nuova elezione
 						}
 					}
 				}

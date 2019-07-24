@@ -1,4 +1,4 @@
-package ClientCasa.P2p.Statistics;
+package ClientCasa.P2p.Statistics.Election;
 
 import ClientCasa.CasaApp;
 import ServerREST.beans.Condominio;
@@ -25,6 +25,8 @@ public class Election
 		{
 			// lista case coinvolte in elezione
 			condominio = CasaApp.getCondominio();
+
+			
 
 		}
 		catch(Exception e)

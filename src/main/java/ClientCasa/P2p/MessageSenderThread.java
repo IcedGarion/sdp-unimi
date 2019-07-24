@@ -1,5 +1,7 @@
 package ClientCasa.P2p;
 
+import ClientCasa.P2p.Statistics.Election.Election;
+import ClientCasa.P2p.Statistics.Election.ElectionMessage;
 import ServerREST.beans.MeanMeasurement;
 
 import javax.xml.bind.JAXBContext;
@@ -9,7 +11,7 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-// Thread per mandare messaggi; per ora fa marshal solo di MeanMeasurement; ma potrebbe essere riutilizzato per altri msg
+// Thread per mandare messaggi; per ora fa marshal solo di MeanMeasurement e ElectionMessage; ma puo' essere riutilizzato per altri msg
 public class MessageSenderThread extends Thread
 {
 	private static final Logger LOGGER = Logger.getLogger(MessageSenderThread.class.getName());
@@ -18,20 +20,36 @@ public class MessageSenderThread extends Thread
 	private String senderId;
 	private String destId;
 	private int port;
-	private MeanMeasurement message;
+	private Object message;
 	private JAXBContext jaxbContext;
 	private Marshaller marshaller;
 
-	public MessageSenderThread(String senderId, String destId, String ip, int port, MeanMeasurement message) throws JAXBException
+	private void MessageSenderThread(String senderId, String destId, String ip, int port)
 	{
 		this.senderId = senderId;
 		this.destId = destId;
 		this.ip = ip;
 		this.port = port;
+	}
+
+	public MessageSenderThread(String senderId, String destId, String ip, int port, MeanMeasurement message) throws JAXBException
+	{
+		MessageSenderThread(senderId, destId, ip, port);
 		this.message = message;
 
 		// setup marshaller per invio statistiche
 		jaxbContext = JAXBContext.newInstance(MeanMeasurement.class);
+		marshaller = jaxbContext.createMarshaller();
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+	}
+
+	public MessageSenderThread(String senderId, String destId, String ip, int port, ElectionMessage message) throws JAXBException
+	{
+		MessageSenderThread(senderId, destId, ip, port);
+		this.message = message;
+
+		// setup marshaller per invio statistiche
+		jaxbContext = JAXBContext.newInstance(ElectionMessage.class);
 		marshaller = jaxbContext.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 	}

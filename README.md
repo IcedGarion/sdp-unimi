@@ -5,7 +5,9 @@
   Se e' la prima volta (chissa' come capirlo?) devi indire elezione...
   Tutto nel StatsReceiver di seguito? o lancia altro thread elezione? in oni caso p2pthread e' inutile
 
-BULLY
+- 3 rami da checkare
+
+- Election: fare elezione BULLY
 
 ( vecchia idea da guardare per election: 
   -- [un altro thread, P2Pcoord], che invece si coordina con gli altri P2Pcoord della rete: indice "elezione" o meccanismo simile
