@@ -15,25 +15,43 @@ import java.util.logging.Logger;
  */
 public class Election
 {
-	public enum ElectionOutcome	{ NEED_ELECTION, COORD, NOT_COORD };
-	public static String coordinator;
 	private static final Logger LOGGER = Logger.getLogger(Election.class.getName());
+	public enum ElectionOutcome	{ NEED_ELECTION, COORD, NOT_COORD };
+	public String casaId;
+
+	// dati condivisi (con relativi metodi per accedere: stato (se sei coord)
+	public ElectionOutcome state;
+
+	public Election(String casaId)
+	{
+		this.casaId = casaId;
+		setState(ElectionOutcome.NEED_ELECTION);
+	}
+
+	public synchronized void setState(ElectionOutcome state)
+	{
+		this.state = state;
+	}
+	public synchronized ElectionOutcome getState()
+	{
+		return this.state;
+	}
+
 
 	// Fa elezione: ci sono 2 thread che interagiscono: uno manda per primo il msg, l'altro risponde
 	// ma entrambi fanno sia client che server
 	// solo che il "listener" rimane perennemente attivo in ascolto.. invece questo viene chiamato solo quando serve elezione
-	public static ElectionOutcome elect(String casaId)
+	public void startElection()
 	{
 		Condominio condominio;
-		ElectionOutcome ret = ElectionOutcome.NOT_COORD;
 		MessageSenderThread electionMessageSender;
 
 		try
 		{
-			// Thread ascolto elezione e' gia' attivato... E' lì che aspetta di rispondere a questo thread che invierà msg
+			// Thread ascolto elezione e' gia' attivato... E' lì che aspetta di rispondere a questo thread che invierà msg di inizio
 
 
-			/*	QUESTO E' IL THREAD DI CHI INIZIA ELEZIONE ("sender")*/
+			/* INIZIA ELEZIONE: manda msg ELECTION a ~tutti; poi electionThread se ne occupa*/
 			// lista case coinvolte in elezione
 			condominio = CasaApp.getCondominio();
 
@@ -47,24 +65,11 @@ public class Election
 					electionMessageSender.start();
 				}
 			}
-
-			// si mette in attesa di ok
-
-
-
-
-
-
-
-			// TODO: avanti con bully
-
 		}
 		catch(Exception e)
 		{
 			LOGGER.log(Level.SEVERE, "{ " + casaId + " } Error occurred during elecion");
 			e.printStackTrace();
 		}
-
-		return ret;
 	}
 }

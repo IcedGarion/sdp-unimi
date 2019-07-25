@@ -1,3 +1,14 @@
+# TODO now
+- Sposta p2pthread in casaApp
+  - interfaccia EXIT: check se sei coordinatore (anche per questo devi spostare tutti in casaApp)
+    e invii a tutti i electionThread un MSG "NEED_REELEcTION"
+
+- check uscita casa / cosa provoca su elezione
+
+- server concorrente per electionThread
+
+
+
 # TODO
 - StatsReceiverServerThread: 
   una volta calcolato il consumo globale, qualcuno deve mandarlo al server.
@@ -11,6 +22,8 @@
 
 - SERVER CONCORRENTE ANCHE PER QUESTO? (ElectionListener)
   STESSSA ROBA DI STATSRECEIVER: SERVE OGGETTO CONDIVISO...
+   SERVER CONCORRENTE SIA PER ELECTION (quindi un electionThread da lanciare ogni volta + oggetto condiviso)
+   SERVER CONCORRENTE ANCHE PER ELECTIONLISTENER (idem come sopra: un electionListenerThread + oggetto condiviso)
 - TESTARE ANCHE CASO IN CUI C'E' UNA SOLA CASA: COORD LEI SUBITO!
 
 

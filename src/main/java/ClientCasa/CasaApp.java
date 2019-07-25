@@ -1,6 +1,8 @@
 package ClientCasa;
 
-import ClientCasa.P2p.P2PThread;
+import ClientCasa.P2p.Statistics.Election.Election;
+import ClientCasa.P2p.Statistics.Election.ElectionThread;
+import ClientCasa.P2p.Statistics.StatsReceiverServerThread;
 import ClientCasa.smartMeter.SmartMeterSimulator;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
@@ -121,12 +123,19 @@ public class CasaApp
 			}
 		}
 
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/*	PARTE RETE P2P	*/
+		// Prepara thread elezione e oggetto condiviso Election da passargli; lo passa anche a statsReceiver perche' deve sapere stato elezione
+		// ( per sapere chi e' coord e quindi chi manda le stats)
+		Election election = new Election(CASA_ID);
 
-		// parte rete p2p
-		// lancia nuovo thread che si occupa delle statistiche globali
-		P2PThread p2p = new P2PThread(CASA_ID, CASA_IP, CASA_STATS_PORT, CASA_ELECTION_PORT);
-		p2p.start();
+		// lancia thread "ascoltatore" elezione bully: riceve msg e risponde a dovere secondo alg BULLY
+		ElectionThread electionThread = new ElectionThread(CASA_ID, CASA_ELECTION_PORT, election);
+		electionThread.start();
 
+		// lancia thread che riceve le statistiche
+		StatsReceiverServerThread statsReceiver = new StatsReceiverServerThread(CASA_ID, CASA_STATS_PORT, election);
+		statsReceiver.start();
 
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -151,9 +160,21 @@ public class CasaApp
 				marshaller.marshal(myCasa, conn.getOutputStream());
 				assert conn.getResponseCode()== 204: "Error in removing casa " + CASA_ID;
 
+
+				// se sta per uscire ed era il coordinatore delle stat globali, dice a tutti che molla (nuova elezione poi)
+				if(election.getState().equals(Election.ElectionOutcome.COORD))
+				{
+					// TODO: invia msg a tutti NEED_REELECTION che sta per uscire, e tutti settano NEED ELECTION
+					// TODO: ma soltanto se era lui il coordinatore!!
+					//MessageSenderThread...
+				}
+
 				// termina i suoi thread
+				// TODO: check se va terminato prima un thread di un altro (election / stat receiver? )
 				mean.interrupt();
 				simulator.interrupt();
+				statsReceiver.interrupt();
+				electionThread.interrupt();
 				break;
 			}
 			else if(choice.equals("0"))

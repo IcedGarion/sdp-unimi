@@ -9,10 +9,8 @@ import ServerREST.beans.MeanMeasurement;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import java.net.HttpURLConnection;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.URL;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,21 +23,22 @@ import java.util.logging.Logger;
  */
 public class StatsReceiverServerThread extends Thread
 {
-	// stato elezione:
+	// stato elezione lo trova nell'oggetto election condiviso:
 	// all'inizio nessun coordinatore eletto -> "NEED_ELECTION"
 	// dopo una elezione uno puo' essere -> "COORD" / "NOT_COORD"
-	private Election.ElectionOutcome electionOutcome;
 
 	private static final Logger LOGGER = Logger.getLogger(StatsReceiverServerThread.class.getName());
 	private static final int DELAY = 100;
 	private String casaId;
 	private int statsPort;
+	private Election election;
 
-	public StatsReceiverServerThread(String casaId, int statsPort) throws JAXBException
+	// riceve anche oggetto Elezione con info su chi e' l'eletto e su come eleggerne un altro
+	public StatsReceiverServerThread(String casaId, int statsPort, Election election)
 	{
 		this.casaId = casaId;
 		this.statsPort = statsPort;
-		this.electionOutcome = Election.ElectionOutcome.NEED_ELECTION;
+		this.election = election;
 	}
 
 	// server concorrente
@@ -47,12 +46,11 @@ public class StatsReceiverServerThread extends Thread
 	{
 		ServerSocket welcomeSocket;
 		Socket connectionSocket;
-		URL url;
-		HttpURLConnection conn;
 		Condominio condominio;
 
 		// prepara oggetto condiviso (fra lui e i StatsReceiverThread) che contiene le stat ricevute
 		CondominioStats condominioStats = new CondominioStats();
+
 
 		try
 		{
@@ -123,12 +121,13 @@ public class StatsReceiverServerThread extends Thread
 
 
 						//	ELEZIONE / INVIO STATISTICHE GLOBALI AL SERVER
-						// inizialmente non c'e' nessun coordinatore e si indice elezione
-						if(electionOutcome.equals(Election.ElectionOutcome.NEED_ELECTION))
+						// inizialmente non c'e' nessun coordinatore e si indice elezione;
+						// anche se questa casaId si e' unita dopo, quando c'era gia un coord, si rifa elezione
+						if(election.getState().equals(Election.ElectionOutcome.NEED_ELECTION))
 						{
-							electionOutcome = Election.elect(casaId);
+							election.startElection();
 
-							System.out.println("Elezione terminata: " + casaId + " ha ottenuto ruolo: " + electionOutcome);
+							System.out.println("Elezione terminata: " + casaId + " ha ottenuto ruolo: " + election.getState());
 
 
 
@@ -146,7 +145,7 @@ public class StatsReceiverServerThread extends Thread
 
 						}
 						// se c'e gia'/appena stata elezione e sei tu coord, invia le statistiche al server
-						if(electionOutcome.equals(Election.ElectionOutcome.COORD))
+						if(election.getState().equals(Election.ElectionOutcome.COORD))
 						{
 
 
@@ -192,6 +191,13 @@ public class StatsReceiverServerThread extends Thread
 				// non dovrebbe mai succedere perche' tutti mandano in ordine;
 				// basterebbe anche solo aumentare il delay di attesa per il thread
 				// volendo si puo' aggiungere qua un timeout...
+
+				// check TERMINAZIONE
+				if(interrupted())
+				{
+					LOGGER.log(Level.INFO, "{ " + casaId + " } Stopping StatsReceiverThread... ");
+					return;
+				}
 			}
 		}
 		catch(Exception e)
