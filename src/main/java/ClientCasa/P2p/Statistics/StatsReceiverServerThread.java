@@ -127,12 +127,16 @@ public class StatsReceiverServerThread extends Thread
 						// elezione parte soltanto se "tutti" sono in NEED_ELECTION, cioè all'inizio, oppure quando esce coord
 						if(election.getState().equals(Election.ElectionOutcome.NEED_ELECTION))
 						{
+							// FIXME: remove print
+							System.out.println("{ " + casaId + " } [ STATSRECEIVER ] Serve elezione");
+
 							election.startElection();
 						}
 						// se c'e gia'/appena stata elezione e sei tu coord, invia le statistiche al server
-						if(election.getState().equals(Election.ElectionOutcome.COORD))
+						else if(election.getState().equals(Election.ElectionOutcome.COORD))
 						{
-							System.out.println("{ " + casaId + " } Sono io il coord e sto mandando le stat globali al server");
+							// FIXME: remove print
+							System.out.println("{ " + casaId + " } [ STATSRECEIVER ] Sono io il coord e sto mandando le stat globali al server");
 
 
 							// TODO: poi manda al server global stat
@@ -141,6 +145,11 @@ public class StatsReceiverServerThread extends Thread
 						}
 						// se invece non e' il primo giro (need election) / la casa non si e' appena unita (need election)
 						// allora in teoria c'e' gia' un coordinatore, e se non e' lui allora non fa piu' niente
+						else
+						{
+							// FIXME: remove print
+							System.out.println("{ " + casaId + " } [ STATSRECEIVER ] Non sono io il coord: non mando info al server");
+						}
 
 					}
 				}

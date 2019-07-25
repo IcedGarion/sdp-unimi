@@ -139,12 +139,11 @@ public class ElectionThread extends Thread
 								}
 							}
 							// altrimenti ha finito, non sara' mai il coord
-
-
-
-							// FIXME: remove print
-							System.out.println("{ " + casaId + " } [ ELECTION ] non sono il quello con id maggiore e quindi ho finito qua");
-
+							else
+							{
+								// FIXME: remove print
+								System.out.println("{ " + casaId + " } [ ELECTION ] non sono il quello con id maggiore e quindi ho finito qua");
+							}
 						}
 						// ultimo caso: esiste gia' un coord ma non e' lui: non fa niente. Il coord rispondera' al nuovo arrivato informandolo
 						// OPPURE e' stata indetta una nuova elezione.

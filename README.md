@@ -1,4 +1,28 @@
 # TODO now
+- prova prima server concorrente
+- poi test election
+
+
+
+Se entra una casa con id maggiore del coord si rifa elezione e viene eletto lui
+Se entra una casa con il minore del coord, il coord gli risponde e lui lo accetta e non si rifa elezione
+NON CENTRANO GLI ID MA SUCCEDE COMUNQUE UNA ROBA DEL GENERE
+
+chiarire cosa succede durante sta election:
+il problema puo' essere il fatto che chi entra manda "election" a se stesso:
+- se pero' riceve prima "ELECTED" dal vecchio coord, allora accetta quello e bon
+- se invece riceve prima il suo stesso "ELECTION", fa partire elezione perche' secondo lui coord non c'e' ancora
+
+Sara' tutta colpa del fatto che il server e' iterativo e non concorrente:
+se arriva una richiesta (ELECTION / ELECTED), la seconda che arriva viene persa perche' il codice e' impegnato a gestirla.
+
+
+
+
+
+
+
+
 - check come va election: tutti i vari casi:
     check join casa / come va election
     check uscita casa / cosa provoca su elezione
