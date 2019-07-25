@@ -1,35 +1,10 @@
 # TODO now
-- prova prima server concorrente
-- poi test election
-
-
-
-Se entra una casa con id maggiore del coord si rifa elezione e viene eletto lui
-Se entra una casa con il minore del coord, il coord gli risponde e lui lo accetta e non si rifa elezione
-NON CENTRANO GLI ID MA SUCCEDE COMUNQUE UNA ROBA DEL GENERE
-
-chiarire cosa succede durante sta election:
-il problema puo' essere il fatto che chi entra manda "election" a se stesso:
-- se pero' riceve prima "ELECTED" dal vecchio coord, allora accetta quello e bon
-- se invece riceve prima il suo stesso "ELECTION", fa partire elezione perche' secondo lui coord non c'e' ancora
-
-Sara' tutta colpa del fatto che il server e' iterativo e non concorrente:
-se arriva una richiesta (ELECTION / ELECTED), la seconda che arriva viene persa perche' il codice e' impegnato a gestirla.
-
-
-
-
-
-
-
+- server concorrente electionThread
 
 - check come va election: tutti i vari casi:
     check join casa / come va election
     check uscita casa / cosa provoca su elezione
     ALLA FINE TOGLI TUTTE LE STAMPE FIXME
-
-- server concorrente per electionThread
-
 
 
 - Risolta election, finisci con StatsReceiver:
@@ -214,7 +189,7 @@ di MeanMeasurement, cioe' una lista di medie calcolate. (Calcolo fatto da CasaAp
 **Election**
 electionThread sempre in ascolto. Scrive stati su un oggetto CONDIVISO fra StatsReceiverThread e ElectionThread (Election)
 StatsReceiver legge oggetto condiviso per sapere il suo stato nella elezione:
-- ancora nessun coord (prima volta): manda un iniziale msg di "ELECTION" a tutte le case con ID superiore compresa se stessa (startElection)
+- ancora nessun coord (prima volta): manda un iniziale msg di "ELECTION" a TUTTE le case tranne se stessa (startElection)
 - e' lui il coord: invia lui stat globali al server
 - non e' lui il coord: non fa niente. Non serve pingare il coord perche' tanto uscite sono controllate quindi se il coord cade avvisa prima
 
@@ -228,10 +203,12 @@ Poi la elezione la gestisce ElectionThread: riceve "ELECTION" e allora invia a s
 se non ce ne sono, si proclama coord e avvisa tutti gli altri ElectionThread, che settano stato in Election come NOT_COORD;
 lui invece si setta COORD.
 
-Se una casa si unisce dopo: parte da stato NEED_ELECTION, quindi crede che non ci sia coord ancora: fa partire startElection
-Ma chi riceve, se e' NOT_COORD allora non risponde; se e' lui il COORD gli risponde dicendo che e' lui il COORD.
+- Se una casa si unisce dopo: parte da stato NEED_ELECTION, quindi crede che non ci sia coord ancora: fa partire startElection, mandando un msg
+  ELECTION a tutte le case tranne se stessa;
+Chi riceve, se e' NOT_COORD allora non risponde; se e' lui il COORD gli risponde dicendo che e' lui il COORD.
 Non ci sono altri casi perche' quando una casa esce, tutti settano lo stato NEED_ELECTION: questo e' l'unico caso in cui si porta avanti
-una elezione vera. Negli altri casi un coord c'e' gia' e quindi risponde al nuovo arrivato, che si mette NOT_COORD.
+una nuova elezione vera. Negli altri casi un coord c'e' gia' e quindi risponde al nuovo arrivato, che si mette NOT_COORD.
+
 Elezione parte solo quando tutti sono in NEED_ELECTION, cioe' all'inizio OPPURE quando esce il coord. Quindi elezione non si rifa' ogni volta.
 Questo vuol dire che coord non e' per forza sempre quello con id maggiore in ogni momento, ma si tiene quello che esisteva gia (se entra una casa
 con id maggiore, accetta il vecchio coord).

@@ -48,6 +48,7 @@ public class Election
 	{
 		Condominio condominio;
 		MessageSenderThread electionMessageSender;
+		int caseTot = 0;
 
 		try
 		{
@@ -58,15 +59,25 @@ public class Election
 			// lista case coinvolte in elezione
 			condominio = CasaApp.getCondominio();
 
-			// manda msg elezione a tutti quelli con ID maggiore, COMPRESO SE STESSO! COSI' LA PARTE ElectionThread se ne occupa ( caso in cui e' l'unico nella rete così funziona)
+			// manda msg elezione a TUTTI, tranne se stesso (informa tutti che e' entrato: se c'e' un coord gli risponde, se non c'e allora si fa elezione)
+			// se e' l'unica casa a entrare qua (da sola), allora si autoproclama coord di se stesso e basta
 			for(Casa c: condominio.getCaselist())
 			{
-				if(c.getId().compareTo(casaId) >= 0)
+				caseTot++;
+
+				if(c.getId().compareTo(casaId) != 0)
 				{
 					// invia "ELECTION": chiede ai superiori di prendersi carico coordinatore
 					electionMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getElectionPort(), new ElectionMessage(casaId, casaElectionPort, c.getId(), "ELECTION"));
 					electionMessageSender.start();
 				}
+			}
+			// se c'e' solo una casa in rete allora fa subito coord
+			if(caseTot == 1)
+			{
+				// FIXME: remove print
+				System.out.println("{ " + casaId + " } [ START ELECTION ] Sono da solo e faccio io il coord");
+				setState(ElectionOutcome.COORD);
 			}
 		}
 		catch(Exception e)

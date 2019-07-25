@@ -23,10 +23,10 @@ public class CasaApp
 {
 	public static final String SERVER_URL = "http://localhost:1337";
 
-	private static final String CASA_ID = "casa2";
+	private static final String CASA_ID = "casa0";
 	private static final String CASA_IP = "localhost";
-	private static final int CASA_STATS_PORT = 8082;
-	private static final int CASA_ELECTION_PORT = 8092;
+	private static final int CASA_STATS_PORT = 8085;
+	private static final int CASA_ELECTION_PORT = 8095;
 
 	private static final int RETRY_TIMEOUT = 250;
 	private static final int SIMULATOR_DELAY = 100;
