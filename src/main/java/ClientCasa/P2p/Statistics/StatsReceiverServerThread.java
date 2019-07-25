@@ -119,70 +119,29 @@ public class StatsReceiverServerThread extends Thread
 						// azzera per ricominziare il prossimo giro di calcolo complessivo
 						condominioStats.resetStats();
 
-
+						////////////////////////////////////////////////////////////////////////////////////////////////
 						//	ELEZIONE / INVIO STATISTICHE GLOBALI AL SERVER
 						// inizialmente non c'e' nessun coordinatore e si indice elezione;
-						// anche se questa casaId si e' unita dopo, quando c'era gia un coord, si rifa elezione
+						// se invece, questa casa si e' unita dopo e il coord c'e' gia': fa comunque startElection
+						// il suo ElectionThread ricevera' un msg dal coord dicendogli che esiste, e il thread settera' lo stato di election a NOT_COORD
+						// elezione parte soltanto se "tutti" sono in NEED_ELECTION, cioè all'inizio, oppure quando esce coord
 						if(election.getState().equals(Election.ElectionOutcome.NEED_ELECTION))
 						{
 							election.startElection();
-
-							System.out.println("Elezione terminata: " + casaId + " ha ottenuto ruolo: " + election.getState());
-
-
-
-							// TODO: qua vanno comunque sistemati questi 3 rami: accorgersi che c'e bisogno coord / pingarlo / rispondere se sei coord
-
-
-
-							//prova cosa viene fuori da elezione
-
-
-
-
-
-
-
 						}
 						// se c'e gia'/appena stata elezione e sei tu coord, invia le statistiche al server
 						if(election.getState().equals(Election.ElectionOutcome.COORD))
 						{
+							System.out.println("{ " + casaId + " } Sono io il coord e sto mandando le stat globali al server");
 
 
-
-
-
-
-
-
-
-
-
-							//si mette in ascolto per ricevere i ping da tutti e dire che è vivo (ramo else qua sotto)
-
-							//poi manda al server global stat
-
-
-							//crea spazio apposta nel server rest per tenere stat globali
+							// TODO: poi manda al server global stat
+							//TODO: crea spazio apposta nel server rest per tenere stat globali
 
 						}
-						// se invece non e' il primo giro (need election) e in teoria c'e' gia' un coordinatore,
-						// bisogna contattarlo per sapere se e' attivo; OPPURE se e' uscito e quindi serve nuova elezione
-						else
-						{
+						// se invece non e' il primo giro (need election) / la casa non si e' appena unita (need election)
+						// allora in teoria c'e' gia' un coordinatore, e se non e' lui allora non fa piu' niente
 
-
-
-
-
-
-
-
-
-
-
-							//pinga il coordinatore per sapere se è vivo o se serve nuova elezione
-						}
 					}
 				}
 				// se manca ancora qualche casa a questo giro di loop, attende il prossimo (non fa niente)

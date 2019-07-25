@@ -1,30 +1,21 @@
 # TODO now
-- Sposta p2pthread in casaApp
-  - interfaccia EXIT: check se sei coordinatore (anche per questo devi spostare tutti in casaApp)
-    e invii a tutti i electionThread un MSG "NEED_REELEcTION"
-
-- check uscita casa / cosa provoca su elezione
+- check come va election: tutti i vari casi:
+    check join casa / come va election
+    check uscita casa / cosa provoca su elezione
+    ALLA FINE TOGLI TUTTE LE STAMPE FIXME
 
 - server concorrente per electionThread
 
 
 
-# TODO
-- StatsReceiverServerThread: 
-  una volta calcolato il consumo globale, qualcuno deve mandarlo al server.
-  indice elezione la prima volta; se sei l'eletto invii tu; se non sei l'eletto non fai niente.
-  Se e' la prima volta (chissa' come capirlo?) devi indire elezione...
-  Tutto nel StatsReceiver di seguito? o lancia altro thread elezione? in oni caso p2pthread e' inutile
+- Risolta election, finisci con StatsReceiver:
+    crea spazio nel server rest per poter aggiungere stat globali
+    manda le stat se sei il coord
 
-- 3 rami da checkare
 
-- Election: fare elezione BULLY
-
-- SERVER CONCORRENTE ANCHE PER QUESTO? (ElectionListener)
-  STESSSA ROBA DI STATSRECEIVER: SERVE OGGETTO CONDIVISO...
-   SERVER CONCORRENTE SIA PER ELECTION (quindi un electionThread da lanciare ogni volta + oggetto condiviso)
-   SERVER CONCORRENTE ANCHE PER ELECTIONLISTENER (idem come sopra: un electionListenerThread + oggetto condiviso)
-- TESTARE ANCHE CASO IN CUI C'E' UNA SOLA CASA: COORD LEI SUBITO!
+(una cosa da sistemare indietro, poi quando avrai finito election):
+--------- "una stat non deve contribuire piu di una volta nel calcolo globale -->> vai in CondominioStats e 
+	   fai che quando arriva una nuova stat da x ma x esistevia gia (a questo giro di tot) allora non fa niente, invece di aggiornare!
 
 
 
@@ -39,7 +30,6 @@
 )
 
 
-- crea spazio nel server rest per poter aggiungere stat globali
 
 
 # DOMANDE FATTE / COSE DA SISTEMARE POI
@@ -189,14 +179,38 @@ di MeanMeasurement, cioe' una lista di medie calcolate. (Calcolo fatto da CasaAp
 - P2PThread, StatsReceiverThread e MeanThread:
   MeanT manda a tutte le case la sua statistica locale calcolata.
   StatsReceiver ascolta e riceve queste statistiche da tutte le case: aspetta finche' non le riceve da TUTTO il condominio:
-    - StatsRceiverThread riceve e basta; poi salva la statistica in un oggetto condiviso con StatsReceiverServer
+    - StatsRceiverThread riceve e basta; poi salva la statistica in un oggetto condiviso con StatsReceiverServer (CondominioStats)
     - StatsReceiverServer tira le somme: controlla questo oggetto dopo ogni richiesta ricevuta e si assicura che ci siano
          stat da tutte le case... Poi, quando succede, stampa il consumo globale e "azzera" l'oggetto condiviso, per ricominciare
     - E se non arrivano tutte le case per bene ma, mentre aspetti l'ultima, arriva di nuovo stat di qualcun altra???
-      -> la ignora e aspetta il ritardatario, che tanto prima o poi arriva
+      -> la ignora e aspetta il ritardatario (si puo' cambiare in CondominioStats)
+    - Una volta che ogni casa possiede le stesse stat globali in ogni "momento", qualcuno deve inviarle al server. Vedi sotto
 
 
+**Election**
+electionThread sempre in ascolto. Scrive stati su un oggetto CONDIVISO fra StatsReceiverThread e ElectionThread (Election)
+StatsReceiver legge oggetto condiviso per sapere il suo stato nella elezione:
+- ancora nessun coord (prima volta): manda un iniziale msg di "ELECTION" a tutte le case con ID superiore compresa se stessa (startElection)
+- e' lui il coord: invia lui stat globali al server
+- non e' lui il coord: non fa niente. Non serve pingare il coord perche' tanto uscite sono controllate quindi se il coord cade avvisa prima
 
+( se il coord esce dalla rete: 
+manda a tutti un msg di "NEED_REELECTION": gli ElectionThread lo ricevono e settano lo stato in Election come NEED_ELECTION (come fosse prima volta)
+e quindi, al prossimo giro di StatsReceiver, quando fa il check sullo stato elezione (coord / non coord / serve elezione), si accorge
+che serve nuova elezione e ricomincia
+)
+
+Poi la elezione la gestisce ElectionThread: riceve "ELECTION" e allora invia a sua volta "ELECTION" a tutti quelli con ID maggiore del suo;
+se non ce ne sono, si proclama coord e avvisa tutti gli altri ElectionThread, che settano stato in Election come NOT_COORD;
+lui invece si setta COORD.
+
+Se una casa si unisce dopo: parte da stato NEED_ELECTION, quindi crede che non ci sia coord ancora: fa partire startElection
+Ma chi riceve, se e' NOT_COORD allora non risponde; se e' lui il COORD gli risponde dicendo che e' lui il COORD.
+Non ci sono altri casi perche' quando una casa esce, tutti settano lo stato NEED_ELECTION: questo e' l'unico caso in cui si porta avanti
+una elezione vera. Negli altri casi un coord c'e' gia' e quindi risponde al nuovo arrivato, che si mette NOT_COORD.
+Elezione parte solo quando tutti sono in NEED_ELECTION, cioe' all'inizio OPPURE quando esce il coord. Quindi elezione non si rifa' ogni volta.
+Questo vuol dire che coord non e' per forza sempre quello con id maggiore in ogni momento, ma si tiene quello che esisteva gia (se entra una casa
+con id maggiore, accetta il vecchio coord).
 
 ======================================================================================================================================
 **APPUNTI**

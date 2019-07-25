@@ -127,7 +127,7 @@ public class CasaApp
 		/*	PARTE RETE P2P	*/
 		// Prepara thread elezione e oggetto condiviso Election da passargli; lo passa anche a statsReceiver perche' deve sapere stato elezione
 		// ( per sapere chi e' coord e quindi chi manda le stats)
-		Election election = new Election(CASA_ID);
+		Election election = new Election(CASA_ID, CASA_ELECTION_PORT);
 
 		// lancia thread "ascoltatore" elezione bully: riceve msg e risponde a dovere secondo alg BULLY
 		ElectionThread electionThread = new ElectionThread(CASA_ID, CASA_ELECTION_PORT, election);
