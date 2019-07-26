@@ -1,4 +1,4 @@
-package ClientCasa.P2p.Statistics.Election;
+package ClientCasa.P2P.Statistics.Election;
 
 import java.net.ServerSocket;
 import java.net.Socket;

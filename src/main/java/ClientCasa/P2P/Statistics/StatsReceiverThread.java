@@ -1,13 +1,11 @@
-package ClientCasa.P2p.Statistics;
+package ClientCasa.P2P.Statistics;
 
 import ClientCasa.CasaApp;
-import ClientCasa.P2p.Statistics.Election.Election;
+import ClientCasa.P2P.Statistics.Election.Election;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 import ServerREST.beans.MeanMeasurement;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.Timestamp;
@@ -163,7 +161,7 @@ public class StatsReceiverThread extends Thread
 				// check TERMINAZIONE
 				if(interrupted())
 				{
-					LOGGER.log(Level.INFO, "{ " + casaId + " } Stopping StatsReceiverWorkerThread... ");
+					LOGGER.log(Level.INFO, "{ " + casaId + " } Stopping StatsReceiverThread... ");
 					return;
 				}
 			}

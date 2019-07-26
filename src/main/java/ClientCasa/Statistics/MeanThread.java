@@ -1,7 +1,7 @@
 package ClientCasa.Statistics;
 
 import ClientCasa.CasaApp;
-import ClientCasa.P2p.MessageSenderThread;
+import ClientCasa.P2P.MessageSenderThread;
 import ClientCasa.Statistics.smartMeter.Measurement;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;

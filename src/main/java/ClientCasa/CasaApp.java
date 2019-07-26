@@ -1,8 +1,10 @@
 package ClientCasa;
 
-import ClientCasa.P2p.Statistics.Election.Election;
-import ClientCasa.P2p.Statistics.Election.ElectionThread;
-import ClientCasa.P2p.Statistics.StatsReceiverThread;
+import ClientCasa.P2P.Boost.PowerBoost;
+import ClientCasa.P2P.Boost.PowerBoostThread;
+import ClientCasa.P2P.Statistics.Election.Election;
+import ClientCasa.P2P.Statistics.Election.ElectionThread;
+import ClientCasa.P2P.Statistics.StatsReceiverThread;
 import ClientCasa.Statistics.smartMeter.SmartMeterSimulator;
 import ClientCasa.Statistics.MeanThread;
 import ClientCasa.Statistics.SimulatorBuffer;
@@ -30,6 +32,7 @@ public class CasaApp
 	private static final String CASA_IP = "localhost";
 	private static final int CASA_STATS_PORT = 8081;
 	private static final int CASA_ELECTION_PORT = 8091;
+	private static final int CASA_BOOST_PORT = 8071;
 
 	private static final int RETRY_TIMEOUT = 250;
 	private static final int SIMULATOR_DELAY = 100;
@@ -133,7 +136,7 @@ public class CasaApp
 
 		///////////////////////////////////////////////////
 		/*	REGISTRA LA CASA AL SERVER AMMINISTRATORE	*/
-		Casa myCasa = new Casa(CASA_ID, CASA_IP, CASA_STATS_PORT, CASA_ELECTION_PORT);
+		Casa myCasa = new Casa(CASA_ID, CASA_IP, CASA_STATS_PORT, CASA_ELECTION_PORT, CASA_BOOST_PORT);
 
 		// POST /condominio/add: inserisce nuova casa
 		// continua a tentare di connettersi al server, se non riesce riprova
@@ -175,6 +178,10 @@ public class CasaApp
 		StatsReceiverThread statsReceiver = new StatsReceiverThread(CASA_ID, CASA_STATS_PORT, election);
 		statsReceiver.start();
 
+		// lancia thread che riceve richieste di power boost e si coordina
+		PowerBoost powerBoostState = new PowerBoost(CASA_ID);
+		PowerBoostThread powerBoostThread = new PowerBoostThread(CASA_ID, CASA_BOOST_PORT, powerBoostState);
+		powerBoostThread.start();
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/*	INTERFACCIA CLI BOOST + EXIT	*/
@@ -202,8 +209,6 @@ public class CasaApp
 				// se sta per uscire ed era il coordinatore delle stat globali, dice a tutti che molla (nuova elezione poi)
 				if(election.getState().equals(Election.ElectionOutcome.COORD))
 				{
-					// TODO: invia msg a tutti NEED_REELECTION che sta per uscire, e tutti settano NEED ELECTION
-					// TODO: ma soltanto se era lui il coordinatore!!
 					election.coordLeaving();
 				}
 
@@ -217,10 +222,11 @@ public class CasaApp
 				LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Stopping...");
 				break;
 			}
+			// POWER BOOST
 			else if(choice.equals("0"))
 			{
-				// TODO: to be implemented (power boost)
-				System.out.println("To be implemented");
+				powerBoostState.requestPowerBoost();
+				LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Power boost requested... (Please wait)");
 			}
 			else
 			{

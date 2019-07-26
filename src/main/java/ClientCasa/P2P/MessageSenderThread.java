@@ -1,7 +1,5 @@
-package ClientCasa.P2p;
+package ClientCasa.P2P;
 
-import ClientCasa.P2p.Statistics.Election.Election;
-import ClientCasa.P2p.Statistics.Election.ElectionMessage;
 import ServerREST.beans.MeanMeasurement;
 
 import javax.xml.bind.JAXBContext;
@@ -11,7 +9,7 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-// Thread per mandare messaggi; per ora fa marshal solo di MeanMeasurement e ElectionMessage; ma puo' essere riutilizzato per altri msg
+// Thread per mandare messaggi; per ora fa marshal solo di MeanMeasurement e P2PMessage; ma puo' essere riutilizzato per altri msg
 public class MessageSenderThread extends Thread
 {
 	private static final Logger LOGGER = Logger.getLogger(MessageSenderThread.class.getName());
@@ -43,13 +41,13 @@ public class MessageSenderThread extends Thread
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 	}
 
-	public MessageSenderThread(String senderId, String destId, String ip, int port, ElectionMessage message) throws JAXBException
+	public MessageSenderThread(String senderId, String destId, String ip, int port, P2PMessage message) throws JAXBException
 	{
 		MessageSenderThread(senderId, destId, ip, port);
 		this.message = message;
 
 		// setup marshaller per invio statistiche
-		jaxbContext = JAXBContext.newInstance(ElectionMessage.class);
+		jaxbContext = JAXBContext.newInstance(P2PMessage.class);
 		marshaller = jaxbContext.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 	}

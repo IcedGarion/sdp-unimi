@@ -1,13 +1,15 @@
-package ClientCasa.P2p.Statistics.Election;
+package ClientCasa.P2P;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name="ElectionMessage")
+
+// Serve per fare marshalling / unmarshalling di messaggi election
+@XmlRootElement(name="P2PMessage")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ElectionMessage
+public class P2PMessage
 {
 	@XmlElement(name = "senderId")
 	private String senderId;
@@ -21,9 +23,9 @@ public class ElectionMessage
 	@XmlElement(name = "message")
 	private String message;
 
-	public ElectionMessage() {}
+	public P2PMessage() {}
 
-	public ElectionMessage(String senderId, int senderPort, String receiverId, String message)
+	public P2PMessage(String senderId, int senderPort, String receiverId, String message)
 	{
 		this.senderId = senderId;
 		this.senderPort = senderPort;

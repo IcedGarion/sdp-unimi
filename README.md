@@ -40,6 +40,7 @@
 
 
 # REFACTOR
+- si puo' togliere RECEIVER_ID da P2PMessage
 - Classe REST per mandare TUTTE le richieste GET/POST al server (capita spesso e usano in tanti)
 - StatLocaliService ha un lock obj che puo' diventare sync (si puo togliere e metti sync method)
 - AdminApp e' un orrore, serve refactor e metodi comuni
@@ -155,9 +156,9 @@ di MeanMeasurement, cioe' una lista di medie calcolate. (Calcolo fatto da CasaAp
 - P2PThread, StatsReceiverThread e MeanThread:
   MeanT manda a tutte le case la sua statistica locale calcolata.
   StatsReceiver ascolta e riceve queste statistiche da tutte le case: aspetta finche' non le riceve da TUTTO il condominio:
-    - StatsRceiverThread riceve e basta; poi salva la statistica in un oggetto condiviso con StatsReceiverServer (CondominioStats)
-    - StatsReceiverServer tira le somme: controlla questo oggetto dopo ogni richiesta ricevuta e si assicura che ci siano
-         stat da tutte le case... Poi, quando succede, stampa il consumo globale e "azzera" l'oggetto condiviso, per ricominciare
+    - StatsRceiverWorkerThread riceve e basta; poi salva la statistica in un oggetto condiviso con StatsReceiverServer (CondominioStats)
+    - StatsReceiverThread tira le somme: controlla questo oggetto dopo ogni richiesta ricevuta e si assicura che ci siano
+         stat da tutte le case... Poi, quando succede, stampa il consumo globale e "azzera" l'oggetto condiviso, per ricominciare.
     - E se non arrivano tutte le case per bene ma, mentre aspetti l'ultima, arriva di nuovo stat di qualcun altra???
       -> la ignora e aspetta il ritardatario (si puo' cambiare in CondominioStats)
     - Una volta che ogni casa possiede le stesse stat globali in ogni "momento", qualcuno deve inviarle al server. Vedi sotto

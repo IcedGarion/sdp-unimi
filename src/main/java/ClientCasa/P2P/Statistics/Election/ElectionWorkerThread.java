@@ -1,7 +1,8 @@
-package ClientCasa.P2p.Statistics.Election;
+package ClientCasa.P2P.Statistics.Election;
 
 import ClientCasa.CasaApp;
-import ClientCasa.P2p.MessageSenderThread;
+import ClientCasa.P2P.MessageSenderThread;
+import ClientCasa.P2P.P2PMessage;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 
@@ -29,17 +30,21 @@ public class ElectionWorkerThread extends Thread
 
 	public void run()
 	{
+		JAXBContext jaxbContext;
+		Unmarshaller unmarshaller;
+		P2PMessage electionMessage;
+		MessageSenderThread electionMessageSender;
+		Condominio condominio;
+		String senderIp, senderId;
+		int senderPort;
+
 		try
 		{
-			JAXBContext jaxbContext = JAXBContext.newInstance(ElectionMessage.class);
-			Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-			ElectionMessage electionMessage;
-			MessageSenderThread electionMessageSender;
-			Condominio condominio;
-			String senderIp, senderId;
-			int senderPort;
+			jaxbContext = JAXBContext.newInstance(P2PMessage.class);
+			unmarshaller = jaxbContext.createUnmarshaller();
 
-			electionMessage = (ElectionMessage) unmarshaller.unmarshal(listenSocket.getInputStream());
+
+			electionMessage = (P2PMessage) unmarshaller.unmarshal(listenSocket.getInputStream());
 			senderId = electionMessage.getSenderId();
 			senderIp = listenSocket.getInetAddress().getHostAddress();
 			senderPort = electionMessage.getSenderPort();
@@ -58,7 +63,7 @@ public class ElectionWorkerThread extends Thread
 
 
 						// risponde ELECTED: informa che e' lui il coord
-						electionMessageSender = new MessageSenderThread(casaId, senderId, senderIp, senderPort, new ElectionMessage(casaId, casaElectionPort, senderId, "ELECTED"));
+						electionMessageSender = new MessageSenderThread(casaId, senderId, senderIp, senderPort, new P2PMessage(casaId, casaElectionPort, senderId, "ELECTED"));
 						electionMessageSender.start();
 
 
@@ -88,7 +93,7 @@ public class ElectionWorkerThread extends Thread
 
 
 								// invia "ELECTION": chiede ai superiori di prendersi carico coordinatore
-								electionMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getElectionPort(), new ElectionMessage(casaId, casaElectionPort, c.getId(), "ELECTION"));
+								electionMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getElectionPort(), new P2PMessage(casaId, casaElectionPort, c.getId(), "ELECTION"));
 								electionMessageSender.start();
 								superiori++;
 							}
@@ -116,7 +121,7 @@ public class ElectionWorkerThread extends Thread
 
 
 									// invia "ELECTED"
-									electionMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getElectionPort(), new ElectionMessage(casaId, casaElectionPort, c.getId(), "ELECTED"));
+									electionMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getElectionPort(), new P2PMessage(casaId, casaElectionPort, c.getId(), "ELECTED"));
 									electionMessageSender.start();
 								}
 							}

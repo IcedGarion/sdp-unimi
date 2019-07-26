@@ -1,7 +1,8 @@
-package ClientCasa.P2p.Statistics.Election;
+package ClientCasa.P2P.Statistics.Election;
 
 import ClientCasa.CasaApp;
-import ClientCasa.P2p.MessageSenderThread;
+import ClientCasa.P2P.MessageSenderThread;
+import ClientCasa.P2P.P2PMessage;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 
@@ -67,7 +68,7 @@ public class Election
 				if(c.getId().compareTo(casaId) != 0)
 				{
 					// invia "ELECTION": chiede ai superiori di prendersi carico coordinatore
-					electionMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getElectionPort(), new ElectionMessage(casaId, casaElectionPort, c.getId(), "ELECTION"));
+					electionMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getElectionPort(), new P2PMessage(casaId, casaElectionPort, c.getId(), "ELECTION"));
 					electionMessageSender.start();
 				}
 			}
@@ -102,7 +103,7 @@ public class Election
 				if(c.getId().compareTo(casaId) != 0)
 				{
 					// invia "ELECTION": chiede ai superiori di prendersi carico coordinatore
-					electionMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getElectionPort(), new ElectionMessage(casaId, casaElectionPort, c.getId(), "NEED_REELECTION"));
+					electionMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getElectionPort(), new P2PMessage(casaId, casaElectionPort, c.getId(), "NEED_REELECTION"));
 					electionMessageSender.start();
 				}
 			}
