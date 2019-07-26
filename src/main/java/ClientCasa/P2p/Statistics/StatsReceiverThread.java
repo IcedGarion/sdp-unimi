@@ -63,7 +63,7 @@ public class StatsReceiverThread extends Thread
 				connectionSocket = welcomeSocket.accept();
 				receiver = new StatsReceiverWorkerThread(connectionSocket, casaId, condominioStats);
 				receiver.start();
-				LOGGER.log(Level.FINE, "{ " + casaId + " } Received connection for statistics: launching worker thread");
+				LOGGER.log(Level.FINE, "{ " + casaId + " } Received connection for Statistics: launching worker thread");
 
 				// da il tempo al thread di gestire la richiesta e salvare la statistica ricevuta
 				Thread.sleep(DELAY);
@@ -91,7 +91,7 @@ public class StatsReceiverThread extends Thread
 					// se ci sono tutte: calcola consumo complessivo e resetta le stat ricevute fin ora (pronto per prossimo giro di calcolo complessivo)
 					if(ciSonoTutte)
 					{
-						LOGGER.log(Level.INFO, "{ " + casaId + " } received all statistics");
+						LOGGER.log(Level.INFO, "{ " + casaId + " } received all Statistics");
 
 						double globalTot = 0;
 						long timestampMin = Long.MAX_VALUE, timestampMax = Long.MIN_VALUE;
@@ -116,6 +116,8 @@ public class StatsReceiverThread extends Thread
 						// azzera per ricominziare il prossimo giro di calcolo complessivo
 						condominioStats.resetStats();
 
+
+						
 						////////////////////////////////////////////////////////////////////////////////////////////////
 						//	ELEZIONE / INVIO STATISTICHE GLOBALI AL SERVER
 						// inizialmente non c'e' nessun coordinatore e si indice elezione;

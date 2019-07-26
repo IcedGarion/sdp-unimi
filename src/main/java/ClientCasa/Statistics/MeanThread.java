@@ -1,7 +1,8 @@
-package ClientCasa;
+package ClientCasa.Statistics;
 
+import ClientCasa.CasaApp;
 import ClientCasa.P2p.MessageSenderThread;
-import ClientCasa.smartMeter.Measurement;
+import ClientCasa.Statistics.smartMeter.Measurement;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 import ServerREST.beans.MeanMeasurement;
@@ -102,7 +103,7 @@ public class MeanThread extends Thread
 					// invia casa come xml body
 					marshaller.marshal(computedMeasure, conn.getOutputStream());
 
-					assert conn.getResponseCode() == 201 || conn.getResponseCode() == 204: "MeanThread: Send statistics failed ( " + conn.getResponseCode() + " " + conn.getResponseMessage() + " )";
+					assert conn.getResponseCode() == 201 || conn.getResponseCode() == 204: "MeanThread: Send Statistics failed ( " + conn.getResponseCode() + " " + conn.getResponseMessage() + " )";
 					LOGGER.log(Level.INFO, "{ " + casaId + " } Statistic sent to server");
 
 

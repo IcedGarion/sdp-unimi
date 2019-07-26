@@ -1,7 +1,7 @@
-package ClientCasa;
+package ClientCasa.Statistics;
 
-import ClientCasa.smartMeter.Buffer;
-import ClientCasa.smartMeter.Measurement;
+import ClientCasa.Statistics.smartMeter.Buffer;
+import ClientCasa.Statistics.smartMeter.Measurement;
 
 import java.util.ArrayList;
 import java.util.List;

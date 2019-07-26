@@ -1,4 +1,4 @@
-package ClientCasa.smartMeter;
+package ClientCasa.Statistics.smartMeter;
 
 public class Measurement implements Comparable<Measurement> {
 

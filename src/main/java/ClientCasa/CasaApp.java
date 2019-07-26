@@ -3,7 +3,9 @@ package ClientCasa;
 import ClientCasa.P2p.Statistics.Election.Election;
 import ClientCasa.P2p.Statistics.Election.ElectionThread;
 import ClientCasa.P2p.Statistics.StatsReceiverThread;
-import ClientCasa.smartMeter.SmartMeterSimulator;
+import ClientCasa.Statistics.smartMeter.SmartMeterSimulator;
+import ClientCasa.Statistics.MeanThread;
+import ClientCasa.Statistics.SimulatorBuffer;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 import ServerREST.beans.MeanMeasurement;
@@ -24,10 +26,10 @@ public class CasaApp
 {
 	public static final String SERVER_URL = "http://localhost:1337";
 
-	private static final String CASA_ID = "casa2";
+	private static final String CASA_ID = "casa1";
 	private static final String CASA_IP = "localhost";
-	private static final int CASA_STATS_PORT = 8082;
-	private static final int CASA_ELECTION_PORT = 8092;
+	private static final int CASA_STATS_PORT = 8081;
+	private static final int CASA_ELECTION_PORT = 8091;
 
 	private static final int RETRY_TIMEOUT = 250;
 	private static final int SIMULATOR_DELAY = 100;
