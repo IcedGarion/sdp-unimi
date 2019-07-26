@@ -157,8 +157,40 @@ public class AdminApp
 				// ultime n statistiche condominiali
 				case "2":
 				{
-					// TODO
-					System.out.println("To be implemented!");
+					System.out.println("Ultime <n> statistiche condominiali");
+					while(true)
+					{
+						try
+						{
+							System.out.println("Inserire parametro <n>... ");
+							n = in.readLine();
+							Integer.parseInt(n);
+							break;
+						}
+						catch(Exception e)
+						{
+							System.out.println("Inserire un intero!");
+						}
+					}
+
+					try
+					{
+						url = new URL(SERVER_URL + "/statisticheGlobali/get/"+ n);
+						conn = (HttpURLConnection) url.openConnection();
+						conn.setRequestMethod("GET");
+						misure = (CasaMeasurement) jaxbUnmarshallerStatLocali.unmarshal(conn.getInputStream());
+					}
+					catch(Exception e)
+					{
+						System.out.println("Non esiste ancora nessuna statistica condominiale!");
+						break;
+					}
+
+					System.out.println("Ultime " + n + " statistiche condominiali");
+					for(MeanMeasurement m : misure.getMeasurementList())
+					{
+						System.out.println("Media: " + m.getMean() + " (da " + new Timestamp(m.getBeginTimestamp()) + " a " + new Timestamp(m.getEndTimestamp()) + ")");
+					}
 
 					break;
 				}
@@ -205,8 +237,37 @@ public class AdminApp
 				// deviazione e media condominiali
 				case "4":
 				{
-					// TODO
-					System.out.println("To be implemented!");
+					System.out.println("Deviazione standard e media delle ultime <n> statistiche complessive condominiali");
+					while(true)
+					{
+						try
+						{
+							System.out.println("Inserire parametro <n>... ");
+							n = in.readLine();
+							Integer.parseInt(n);
+							break;
+						}
+						catch(Exception e)
+						{
+							System.out.println("Inserire un intero!");
+						}
+					}
+
+					try
+					{
+						url = new URL(SERVER_URL + "/statisticheGlobali/get/" + n);
+						conn = (HttpURLConnection) url.openConnection();
+						conn.setRequestMethod("GET");
+						misure = (CasaMeasurement) jaxbUnmarshallerStatLocali.unmarshal(conn.getInputStream());
+					}
+					catch(Exception e)
+					{
+						System.out.println("Non esiste ancora nessuna statistica condominale!");
+						break;
+					}
+
+					mean = getMean(misure.getMeasurementList());
+					System.out.println("Media: " + mean + ", Deviazione std: " + getStdev(misure.getMeasurementList(), mean));
 
 					break;
 				}

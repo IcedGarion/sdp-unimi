@@ -1,7 +1,5 @@
 # TODO now
 
-- Admin App stat globali (vedi progetto)
-
 - Power boost
 
 (una cosa da sistemare indietro, poi quando avrai finito election):
@@ -44,6 +42,7 @@
 # REFACTOR
 - Classe REST per mandare TUTTE le richieste GET/POST al server (capita spesso e usano in tanti)
 - StatLocaliService ha un lock obj che puo' diventare sync (si puo togliere e metti sync method)
+- AdminApp e' un orrore, serve refactor e metodi comuni
 
 - Aggiungi LOG ovunque (Service e Apps)
 - Togli eventuali System.out.println()

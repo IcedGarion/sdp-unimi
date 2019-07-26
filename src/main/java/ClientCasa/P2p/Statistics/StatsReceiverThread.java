@@ -117,7 +117,7 @@ public class StatsReceiverThread extends Thread
 						condominioStats.resetStats();
 
 
-						
+
 						////////////////////////////////////////////////////////////////////////////////////////////////
 						//	ELEZIONE / INVIO STATISTICHE GLOBALI AL SERVER
 						// inizialmente non c'e' nessun coordinatore e si indice elezione;
