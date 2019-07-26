@@ -7,9 +7,9 @@ import java.util.HashMap;
 
 /*
 	Soltanto un wrapper per hashmap (synchronized)
-	Condiviso fra: StatsReceiverServerThread e StatsReceiverThread
-	StatsReceiverThread mette qua le statistiche ricevute dalle altre case;
-	StatsReceiverServerThread legge da qua per calcolare il consumo globale e azzerare la mappa per ricominiciare
+	Condiviso fra: StatsReceiverThread e StatsReceiverWorkerThread
+	StatsReceiverWorkerThread mette qua le statistiche ricevute dalle altre case;
+	StatsReceiverThread legge da qua per calcolare il consumo globale e azzerare la mappa per ricominiciare
 	(quando riceve stats da tutte le case attive, azzera e ricomincia)
  */
 public class CondominioStats

@@ -2,7 +2,7 @@ package ClientCasa;
 
 import ClientCasa.P2p.Statistics.Election.Election;
 import ClientCasa.P2p.Statistics.Election.ElectionThread;
-import ClientCasa.P2p.Statistics.StatsReceiverServerThread;
+import ClientCasa.P2p.Statistics.StatsReceiverThread;
 import ClientCasa.smartMeter.SmartMeterSimulator;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
@@ -23,10 +23,10 @@ public class CasaApp
 {
 	public static final String SERVER_URL = "http://localhost:1337";
 
-	private static final String CASA_ID = "casa0";
+	private static final String CASA_ID = "casa3";
 	private static final String CASA_IP = "localhost";
-	private static final int CASA_STATS_PORT = 8085;
-	private static final int CASA_ELECTION_PORT = 8095;
+	private static final int CASA_STATS_PORT = 8083;
+	private static final int CASA_ELECTION_PORT = 8093;
 
 	private static final int RETRY_TIMEOUT = 250;
 	private static final int SIMULATOR_DELAY = 100;
@@ -134,7 +134,7 @@ public class CasaApp
 		electionThread.start();
 
 		// lancia thread che riceve le statistiche
-		StatsReceiverServerThread statsReceiver = new StatsReceiverServerThread(CASA_ID, CASA_STATS_PORT, election);
+		StatsReceiverThread statsReceiver = new StatsReceiverThread(CASA_ID, CASA_STATS_PORT, election);
 		statsReceiver.start();
 
 
@@ -166,7 +166,7 @@ public class CasaApp
 				{
 					// TODO: invia msg a tutti NEED_REELECTION che sta per uscire, e tutti settano NEED ELECTION
 					// TODO: ma soltanto se era lui il coordinatore!!
-					//MessageSenderThread...
+					election.coordLeaving();
 				}
 
 				// termina i suoi thread
@@ -175,6 +175,8 @@ public class CasaApp
 				simulator.interrupt();
 				statsReceiver.interrupt();
 				electionThread.interrupt();
+
+				LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Stopping...");
 				break;
 			}
 			else if(choice.equals("0"))

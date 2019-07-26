@@ -41,9 +41,8 @@ public class Election
 	}
 
 
-	// Fa elezione: ci sono 2 thread che interagiscono: uno manda per primo il msg, l'altro risponde
-	// ma entrambi fanno sia client che server
-	// solo che il "listener" rimane perennemente attivo in ascolto.. invece questo viene chiamato solo quando serve elezione
+	// Fa partire elezione: manda msg al thread vero di election per mettere in moto tutto;
+	// ElectionThread vede msg ELECTION e parla con gli altri ElectionThread
 	public void startElection()
 	{
 		Condominio condominio;
@@ -82,7 +81,35 @@ public class Election
 		}
 		catch(Exception e)
 		{
-			LOGGER.log(Level.SEVERE, "{ " + casaId + " } Error occurred during elecion");
+			LOGGER.log(Level.SEVERE, "{ " + casaId + " } Error occurred while starting elecion");
+			e.printStackTrace();
+		}
+	}
+
+	// Il coord esce dalla rete: avvisa tutti che dovranno eleggerne uno nuovo
+	public void coordLeaving()
+	{
+		Condominio condominio;
+		MessageSenderThread electionMessageSender;
+
+		try
+		{
+			condominio = CasaApp.getCondominio();
+
+			// manda msg elezione a TUTTI, tranne se stesso (informa tutti che sta per uscire)
+			for(Casa c : condominio.getCaselist())
+			{
+				if(c.getId().compareTo(casaId) != 0)
+				{
+					// invia "ELECTION": chiede ai superiori di prendersi carico coordinatore
+					electionMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getElectionPort(), new ElectionMessage(casaId, casaElectionPort, c.getId(), "NEED_REELECTION"));
+					electionMessageSender.start();
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			LOGGER.log(Level.SEVERE, "{ " + casaId + " } Error occurred in coord leaving");
 			e.printStackTrace();
 		}
 	}

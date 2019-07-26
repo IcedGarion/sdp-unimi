@@ -1,11 +1,4 @@
 # TODO now
-- server concorrente electionThread
-
-- check come va election: tutti i vari casi:
-    check join casa / come va election
-    check uscita casa / cosa provoca su elezione
-    ALLA FINE TOGLI TUTTE LE STAMPE FIXME
-
 
 - Risolta election, finisci con StatsReceiver:
     crea spazio nel server rest per poter aggiungere stat globali
@@ -16,17 +9,6 @@
 --------- "una stat non deve contribuire piu di una volta nel calcolo globale -->> vai in CondominioStats e 
 	   fai che quando arriva una nuova stat da x ma x esistevia gia (a questo giro di tot) allora non fa niente, invece di aggiornare!
 
-
-
-( vecchia idea da guardare per election: 
-  -- [un altro thread, P2Pcoord], che invece si coordina con gli altri P2Pcoord della rete: indice "elezione" o meccanismo simile
-     per decidere chi invia le statistiche al serverAmministratore. STATE?
-     Poi, una volta deciso coordinatore, lui invia la statistica al server.
-     STATE perche' ci sara' credo un loop in cui periodicamente, a seconda dello stato in cui si e', si eseguono diverse azioni:
-     <elezione> sai che devi indire elezione
-     <coord> sai che sei il coord e devi mandare info
-     <stato_particolare_in_mezzo_a_elezione> sai cosa devi fare.
-)
 
 
 
