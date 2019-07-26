@@ -3,6 +3,10 @@ package ServerREST.beans;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+
+// Contiene lista di misurazioni per ogni casa; condivisa perche' piu' thread inseriscono e admin le legge
+// Corrispondenza fra casaId e la sua lista di misure (HashMap)
+
 // Simile a condominio ma senza annotazioni perche' non viene mai ritornato intero come oggetto da REST (/jaxb)
 // invece si accede solo al metodo getLastN, che torna CasaMeasurement: e' quello l'oggetto da annotare
 

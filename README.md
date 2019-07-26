@@ -1,9 +1,8 @@
 # TODO now
 
-- Risolta election, finisci con StatsReceiver:
-    crea spazio nel server rest per poter aggiungere stat globali
-    manda le stat se sei il coord
+- Admin App stat globali (vedi progetto)
 
+- Power boost
 
 (una cosa da sistemare indietro, poi quando avrai finito election):
 --------- "una stat non deve contribuire piu di una volta nel calcolo globale -->> vai in CondominioStats e 
@@ -29,14 +28,8 @@
   ( ANDREBBE RI-AGGIORNATO IL CONDOMINIO E PASSATO AL STATSRECEIVER (seno' crede che ci sia ancora una casa in piu)
    -> dovrebbe essere ok questa parte, perche' si scarica condominio gia' di suo ogni volta che manda / riceve stats
 
-DOPPIA (O TRIPLA) PORTA PER OGNI CASA!!!
-QUANDO SI REGISTRA COMUNICA PIU' DI UNA PORTA
-UNA PER PARLARSI CON LE ALTRE CASE SULLE STATISTICHE
-UNA PER ELEZIONE
-UNA PER POWER BOOST
 
 - invece per power boost va usato algoritmo mutua esclusione distribuita (ricart&agrawala) o ring
-- state ok per casa
 
 
 
@@ -49,6 +42,9 @@ UNA PER POWER BOOST
 
 
 # REFACTOR
+- Classe REST per mandare TUTTE le richieste GET/POST al server (capita spesso e usano in tanti)
+- StatLocaliService ha un lock obj che puo' diventare sync (si puo togliere e metti sync method)
+
 - Aggiungi LOG ovunque (Service e Apps)
 - Togli eventuali System.out.println()
 - SYNCHRONIZED da aggiungere in posti (es. in services)

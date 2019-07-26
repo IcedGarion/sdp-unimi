@@ -94,7 +94,7 @@ public class StatsReceiverThread extends Thread
 						LOGGER.log(Level.INFO, "{ " + casaId + " } received all statistics");
 
 						double globalTot = 0;
-						long timestampMin = 9999, timestampMax = 0;
+						long timestampMin = Long.MAX_VALUE, timestampMax = Long.MIN_VALUE;
 						int n = 0;
 						MeanMeasurement globalComsumption;
 
@@ -105,13 +105,13 @@ public class StatsReceiverThread extends Thread
 
 							if(measurement.getEndTimestamp() > timestampMax)
 								timestampMax = measurement.getEndTimestamp();
-							else if(measurement.getBeginTimestamp() < timestampMin)
+							if(measurement.getBeginTimestamp() < timestampMin)
 								timestampMin = measurement.getBeginTimestamp();
 
 							n++;
 						}
 						System.out.println("Consumo globale condominiale aggiornato a " + new Timestamp(timestampMax) + ": " + globalTot + " (" + n + " misure)");
-						globalComsumption = new MeanMeasurement(casaId, globalTot, timestampMin, timestampMax);
+						globalComsumption = new MeanMeasurement("Condominio", globalTot, timestampMin, timestampMax);
 
 						// azzera per ricominziare il prossimo giro di calcolo complessivo
 						condominioStats.resetStats();
@@ -135,10 +135,11 @@ public class StatsReceiverThread extends Thread
 							// FIXME: remove print
 							System.out.println("{ " + casaId + " } [ STATSRECEIVER ] Sono io il coord e sto mandando le stat globali al server");
 
+							// Manda la stat globale appena calcolata al server rest tramite metodo in CasaApp (conosce lei info su server)
+							CasaApp.sendGlobalStat(globalComsumption);
 
-							// TODO: poi manda al server global stat
-							//TODO: crea spazio apposta nel server rest per tenere stat globali
-
+							// FIXME: remove print
+							System.out.println("{ " + casaId + " } [ STATSRECEIVER ] Stat globali inviate");
 						}
 						// se invece non e' il primo giro (need election) / la casa non si e' appena unita (need election)
 						// allora in teoria c'e' gia' un coordinatore, e se non e' lui allora non fa piu' niente

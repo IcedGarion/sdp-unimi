@@ -6,6 +6,7 @@ import ClientCasa.P2p.Statistics.StatsReceiverThread;
 import ClientCasa.smartMeter.SmartMeterSimulator;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
+import ServerREST.beans.MeanMeasurement;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -23,15 +24,18 @@ public class CasaApp
 {
 	public static final String SERVER_URL = "http://localhost:1337";
 
-	private static final String CASA_ID = "casa3";
+	private static final String CASA_ID = "casa2";
 	private static final String CASA_IP = "localhost";
-	private static final int CASA_STATS_PORT = 8083;
-	private static final int CASA_ELECTION_PORT = 8093;
+	private static final int CASA_STATS_PORT = 8082;
+	private static final int CASA_ELECTION_PORT = 8092;
 
 	private static final int RETRY_TIMEOUT = 250;
 	private static final int SIMULATOR_DELAY = 100;
 	private static final Logger LOGGER = Logger.getLogger(CasaApp.class.getName());
 
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Metodi per comunicare con il SERVER REST	//
 
 	/*	RICHIEDE ELENCO CASE	*/
 	public static synchronized Condominio getCondominio() throws JAXBException, InterruptedException
@@ -65,7 +69,39 @@ public class CasaApp
 		return condominio;
 	}
 
+	/*	INVIA STAT GLOBALI */
+	public static void sendGlobalStat(MeanMeasurement globalConsumption)
+	{
+		URL url;
+		HttpURLConnection conn;
+		JAXBContext jaxbContext;
+		Marshaller marshaller;
 
+		try
+		{
+			jaxbContext = JAXBContext.newInstance(MeanMeasurement.class);
+			marshaller = jaxbContext.createMarshaller();
+
+			url = new URL(SERVER_URL + "/statisticheGlobali/add");
+			conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("content-type", "application/xml");
+			conn.setDoOutput(true);
+
+			// invia casa come xml body
+			marshaller.marshal(globalConsumption, conn.getOutputStream());
+
+			assert conn.getResponseCode() == 201 : "CasaApp: Global stat send failed ( " + conn.getResponseCode() + " " + conn.getResponseMessage() + " )";
+		}
+		catch(Exception e)
+		{
+			LOGGER.log(Level.WARNING, "Failed to connect to Admin Server ( GET " + SERVER_URL + "/statisticheGlobali )");
+			e.printStackTrace();
+		}
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//	PROGRAMMA PRINCIPALE CASE	//
 	public static void main(String[] args) throws JAXBException, InterruptedException, IOException
 	{
 		LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Started Casa Application with ID " + CASA_ID);

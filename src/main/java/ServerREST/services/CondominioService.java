@@ -7,10 +7,14 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Path("condominio")
 public class CondominioService
 {
+	private static final Logger LOGGER = Logger.getLogger(CondominioService.class.getName());
+
 	// LOCKS
 	public static Object condominioLock = new Object();
 
@@ -20,6 +24,8 @@ public class CondominioService
 	@Produces({"application/xml"})
 	public Response getCaseList()
 	{
+		LOGGER.log(Level.INFO, "GET /condominio\n");
+
 		synchronized(condominioLock)
 		{
 			return Response.ok(Condominio.getInstance()).build();
@@ -33,6 +39,8 @@ public class CondominioService
 	@Consumes({"application/xml"})
 	public Response addCasa(Casa c) throws URISyntaxException
 	{
+		LOGGER.log(Level.INFO, "POST /condominio/add/" + c.getId() + "\n");
+
 		synchronized(condominioLock)
 		{
 			// esiste gia'
@@ -56,6 +64,8 @@ public class CondominioService
 	@Consumes({"application/xml"})
 	public Response removeCasa(Casa c)
 	{
+		LOGGER.log(Level.INFO, "POST /condominio/delete/" + c.getId() + "\n");
+
 		synchronized(condominioLock)
 		{
 			// esiste: puo' rimuovere
