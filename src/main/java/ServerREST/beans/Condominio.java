@@ -39,6 +39,8 @@ public class Condominio
 		caseList.remove(c);
 	}
 
+	public synchronized int size() { return caseList.size(); }
+
 	// serve a getByName
 	public synchronized List<Casa> getCaselist() {
 		return new ArrayList<>(caseList);

@@ -43,7 +43,6 @@ public class ElectionWorkerThread extends Thread
 			jaxbContext = JAXBContext.newInstance(P2PMessage.class);
 			unmarshaller = jaxbContext.createUnmarshaller();
 
-
 			electionMessage = (P2PMessage) unmarshaller.unmarshal(listenSocket.getInputStream());
 			senderId = electionMessage.getSenderId();
 			senderIp = listenSocket.getInetAddress().getHostAddress();
@@ -137,6 +136,9 @@ public class ElectionWorkerThread extends Thread
 					// OPPURE e' stata indetta una nuova elezione.
 					else
 					{
+						// TODO: migliorare il caso in cui non sei coord... non stai li a fare niente, ma prova a vedere se esiste coord..... vedi appunti!
+
+
 						System.out.println("{ " + casaId + " } [ ELECTION ] Non sono io il coord e quindi non rispondo a msg di election; coord esiste gia' e gli rispondera'");
 					}
 					break;

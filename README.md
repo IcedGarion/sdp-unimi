@@ -1,11 +1,19 @@
 # TODO now
 
-- Power boost
+- power boost semplice con una casa sola (non 2 alla volta)
+--- in corso: vedi i TODO in PowerBoostWorkerThread
+
+
+
+- Power boost 2 alla volta
+
+- un costruttore overload da qualche parte e' fatto male
 
 (una cosa da sistemare indietro, poi quando avrai finito election):
 --------- "una stat non deve contribuire piu di una volta nel calcolo globale -->> vai in CondominioStats e 
 	   fai che quando arriva una nuova stat da x ma x esistevia gia (a questo giro di tot) allora non fa niente, invece di aggiornare!
 
+(guarda appunti e sistema caso election non coord: da aggiungere cose)
 
 
 

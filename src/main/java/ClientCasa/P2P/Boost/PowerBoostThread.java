@@ -5,6 +5,9 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/*
+	Server concorrente che lancia thread che gestiscono le richieste power boost p2p
+ */
 public class PowerBoostThread extends Thread
 {
 	private static final Logger LOGGER = Logger.getLogger(PowerBoostThread.class.getName());
@@ -33,7 +36,7 @@ public class PowerBoostThread extends Thread
 			while(true)
 			{
 				connectionSocket = welcomeSocket.accept();
-				powerWorker = new PowerBoostWorkerThread(connectionSocket, casaId, powerBoostState);
+				powerWorker = new PowerBoostWorkerThread(connectionSocket, casaId, boostPort, powerBoostState);
 				powerWorker.start();
 				LOGGER.log(Level.FINE, "{ " + casaId + " } Received connection for Power Boost: launching worker thread");
 
