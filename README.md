@@ -1,7 +1,16 @@
 # TODO now
 
 - power boost semplice con una casa sola (non 2 alla volta)
---- in corso: vedi i TODO in PowerBoostWorkerThread
+
+( sync anche request powerboost?)
+
+- caso base in cui c'e' solo UNA (o DUE) case attive: ottieni subito il BOOST. Come Election
+
+- caso in cui sei in attesa degli OK (stai per ottenere boost) ma un altro chiede BOOST?
+  ultimo ramo else del messaggio "BOOST" -----> come gestire? accoda richiesta? serve cambio stato WAIT OK oppure sei gia' in USING e gestisce
+  come gia' scritto?
+
+- caso in cui ti arrivano gli OK ma non sei in USING? cosa significa / come ci entri?
 
 
 

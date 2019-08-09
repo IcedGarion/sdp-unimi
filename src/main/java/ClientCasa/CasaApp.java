@@ -179,7 +179,7 @@ public class CasaApp
 		statsReceiver.start();
 
 		// lancia thread che riceve richieste di power boost e si coordina
-		PowerBoost powerBoostState = new PowerBoost(CASA_ID, CASA_BOOST_PORT);
+		PowerBoost powerBoostState = new PowerBoost(CASA_ID, CASA_BOOST_PORT, simulator);
 		PowerBoostThread powerBoostThread = new PowerBoostThread(CASA_ID, CASA_BOOST_PORT, powerBoostState);
 		powerBoostThread.start();
 

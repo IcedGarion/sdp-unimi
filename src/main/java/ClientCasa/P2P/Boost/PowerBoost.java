@@ -3,9 +3,11 @@ package ClientCasa.P2P.Boost;
 import ClientCasa.CasaApp;
 import ClientCasa.P2P.MessageSenderThread;
 import ClientCasa.P2P.P2PMessage;
+import ClientCasa.Statistics.smartMeter.SmartMeterSimulator;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 
+import javax.xml.bind.JAXBException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -21,24 +23,30 @@ public class PowerBoost
 
 	private String casaId;
 	private int casaBoostPort;
+	private SmartMeterSimulator simulator;
 	private PowerBoostState state;
 	// numero case che stanno usando il boost (0-2)
 	private int boostCount;
 	// coda di case che hanno richiesto boost mentre lo stavi usando
-	private List<String> queue;
+	private List<String[]> queue;
 	// numero case in gioco quando manda la prima richiesta boost
 	private int caseAttive;
+	// contatore degli OK
+	private int OKCount;
 	// timestamp del messaggio di richiesta appena inviato
 	private long messageTimestamp;
 
-	public PowerBoost(String casaId, int casaBoostPort)
+	public PowerBoost(String casaId, int casaBoostPort, SmartMeterSimulator simulator)
 	{
 		this.casaId = casaId;
 		this.casaBoostPort = casaBoostPort;
+		this.simulator = simulator;
 		this.state = PowerBoostState.NOT_INTERESTED;
 		this.boostCount = 0;
 		this.caseAttive = 1;
+		this.OKCount = 0;
 		this.queue = new ArrayList<>();
+		this.messageTimestamp = -1;
 	}
 
 	public synchronized void setState(PowerBoostState state)
@@ -61,21 +69,34 @@ public class PowerBoost
 
 	public synchronized long getMessageTimestamp() { return this.messageTimestamp; }
 
-	// aggiungi / rimuovi casa dalla coda delle richieste
-	public synchronized String rimuoviRichiesta()
+	// aggiungi / rimuovi casa dalla coda delle richieste (null se vuota)
+	public synchronized String[] rimuoviRichiesta()
 	{
 		// prende elemento in testa, rimuove e ritorna
-		String ret = queue.get(0);
-		queue.remove(0);
+		String[] ret;
+
+		try
+		{
+			ret = queue.get(0);
+			queue.remove(0);
+		}
+		catch(IndexOutOfBoundsException e)
+		{
+			return null;
+		}
 		return ret;
 	}
 
-	public synchronized void accodaRichiesta(String casaId)
+	public synchronized void accodaRichiesta(String senderId, String senderIp, int senderPort)
 	{
-		// inserisce in coda
-		queue.add(casaId);
+		// inserisce in coda (una coda senderId, senderIp, senderPort) per poter poi mandare OK
+		queue.add(new String[] {senderId, senderIp, String.valueOf(senderPort)});
 	}
 
+	// aggiorna / check del numero di OK ricevuti dopo una richiesta di BOOST
+	public synchronized void incrOKCount() { this.OKCount = this.OKCount+1; }
+
+	public synchronized int getOKCount() { return this.OKCount; }
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// INIZIO BOOST
@@ -115,9 +136,48 @@ public class PowerBoost
 		}
 	}
 
-	// finito il power boost, rilascia la risorsa
-	public void endedPowerBoost()
+	// chiama metodo simulatore per il power boost
+	public synchronized void beginPowerBoost() throws InterruptedException
 	{
-		// TODO
+		// aumenta di 1 il numero di case che stanno usando il boost
+		this.boostCount += 1;
+		this.simulator.boost();
+	}
+
+	// finito il power boost, rilascia la risorsa (sync perche' modifica tanti campi ed e' meglio farlo in modo "atomico"
+	public synchronized void endPowerBoost() throws JAXBException
+	{
+		// riazzera tutto per poter ricominciare: come da oggetto nuobo (costruttore)
+		String richiesta[];
+		String senderId, senderIp;
+		int senderPort;
+		MessageSenderThread boostMessageSender;
+
+		// azzera timestamp utlima richiesta (-1)
+		this.messageTimestamp = -1;
+
+		// resetta il conto degli OK ricevuti (0)
+		this.OKCount = 0;
+
+		// diminuisce di 1 il numero di case che stanno usando il boost
+		this.boostCount -= 1;
+
+		// setta stato iniziale
+		this.state = PowerBoostState.NOT_INTERESTED;
+
+		// svuota coda di attesa, inviando OK a tutti i presenti
+		while((richiesta = rimuoviRichiesta()) != null)
+		{
+			senderId = richiesta[0];
+			senderIp = richiesta[1];
+			senderPort = Integer.parseInt(richiesta[2]);
+
+			// risponde OK
+			boostMessageSender = new MessageSenderThread(casaId, senderId, senderIp, senderPort, new P2PMessage(casaId, casaBoostPort, senderId, "OK"));
+			boostMessageSender.start();
+
+			// FIXME: remove print
+			System.out.println("{ " + casaId + " } [ BOOST ] Fine BOOST: mando OK a " + senderId);
+		}
 	}
 }
