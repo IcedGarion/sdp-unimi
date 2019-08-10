@@ -3,7 +3,7 @@ package ClientCasa.P2P.Boost;
 import ClientCasa.CasaApp;
 import ClientCasa.P2P.MessageSenderThread;
 import ClientCasa.P2P.P2PMessage;
-import ClientCasa.Statistics.smartMeter.SmartMeterSimulator;
+import ClientCasa.LocalStatistics.smartMeter.SmartMeterSimulator;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 
@@ -70,7 +70,7 @@ public class PowerBoost
 	public synchronized long getMessageTimestamp() { return this.messageTimestamp; }
 
 	// aggiungi / rimuovi casa dalla coda delle richieste (null se vuota)
-	public synchronized String[] rimuoviRichiesta()
+	private synchronized String[] deaccodaRichiesta()
 	{
 		// prende elemento in testa, rimuove e ritorna
 		String[] ret;
@@ -166,7 +166,7 @@ public class PowerBoost
 		this.state = PowerBoostState.NOT_INTERESTED;
 
 		// svuota coda di attesa, inviando OK a tutti i presenti
-		while((richiesta = rimuoviRichiesta()) != null)
+		while((richiesta = deaccodaRichiesta()) != null)
 		{
 			senderId = richiesta[0];
 			senderIp = richiesta[1];

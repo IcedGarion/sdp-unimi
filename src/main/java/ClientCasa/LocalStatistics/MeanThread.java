@@ -1,8 +1,8 @@
-package ClientCasa.Statistics;
+package ClientCasa.LocalStatistics;
 
 import ClientCasa.CasaApp;
+import ClientCasa.LocalStatistics.smartMeter.Measurement;
 import ClientCasa.P2P.MessageSenderThread;
-import ClientCasa.Statistics.smartMeter.Measurement;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 import ServerREST.beans.MeanMeasurement;
@@ -10,8 +10,6 @@ import ServerREST.beans.MeanMeasurement;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,7 +17,6 @@ import java.util.logging.Logger;
 public class MeanThread extends Thread
 {
 	private SimulatorBuffer buffer;
-	private static final String URL = "http://localhost:1337";
 	private static final Logger LOGGER = Logger.getLogger(MeanThread.class.getName());
 
 	// id della casa che ha creato il buffer: serve per poi inserire in rest
@@ -38,7 +35,6 @@ public class MeanThread extends Thread
 		jaxbContext = JAXBContext.newInstance(MeanMeasurement.class);
 		marshaller = jaxbContext.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-
 	}
 
 	@Override
@@ -49,19 +45,15 @@ public class MeanThread extends Thread
 		MeanMeasurement computedMeasure;
 		double mean;
 		long timestampMin, timestampMax;
-		URL url;
-		HttpURLConnection conn;
 
-		LOGGER.log(Level.INFO, "{ " + casaId + " } MeanThread running...");
-
-		try
+		while(true)
 		{
-			while(true)
+			try
 			{
 				// all'inizio aspetta finche' il buffer si riempie
 				if(buffer.size() >= 24)
 				{
-					LOGGER.log(Level.INFO, "{ " + casaId + " } Receiving sensor data...");
+					LOGGER.log(Level.FINE, "{ " + casaId + " } Receiving sensor data...");
 
 					// prende i primi 24
 					sensorData = buffer.getTopBuffer();
@@ -91,20 +83,10 @@ public class MeanThread extends Thread
 
 					/*	AGGIUNGE STATISICA LOCALE AL SERVER	*/
 					// chiamata REST a StatisticheService passando ID_CASA + MeanMeasurement
-					// POST /condominio/add: inserisce nuova casa
-					LOGGER.log(Level.INFO, "{ "  +casaId + " } Sending computed statistic to Server...");
-
-					url = new URL(URL + "/statisticheLocali/add/" + casaId);
-					conn = (HttpURLConnection) url.openConnection();
-					conn.setRequestMethod("POST");
-					conn.setRequestProperty("content-type", "application/xml");
-					conn.setDoOutput(true);
-
-					// invia casa come xml body
-					marshaller.marshal(computedMeasure, conn.getOutputStream());
-
-					assert conn.getResponseCode() == 201 || conn.getResponseCode() == 204: "MeanThread: Send Statistics failed ( " + conn.getResponseCode() + " " + conn.getResponseMessage() + " )";
-					LOGGER.log(Level.INFO, "{ " + casaId + " } Statistic sent to server");
+					// POST /statisticheLocali/add: inserisce nuova statistica
+					LOGGER.log(Level.FINE, "{ " + casaId + " } Sending computed statistic to Server...");
+					CasaApp.sendLocalStat(computedMeasure);
+					LOGGER.log(Level.FINE, "{ " + casaId + " } Statistic sent to server");
 
 
 					/*	MANDA STATISTICA LOCALE ALLE ALTRE CASE	(~BROADCAST: invia anche a se stessa così ognuno ha elenco completo uguale)*/
@@ -112,11 +94,11 @@ public class MeanThread extends Thread
 					MessageSenderThread localStatSender;
 
 					// scarica condominio
-					LOGGER.log(Level.INFO, "{ " + casaId + " } Requesting condominio...");
+					LOGGER.log(Level.FINE, "{ " + casaId + " } Requesting condominio...");
 					Condominio condominio = CasaApp.getCondominio();
 
 					// BROADCAST: crea e lancia thread che invia messaggio statistica a ogni casa
-					for(Casa c: condominio.getCaselist())
+					for(Casa c : condominio.getCaselist())
 					{
 						localStatSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getStatsPort(), computedMeasure);
 						localStatSender.start();
@@ -131,10 +113,10 @@ public class MeanThread extends Thread
 					sleep(delay);
 				}
 			}
-		}
-		catch(Exception e)
-		{
-			LOGGER.log(Level.SEVERE, "{ " + casaId + " } Lost connection with server!");
+			catch(Exception e)
+			{
+				LOGGER.log(Level.SEVERE, "{ " + casaId + " } Lost connection with server!");
+			}
 		}
 	}
 }

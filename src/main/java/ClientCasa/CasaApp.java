@@ -2,12 +2,12 @@ package ClientCasa;
 
 import ClientCasa.P2P.Boost.PowerBoost;
 import ClientCasa.P2P.Boost.PowerBoostThread;
-import ClientCasa.P2P.Statistics.Election.Election;
-import ClientCasa.P2P.Statistics.Election.ElectionThread;
-import ClientCasa.P2P.Statistics.StatsReceiverThread;
-import ClientCasa.Statistics.smartMeter.SmartMeterSimulator;
-import ClientCasa.Statistics.MeanThread;
-import ClientCasa.Statistics.SimulatorBuffer;
+import ClientCasa.P2P.GlobalStatistics.Election.Election;
+import ClientCasa.P2P.GlobalStatistics.Election.ElectionThread;
+import ClientCasa.P2P.GlobalStatistics.StatsReceiverThread;
+import ClientCasa.LocalStatistics.smartMeter.SmartMeterSimulator;
+import ClientCasa.LocalStatistics.MeanThread;
+import ClientCasa.LocalStatistics.SimulatorBuffer;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 import ServerREST.beans.MeanMeasurement;
@@ -21,12 +21,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CasaApp
 {
 	public static final String SERVER_URL = "http://localhost:1337";
+
+	// FINE (tutto) - INFO (solo start / stop e info che servono) - SEVERE (solo errori)
+	public static final Level LOGGER_LEVEL = Level.FINE;
 
 	private static final String CASA_ID = "casa1";
 	private static final String CASA_IP = "localhost";
@@ -50,25 +54,22 @@ public class CasaApp
 		URL url;
 		HttpURLConnection conn;
 
-		Condominio condominio;
-		while(true)
-		{
-			try
-			{
-				// GET /condominio: si aspetta lista xml vuota
-				url = new URL(SERVER_URL + "/condominio");
-				conn = (HttpURLConnection) url.openConnection();
-				conn.setRequestMethod("GET");
-				condominio = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
+		Condominio condominio = null;
 
-				assert conn.getResponseCode() == 200;
-				break;
-			}
-			catch(Exception e)
-			{
-				LOGGER.log(Level.WARNING, "Failed to connect to Admin Server ( GET " + SERVER_URL + "/condominio )");
-				Thread.sleep(RETRY_TIMEOUT);
-			}
+		try
+		{
+			// GET /condominio: si aspetta lista xml vuota
+			url = new URL(SERVER_URL + "/condominio");
+			conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("GET");
+			condominio = (Condominio) jaxbUnmarshaller.unmarshal(conn.getInputStream());
+
+			assert conn.getResponseCode() == 200;
+		}
+		catch(Exception e)
+		{
+			LOGGER.log(Level.SEVERE, "Failed to connect to Admin Server ( GET " + SERVER_URL + "/condominio )");
+			Thread.sleep(RETRY_TIMEOUT);
 		}
 
 		return condominio;
@@ -93,14 +94,45 @@ public class CasaApp
 			conn.setRequestProperty("content-type", "application/xml");
 			conn.setDoOutput(true);
 
-			// invia casa come xml body
+			// invia MeanMeasurement come xml body
 			marshaller.marshal(globalConsumption, conn.getOutputStream());
 
-			assert conn.getResponseCode() == 201 : "CasaApp: Global stat send failed ( " + conn.getResponseCode() + " " + conn.getResponseMessage() + " )";
+			assert conn.getResponseCode() == 201 : "GlobalStatistics send failed ( " + conn.getResponseCode() + " " + conn.getResponseMessage() + " )";
 		}
 		catch(Exception e)
 		{
-			LOGGER.log(Level.WARNING, "Failed to connect to Admin Server ( GET " + SERVER_URL + "/statisticheGlobali )");
+			LOGGER.log(Level.SEVERE, "Failed to connect to Admin Server ( GET " + SERVER_URL + "/statisticheGlobali )");
+			e.printStackTrace();
+		}
+	}
+
+	/* INVIA STAT LOCALE (identico a stat globale ma URL REST diverso) */
+	public static void sendLocalStat(MeanMeasurement localStat)
+	{
+		URL url;
+		HttpURLConnection conn;
+		JAXBContext jaxbContext;
+		Marshaller marshaller;
+
+		try
+		{
+			jaxbContext = JAXBContext.newInstance(MeanMeasurement.class);
+			marshaller = jaxbContext.createMarshaller();
+
+			url = new URL(SERVER_URL + "/statisticheLocali/add/" + CASA_ID);
+			conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("content-type", "application/xml");
+			conn.setDoOutput(true);
+
+			// invia MeanMeasurement come xml body
+			marshaller.marshal(localStat, conn.getOutputStream());
+
+			assert conn.getResponseCode() == 201 || conn.getResponseCode() == 204: "LocalStatistics send failed ( " + conn.getResponseCode() + " " + conn.getResponseMessage() + " )";
+		}
+		catch(Exception e)
+		{
+			LOGGER.log(Level.SEVERE, "Failed to connect to Admin Server ( GET " + SERVER_URL + "/statisticheLocali )");
 			e.printStackTrace();
 		}
 	}
@@ -109,8 +141,6 @@ public class CasaApp
 	//	PROGRAMMA PRINCIPALE CASE	//
 	public static void main(String[] args) throws JAXBException, InterruptedException, IOException
 	{
-		LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Started Casa Application with ID " + CASA_ID);
-
 		//////////////
 		/*	SETUP	*/
 		JAXBContext jaxbContext = JAXBContext.newInstance(Condominio.class);
@@ -120,18 +150,25 @@ public class CasaApp
 		URL url;
 		HttpURLConnection conn;
 
+		// LOGGER setup
+		LOGGER.setLevel(LOGGER_LEVEL);
+		ConsoleHandler handler = new ConsoleHandler();
+		handler.setLevel(LOGGER_LEVEL);
+		LOGGER.addHandler(handler);
+
+		LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Started Casa Application with ID " + CASA_ID);
 
 		///////////////////////////////////////////////////////////
 		/*	AVVIA THREAD SIMULATORE / SMART METER + MEAN THREAD	*/
 		SimulatorBuffer myBuffer = new SimulatorBuffer();
 		SmartMeterSimulator simulator = new SmartMeterSimulator(myBuffer);
 		simulator.start();
-		LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Smart meted launched");
+		LOGGER.log(Level.FINE, "{ " + CASA_ID + " } Smart meted launched");
 
 		// avvia thread che invia periodicamente le medie
 		MeanThread mean = new MeanThread(myBuffer, CASA_ID, SIMULATOR_DELAY);
 		mean.start();
-		LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Local statistic thread launched");
+		LOGGER.log(Level.FINE, "{ " + CASA_ID + " } Local statistic (MeanThread) thread launched");
 
 
 		///////////////////////////////////////////////////
@@ -139,29 +176,24 @@ public class CasaApp
 		Casa myCasa = new Casa(CASA_ID, CASA_IP, CASA_STATS_PORT, CASA_ELECTION_PORT, CASA_BOOST_PORT);
 
 		// POST /condominio/add: inserisce nuova casa
-		// continua a tentare di connettersi al server, se non riesce riprova
-		while(true)
+		try
 		{
-			try
-			{
-				url = new URL(SERVER_URL + "/condominio/add");
-				conn = (HttpURLConnection) url.openConnection();
-				conn.setRequestMethod("POST");
-				conn.setRequestProperty("content-type", "application/xml");
-				conn.setDoOutput(true);
+			url = new URL(SERVER_URL + "/condominio/add");
+			conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("content-type", "application/xml");
+			conn.setDoOutput(true);
 
-				// invia casa come xml body
-				marshaller.marshal(myCasa, conn.getOutputStream());
+			// invia casa come xml body
+			marshaller.marshal(myCasa, conn.getOutputStream());
 
-				assert conn.getResponseCode() == 201: "CasaApp: Condominio register failed ( " + conn.getResponseCode() + " " + conn.getResponseMessage() + " )";
-				LOGGER.log(Level.INFO, "Casa registered to Admin Server with code: " + conn.getResponseCode() + " " + conn.getResponseMessage());
-				break;
-			}
-			catch(Exception e)
-			{
-				LOGGER.log(Level.SEVERE, "Failed to connect to Admin Server ( POST " + SERVER_URL + "/condominio/add )");
-				Thread.sleep(RETRY_TIMEOUT);
-			}
+			assert conn.getResponseCode() == 201: "CasaApp: Condominio register failed ( " + conn.getResponseCode() + " " + conn.getResponseMessage() + " )";
+			LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Casa registered to Admin Server with code: " + conn.getResponseCode() + " " + conn.getResponseMessage());
+		}
+		catch(Exception e)
+		{
+			LOGGER.log(Level.SEVERE, "Failed to connect to Admin Server ( POST " + SERVER_URL + "/condominio/add )");
+			Thread.sleep(RETRY_TIMEOUT);
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -173,15 +205,18 @@ public class CasaApp
 		// lancia thread "ascoltatore" elezione bully: riceve msg e risponde a dovere secondo alg BULLY
 		ElectionThread electionThread = new ElectionThread(CASA_ID, CASA_ELECTION_PORT, election);
 		electionThread.start();
+		LOGGER.log(Level.FINE, "{ " + CASA_ID + " } Election thread launched");
 
 		// lancia thread che riceve le statistiche
 		StatsReceiverThread statsReceiver = new StatsReceiverThread(CASA_ID, CASA_STATS_PORT, election);
 		statsReceiver.start();
+		LOGGER.log(Level.FINE, "{ " + CASA_ID + " } Global statistics (StatsReceiver) thread launched");
 
 		// lancia thread che riceve richieste di power boost e si coordina
 		PowerBoost powerBoostState = new PowerBoost(CASA_ID, CASA_BOOST_PORT, simulator);
 		PowerBoostThread powerBoostThread = new PowerBoostThread(CASA_ID, CASA_BOOST_PORT, powerBoostState);
 		powerBoostThread.start();
+		LOGGER.log(Level.FINE, "{ " + CASA_ID + " } Power Boost thread launched");
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/*	INTERFACCIA CLI BOOST + EXIT	*/
@@ -219,14 +254,14 @@ public class CasaApp
 				statsReceiver.interrupt();
 				electionThread.interrupt();
 
-				LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Stopping...");
+				LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Stopping CasaApp...");
 				break;
 			}
 			// POWER BOOST
 			else if(choice.equals("0"))
 			{
-				powerBoostState.requestPowerBoost();
 				LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Power boost requested... (Please wait)");
+				powerBoostState.requestPowerBoost();
 			}
 			else
 			{

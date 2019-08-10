@@ -1,16 +1,22 @@
 # TODO now
 
+[ LOGGER: Info viene loggato, ma FINE no! come impostare lvl giusto? ]
+FINE NON VANNO PIU.
+Trovare il modo di impostare LVL (Console handler o roba cosi')
+
+
 - power boost semplice con una casa sola (non 2 alla volta)
 
 ( sync anche request powerboost?)
 
 - caso base in cui c'e' solo UNA (o DUE) case attive: ottieni subito il BOOST. Come Election
+  NON RICEVE L'OK DA SE STESSO	
 
 - caso in cui sei in attesa degli OK (stai per ottenere boost) ma un altro chiede BOOST?
-  ultimo ramo else del messaggio "BOOST" -----> come gestire? accoda richiesta? serve cambio stato WAIT OK oppure sei gia' in USING e gestisce
-  come gia' scritto?
+  dovrebbe essere come se lo stai gia usando: accoda
 
 - caso in cui ti arrivano gli OK ma non sei in USING? cosa significa / come ci entri?
+
 
 
 
@@ -57,18 +63,17 @@
 
 
 # REFACTOR
+- I vari System.println vanno cambiati in LOG! Scegli bene lvl
+
 - si puo' togliere RECEIVER_ID da P2PMessage
-- Classe REST per mandare TUTTE le richieste GET/POST al server (capita spesso e usano in tanti)
+~ Classe REST per mandare TUTTE le richieste GET/POST al server (capita spesso e usano in tanti)
 - StatLocaliService ha un lock obj che puo' diventare sync (si puo togliere e metti sync method)
 - AdminApp e' un orrore, serve refactor e metodi comuni
+- metti a posto ogni try/catch + while(true) in modo che il try sia dentro il while (a volte succede il contrario)
 
-- Aggiungi LOG ovunque (Service e Apps)
-- Togli eventuali System.out.println()
-- SYNCHRONIZED da aggiungere in posti (es. in services)
-  Metodi sync invece che sync statement nei services? anche nelle letture?
 - FILE CONFIG (tipo SERVER_URL in giro ovunque)
 - TOGLI / CONTROLLA i TODO e FIXME
-- suppress log per esame
+- log level INFO per esame
 
 
 

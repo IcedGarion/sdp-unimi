@@ -1,4 +1,4 @@
-package ClientCasa.Statistics.smartMeter;
+package ClientCasa.LocalStatistics.smartMeter;
 
 public interface Buffer {
 

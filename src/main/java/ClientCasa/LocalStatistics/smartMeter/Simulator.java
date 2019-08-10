@@ -1,4 +1,4 @@
-package ClientCasa.Statistics.smartMeter;
+package ClientCasa.LocalStatistics.smartMeter;
 
 import java.util.Calendar;
 import java.util.Random;

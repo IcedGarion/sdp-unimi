@@ -1,4 +1,4 @@
-package ClientCasa.P2P.Statistics;
+package ClientCasa.P2P.GlobalStatistics;
 
 import ServerREST.beans.MeanMeasurement;
 

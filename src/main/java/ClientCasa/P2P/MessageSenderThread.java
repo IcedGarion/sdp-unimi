@@ -1,5 +1,6 @@
 package ClientCasa.P2P;
 
+import ClientCasa.CasaApp;
 import ServerREST.beans.MeanMeasurement;
 
 import javax.xml.bind.JAXBContext;
@@ -22,7 +23,7 @@ public class MessageSenderThread extends Thread
 	private JAXBContext jaxbContext;
 	private Marshaller marshaller;
 
-	private void MessageSenderThread(String senderId, String destId, String ip, int port)
+	public MessageSenderThread(String senderId, String destId, String ip, int port)
 	{
 		this.senderId = senderId;
 		this.destId = destId;
@@ -32,7 +33,7 @@ public class MessageSenderThread extends Thread
 
 	public MessageSenderThread(String senderId, String destId, String ip, int port, MeanMeasurement message) throws JAXBException
 	{
-		MessageSenderThread(senderId, destId, ip, port);
+		this(senderId, destId, ip, port);
 		this.message = message;
 
 		// setup marshaller per invio statistiche
@@ -43,7 +44,7 @@ public class MessageSenderThread extends Thread
 
 	public MessageSenderThread(String senderId, String destId, String ip, int port, P2PMessage message) throws JAXBException
 	{
-		MessageSenderThread(senderId, destId, ip, port);
+		this(senderId, destId, ip, port);
 		this.message = message;
 
 		// setup marshaller per invio statistiche
@@ -64,7 +65,7 @@ public class MessageSenderThread extends Thread
 			marshaller.marshal(message, socket.getOutputStream());
 			socket.close();
 
-			LOGGER.log(Level.INFO, "{ " + senderId + " } Statistic sent to " + senderId + " (" + ip + ": " + port + ")");
+			LOGGER.log(Level.FINE, "{ " + senderId + " } Message sent to " + senderId + " (" + ip + ": " + port + ")");
 		}
 		catch(Exception e)
 		{

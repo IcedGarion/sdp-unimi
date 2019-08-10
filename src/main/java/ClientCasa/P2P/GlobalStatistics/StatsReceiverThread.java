@@ -1,7 +1,7 @@
-package ClientCasa.P2P.Statistics;
+package ClientCasa.P2P.GlobalStatistics;
 
 import ClientCasa.CasaApp;
-import ClientCasa.P2P.Statistics.Election.Election;
+import ClientCasa.P2P.GlobalStatistics.Election.Election;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 import ServerREST.beans.MeanMeasurement;
@@ -61,14 +61,14 @@ public class StatsReceiverThread extends Thread
 				connectionSocket = welcomeSocket.accept();
 				receiver = new StatsReceiverWorkerThread(connectionSocket, casaId, condominioStats);
 				receiver.start();
-				LOGGER.log(Level.FINE, "{ " + casaId + " } Received connection for Statistics: launching worker thread");
+				LOGGER.log(Level.FINE, "{ " + casaId + " } Received connection for GlobalStatistics: launching worker thread");
 
 				// da il tempo al thread di gestire la richiesta e salvare la statistica ricevuta
 				Thread.sleep(DELAY);
 
 				// check se sono arrivate le statistiche da tutte le case
 				// scarica condominio
-				LOGGER.log(Level.INFO, "{ " + casaId + " } Requesting condominio...");
+				LOGGER.log(Level.FINE, "{ " + casaId + " } Requesting condominio...");
 				condominio = CasaApp.getCondominio();
 
 				// confronta le stat ricevute fin ora con le case registrate (ci sono tutte per questo giro?)
@@ -89,7 +89,7 @@ public class StatsReceiverThread extends Thread
 					// se ci sono tutte: calcola consumo complessivo e resetta le stat ricevute fin ora (pronto per prossimo giro di calcolo complessivo)
 					if(ciSonoTutte)
 					{
-						LOGGER.log(Level.INFO, "{ " + casaId + " } received all Statistics");
+						LOGGER.log(Level.FINE, "{ " + casaId + " } received all GlobalStatistics");
 
 						double globalTot = 0;
 						long timestampMin = Long.MAX_VALUE, timestampMax = Long.MIN_VALUE;
@@ -153,7 +153,7 @@ public class StatsReceiverThread extends Thread
 				}
 				// se manca ancora qualche casa a questo giro di loop, attende il prossimo (non fa niente)
 
-				// FIXME: e se dopo molti giri ancora manca qualche casa? (qua andrebbe avanti all'infinito...)
+				// TODO: e se dopo molti giri ancora manca qualche casa? (qua andrebbe avanti all'infinito...)
 				// non dovrebbe mai succedere perche' tutti mandano in ordine;
 				// basterebbe anche solo aumentare il delay di attesa per il thread
 				// volendo si puo' aggiungere qua un timeout...

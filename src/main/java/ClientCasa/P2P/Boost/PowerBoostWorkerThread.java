@@ -1,5 +1,6 @@
 package ClientCasa.P2P.Boost;
 
+import ClientCasa.CasaApp;
 import ClientCasa.P2P.MessageSenderThread;
 import ClientCasa.P2P.P2PMessage;
 

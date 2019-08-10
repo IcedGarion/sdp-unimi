@@ -1,4 +1,6 @@
-package ClientCasa.P2P.Statistics.Election;
+package ClientCasa.P2P.GlobalStatistics.Election;
+
+import ClientCasa.CasaApp;
 
 import java.net.ServerSocket;
 import java.net.Socket;

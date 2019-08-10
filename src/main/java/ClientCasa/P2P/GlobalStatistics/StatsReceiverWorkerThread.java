@@ -1,5 +1,6 @@
-package ClientCasa.P2P.Statistics;
+package ClientCasa.P2P.GlobalStatistics;
 
+import ClientCasa.CasaApp;
 import ServerREST.beans.MeanMeasurement;
 
 import javax.xml.bind.JAXBContext;
@@ -37,7 +38,7 @@ public class StatsReceiverWorkerThread extends Thread
 		{
 			message = (MeanMeasurement) unmarshaller.unmarshal(listenSocket.getInputStream());
 			listenSocket.close();
-			LOGGER.log(Level.INFO, "{ " + casaId + " } Statistic received from " + message.getCasaId());
+			LOGGER.log(Level.FINE, "{ " + casaId + " } Statistic received from " + message.getCasaId());
 
 			// salva la statistica appena ricevuta in un oggetto condiviso, così StatsReceiverThread poi le legge
 			condominioStats.addCasaStat(message);
