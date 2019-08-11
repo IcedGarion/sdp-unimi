@@ -9,6 +9,7 @@ import ServerREST.beans.Condominio;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.net.Socket;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,6 +27,12 @@ public class ElectionWorkerThread extends Thread
 		this.casaId = casaId;
 		this.casaElectionPort = casaElectionPort;
 		this.electionObject = electionObject;
+
+		// logger levels
+		LOGGER.setLevel(CasaApp.LOGGER_LEVEL);
+		ConsoleHandler handler = new ConsoleHandler();
+		handler.setLevel(CasaApp.LOGGER_LEVEL);
+		LOGGER.addHandler(handler);
 	}
 
 	public void run()
@@ -57,18 +64,18 @@ public class ElectionWorkerThread extends Thread
 					// se e' lui il coord vuol dire che e' entrata una nuova casa e vuole sapere chi e' il coord: gli risponde
 					if(electionObject.getState().equals(Election.ElectionOutcome.COORD))
 					{
-						LOGGER.log(Level.FINE, "{ " + casaId + " } [ ELECTION ] Ricevuto msg ELECTION da " + senderId + ": sono io il coord e glielo dico");
+						LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Ricevuto msg ELECTION da " + senderId + ": sono io il coord e glielo dico");
 
 						// risponde ELECTED: informa che e' lui il coord
 						electionMessageSender = new MessageSenderThread(casaId, senderId, senderIp, senderPort, new P2PMessage(casaId, casaElectionPort, senderId, "ELECTED"));
 						electionMessageSender.start();
 
-						LOGGER.log(Level.FINE, "{ " + casaId + " } [ ELECTION ] Risposto a " + senderId + " che sono io il coord");
+						LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Risposto a " + senderId + " che sono io il coord");
 					}
 					// se invece anche secondo lui non c'e' un coord, allora ci sara' da indire elezione veramente: contatta i superiori
 					else if(electionObject.getState().equals(Election.ElectionOutcome.NEED_ELECTION))
 					{
-						LOGGER.log(Level.FINE, "{ " + casaId + " } [ ELECTION ] Ricevuto msg ELECTION da " + senderId + ": non c'e ancora coord quindi inidico elezione ai superiori");
+						LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Ricevuto msg ELECTION da " + senderId + ": non c'e ancora coord quindi inidico elezione ai superiori");
 
 						// salta step di rispondere OK, tanto uscite sono controllate: passa direttamente a inviare ELECTION ai suoi superiori
 						// lista case
@@ -81,7 +88,7 @@ public class ElectionWorkerThread extends Thread
 							// qua invece non rimanda il msg anche a se stesso senò va in loop; e poi questa e' la parte vera di elezione, non l'inizio elezione (vedi startElection, codice simile)
 							if(c.getId().compareTo(casaId) > 0)
 							{
-								LOGGER.log(Level.FINE, "{ " + casaId + " } [ ELECTION ] Invio msg elezione al superiore " + c.getId());
+								LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Invio msg elezione al superiore " + c.getId());
 
 								// invia "ELECTION": chiede ai superiori di prendersi carico coordinatore
 								electionMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getElectionPort(), new P2PMessage(casaId, casaElectionPort, c.getId(), "ELECTION"));
@@ -93,7 +100,7 @@ public class ElectionWorkerThread extends Thread
 						// se non c'e' nesusno con ID maggiore del suo, si elegge coordinatore
 						if(superiori == 0)
 						{
-							LOGGER.log(Level.FINE, "{ " + casaId + " } [ ELECTION ] sono io quello con id maggiore di tutti: mi proclamo COORD e avviso gli altri");
+							LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] sono io quello con id maggiore di tutti: mi proclamo COORD e avviso gli altri");
 
 
 							// setta lo stato in modo che poi StatsReceiver sa come comportarsi (inviare al server la stat globale (o no))
@@ -106,7 +113,7 @@ public class ElectionWorkerThread extends Thread
 								// non lo deve mandare anche a se stesso seno' quando lo riceve si mete NOT_COORD!
 								if(c.getId().compareTo(casaId) != 0)
 								{
-									LOGGER.log(Level.FINE, "{ " + casaId + " } [ ELECTION ] Invio ELECTED a " + c.getId());
+									LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Invio ELECTED a " + c.getId());
 
 									// invia "ELECTED"
 									electionMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getElectionPort(), new P2PMessage(casaId, casaElectionPort, c.getId(), "ELECTED"));
@@ -117,7 +124,7 @@ public class ElectionWorkerThread extends Thread
 						// altrimenti ha finito, non sara' mai il coord
 						else
 						{
-							LOGGER.log(Level.FINE, "{ " + casaId + " } [ ELECTION ] non sono il quello con id maggiore e quindi ho finito qua");
+							LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] non sono il quello con id maggiore e quindi ho finito qua");
 						}
 					}
 					// ultimo caso: esiste gia' un coord ma non e' lui: non fa niente. Il coord rispondera' al nuovo arrivato informandolo
@@ -126,7 +133,7 @@ public class ElectionWorkerThread extends Thread
 					{
 						// TODO: migliorare il caso in cui non sei coord... non stai li a fare niente, ma prova a vedere se esiste coord..... vedi appunti!
 
-						LOGGER.log(Level.FINE, "{ " + casaId + " } [ ELECTION ] Non sono io il coord e quindi non rispondo a msg di election; coord esiste gia' e gli rispondera'");
+						LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Non sono io il coord e quindi non rispondo a msg di election; coord esiste gia' e gli rispondera'");
 					}
 					break;
 
@@ -134,7 +141,7 @@ public class ElectionWorkerThread extends Thread
 				// OPPURE una nuova casa e' entrata e vuole sapere chi e' il coord (e gli viene risposto).
 				// in ogni caso c'e il coord che ti avvisa che e' stato eletto: salvati la info
 				case "ELECTED":
-					LOGGER.log(Level.FINE, "{ " + casaId + " } [ ELECTION ] Ricevuto msg ELECTED da " + senderId + ": e' lui il coord e quindi mi proclamo NOT_COORD");
+					LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Ricevuto msg ELECTED da " + senderId + ": e' lui il coord e quindi mi proclamo NOT_COORD");
 
 					// setta lo stato in modo che poi StatsReceiver sa come comportarsi (inviare al server la stat globale o NO)
 					electionObject.setState(Election.ElectionOutcome.NOT_COORD);
@@ -142,7 +149,7 @@ public class ElectionWorkerThread extends Thread
 
 				// caso in cui coordinatore esce dalla rete: dice a tutti che se ne va e tutti quanti faranno poi nuova elezione
 				case "NEED_REELECTION":
-					LOGGER.log(Level.FINE, "{ " + casaId + " } [ ELECTION ] Ricevuto msg NEED_REELECTION da " + senderId + ": il vecchio coord e' uscito e quindi serve nuova elezione: mi proclamo NEED_ELECTION");
+					LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Ricevuto msg NEED_REELECTION da " + senderId + ": il vecchio coord e' uscito e quindi serve nuova elezione: mi proclamo NEED_ELECTION");
 
 					// setta lo stato in modo che poi StatsReceiver sa come comportarsi (servira' indire nuova elezione)
 					electionObject.setState(Election.ElectionOutcome.NEED_ELECTION);

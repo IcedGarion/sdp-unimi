@@ -9,6 +9,7 @@ import ServerREST.beans.MeanMeasurement;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.Timestamp;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,6 +37,12 @@ public class StatsReceiverThread extends Thread
 		this.casaId = casaId;
 		this.statsPort = statsPort;
 		this.election = election;
+
+		// logger levels
+		LOGGER.setLevel(CasaApp.LOGGER_LEVEL);
+		ConsoleHandler handler = new ConsoleHandler();
+		handler.setLevel(CasaApp.LOGGER_LEVEL);
+		LOGGER.addHandler(handler);
 	}
 
 	// server concorrente
@@ -63,14 +70,14 @@ public class StatsReceiverThread extends Thread
 					connectionSocket = welcomeSocket.accept();
 					receiver = new StatsReceiverWorkerThread(connectionSocket, casaId, condominioStats);
 					receiver.start();
-					LOGGER.log(Level.FINER, "{ " + casaId + " } Received connection for GlobalStatistics: launching worker thread");
+					LOGGER.log(Level.FINE, "{ " + casaId + " } Received connection for GlobalStatistics: launching worker thread");
 
 					// da il tempo al thread di gestire la richiesta e salvare la statistica ricevuta
 					Thread.sleep(DELAY);
 
 					// check se sono arrivate le statistiche da tutte le case
 					// scarica condominio
-					LOGGER.log(Level.FINER, "{ " + casaId + " } Requesting condominio...");
+					LOGGER.log(Level.FINE, "{ " + casaId + " } Requesting condominio...");
 					condominio = CasaApp.getCondominio();
 
 					// confronta le stat ricevute fin ora con le case registrate (ci sono tutte per questo giro?)
@@ -91,7 +98,7 @@ public class StatsReceiverThread extends Thread
 						// se ci sono tutte: calcola consumo complessivo e resetta le stat ricevute fin ora (pronto per prossimo giro di calcolo complessivo)
 						if(ciSonoTutte)
 						{
-							LOGGER.log(Level.FINER, "{ " + casaId + " } received all GlobalStatistics");
+							LOGGER.log(Level.FINE, "{ " + casaId + " } received all GlobalStatistics");
 
 							double globalTot = 0;
 							long timestampMin = Long.MAX_VALUE, timestampMax = Long.MIN_VALUE;
@@ -112,6 +119,7 @@ public class StatsReceiverThread extends Thread
 							}
 							// FIXME: dopo questa stampa dovrebbe ripartire il menu' di CASAAPP
 							System.out.println("Consumo globale condominiale aggiornato a " + new Timestamp(timestampMax) + ": " + globalTot + " (" + n + " misure)");
+							CasaApp.refreshMenu();
 
 							globalComsumption = new MeanMeasurement("Condominio", globalTot, timestampMin, timestampMax);
 

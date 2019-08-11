@@ -6,6 +6,7 @@ import ClientCasa.P2P.P2PMessage;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,6 +31,12 @@ public class Election
 		this.casaId = casaId;
 		this.casaElectionPort = casaElectionPort;
 		setState(ElectionOutcome.NEED_ELECTION);
+
+		// logger levels
+		LOGGER.setLevel(CasaApp.LOGGER_LEVEL);
+		ConsoleHandler handler = new ConsoleHandler();
+		handler.setLevel(CasaApp.LOGGER_LEVEL);
+		LOGGER.addHandler(handler);
 	}
 
 	public synchronized void setState(ElectionOutcome state)
@@ -75,7 +82,7 @@ public class Election
 			// se c'e' solo una casa in rete allora fa subito coord
 			if(caseTot == 1)
 			{
-				LOGGER.log(Level.FINE, "{ " + casaId + " } [ ELECTION ] Sono da solo e faccio io il coord");
+				LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Sono da solo e faccio io il coord");
 				setState(ElectionOutcome.COORD);
 			}
 		}

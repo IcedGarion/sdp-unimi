@@ -29,14 +29,14 @@ public class CasaApp
 {
 	public static final String SERVER_URL = "http://localhost:1337";
 
-	// FINER (tutto) - FINE (info election / boost) - INFO (solo start / stop di thread) - SEVERE (solo errori)
-	public static final Level LOGGER_LEVEL = Level.FINER;
+	// FINE (tutto, tracing) - INFO (start/stop thread + election / boost) - SEVERE (solo errori)
+	public static final Level LOGGER_LEVEL = Level.INFO;
 
-	private static final String CASA_ID = "casa1";
+	private static final String CASA_ID = "casa2";
 	private static final String CASA_IP = "localhost";
-	private static final int CASA_STATS_PORT = 8081;
-	private static final int CASA_ELECTION_PORT = 8091;
-	private static final int CASA_BOOST_PORT = 8071;
+	private static final int CASA_STATS_PORT = 8082;
+	private static final int CASA_ELECTION_PORT = 8092;
+	private static final int CASA_BOOST_PORT = 8072;
 
 	private static final int RETRY_TIMEOUT = 250;
 	private static final int SIMULATOR_DELAY = 100;
@@ -137,6 +137,12 @@ public class CasaApp
 		}
 	}
 
+	// chiamato quando avvengono altre stampe, per riportare il menu' davanti
+	public static void refreshMenu()
+	{
+		System.out.println("0) POWER BOOST\n1) EXIT\n");
+	}
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//	PROGRAMMA PRINCIPALE CASE	//
 	public static void main(String[] args) throws JAXBException, InterruptedException, IOException
@@ -163,12 +169,12 @@ public class CasaApp
 		SimulatorBuffer myBuffer = new SimulatorBuffer();
 		SmartMeterSimulator simulator = new SmartMeterSimulator(myBuffer);
 		simulator.start();
-		LOGGER.log(Level.FINER, "{ " + CASA_ID + " } Smart meted launched");
+		LOGGER.log(Level.FINE, "{ " + CASA_ID + " } Smart meted launched");
 
 		// avvia thread che invia periodicamente le medie
 		MeanThread mean = new MeanThread(myBuffer, CASA_ID, SIMULATOR_DELAY);
 		mean.start();
-		LOGGER.log(Level.FINER, "{ " + CASA_ID + " } Local statistic (MeanThread) thread launched");
+		LOGGER.log(Level.FINE, "{ " + CASA_ID + " } Local statistic (MeanThread) thread launched");
 
 
 		///////////////////////////////////////////////////
@@ -205,18 +211,18 @@ public class CasaApp
 		// lancia thread "ascoltatore" elezione bully: riceve msg e risponde a dovere secondo alg BULLY
 		ElectionThread electionThread = new ElectionThread(CASA_ID, CASA_ELECTION_PORT, election);
 		electionThread.start();
-		LOGGER.log(Level.FINER, "{ " + CASA_ID + " } Election thread launched");
+		LOGGER.log(Level.FINE, "{ " + CASA_ID + " } Election thread launched");
 
 		// lancia thread che riceve le statistiche
 		StatsReceiverThread statsReceiver = new StatsReceiverThread(CASA_ID, CASA_STATS_PORT, election);
 		statsReceiver.start();
-		LOGGER.log(Level.FINER, "{ " + CASA_ID + " } Global statistics (StatsReceiver) thread launched");
+		LOGGER.log(Level.FINE, "{ " + CASA_ID + " } Global statistics (StatsReceiver) thread launched");
 
 		// lancia thread che riceve richieste di power boost e si coordina
 		PowerBoost powerBoostState = new PowerBoost(CASA_ID, CASA_BOOST_PORT, simulator);
 		PowerBoostThread powerBoostThread = new PowerBoostThread(CASA_ID, CASA_BOOST_PORT, powerBoostState);
 		powerBoostThread.start();
-		LOGGER.log(Level.FINER, "{ " + CASA_ID + " } Power Boost thread launched");
+		LOGGER.log(Level.FINE, "{ " + CASA_ID + " } Power Boost thread launched");
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/*	INTERFACCIA CLI BOOST + EXIT	*/
@@ -226,7 +232,7 @@ public class CasaApp
 		{
 			try
 			{
-				System.out.println("0) POWER BOOST\n1) EXIT\n");
+				refreshMenu();
 				choice = input.readLine();
 
 				// EXIT

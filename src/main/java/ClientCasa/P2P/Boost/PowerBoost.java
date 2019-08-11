@@ -11,6 +11,7 @@ import javax.xml.bind.JAXBException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,6 +48,12 @@ public class PowerBoost
 		this.OKCount = 0;
 		this.queue = new ArrayList<>();
 		this.messageTimestamp = -1;
+
+		// logger levels
+		LOGGER.setLevel(CasaApp.LOGGER_LEVEL);
+		ConsoleHandler handler = new ConsoleHandler();
+		handler.setLevel(CasaApp.LOGGER_LEVEL);
+		LOGGER.addHandler(handler);
 	}
 
 	public synchronized void setState(PowerBoostState state)
@@ -126,7 +133,7 @@ public class PowerBoost
 				boostMessageSender.start();
 			}
 
-			LOGGER.log(Level.FINE, "{ " + casaId + " } [ BOOST ] Inviato msg BOOST a tutte le " + getCaseAttive() + " case");
+			LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Inviato msg BOOST a tutte le " + getCaseAttive() + " case");
 		}
 		catch(Exception e)
 		{
@@ -175,7 +182,7 @@ public class PowerBoost
 			boostMessageSender = new MessageSenderThread(casaId, senderId, senderIp, senderPort, new P2PMessage(casaId, casaBoostPort, senderId, "OK"));
 			boostMessageSender.start();
 
-			LOGGER.log(Level.FINE, "{ " + casaId + " } [ BOOST ] Fine BOOST: mando OK a " + senderId);
+			LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Fine BOOST: mando OK a " + senderId);
 		}
 	}
 }

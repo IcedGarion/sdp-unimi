@@ -7,6 +7,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.net.Socket;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,6 +29,12 @@ public class StatsReceiverWorkerThread extends Thread
 
 		jaxbContext = JAXBContext.newInstance(MeanMeasurement.class);
 		unmarshaller = jaxbContext.createUnmarshaller();
+
+		// logger levels
+		LOGGER.setLevel(CasaApp.LOGGER_LEVEL);
+		ConsoleHandler handler = new ConsoleHandler();
+		handler.setLevel(CasaApp.LOGGER_LEVEL);
+		LOGGER.addHandler(handler);
 	}
 
 	public void run()
@@ -38,7 +45,7 @@ public class StatsReceiverWorkerThread extends Thread
 		{
 			message = (MeanMeasurement) unmarshaller.unmarshal(listenSocket.getInputStream());
 			listenSocket.close();
-			LOGGER.log(Level.FINER, "{ " + casaId + " } Statistic received from " + message.getCasaId());
+			LOGGER.log(Level.FINE, "{ " + casaId + " } Statistic received from " + message.getCasaId());
 
 			// salva la statistica appena ricevuta in un oggetto condiviso, così StatsReceiverThread poi le legge
 			condominioStats.addCasaStat(message);

@@ -58,8 +58,6 @@
 
 
 # REFACTOR
-- I vari System.println vanno cambiati in LOG! Scegli bene lvl
-
 - si puo' togliere RECEIVER_ID da P2PMessage
 ~ Classe REST per mandare TUTTE le richieste GET/POST al server (capita spesso e usano in tanti)
 - StatLocaliService ha un lock obj che puo' diventare sync (si puo togliere e metti sync method)

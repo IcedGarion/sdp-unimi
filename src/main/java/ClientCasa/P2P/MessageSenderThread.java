@@ -7,6 +7,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.net.Socket;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,6 +30,12 @@ public class MessageSenderThread extends Thread
 		this.destId = destId;
 		this.ip = ip;
 		this.port = port;
+
+		// logger levels
+		LOGGER.setLevel(CasaApp.LOGGER_LEVEL);
+		ConsoleHandler handler = new ConsoleHandler();
+		handler.setLevel(CasaApp.LOGGER_LEVEL);
+		LOGGER.addHandler(handler);
 	}
 
 	public MessageSenderThread(String senderId, String destId, String ip, int port, MeanMeasurement message) throws JAXBException
@@ -65,7 +72,7 @@ public class MessageSenderThread extends Thread
 			marshaller.marshal(message, socket.getOutputStream());
 			socket.close();
 
-			LOGGER.log(Level.FINER, "{ " + senderId + " } Message sent to " + senderId + " (" + ip + ": " + port + ")");
+			LOGGER.log(Level.FINE, "{ " + senderId + " } Message sent to " + senderId + " (" + ip + ": " + port + ")");
 		}
 		catch(Exception e)
 		{

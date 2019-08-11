@@ -4,6 +4,7 @@ import ClientCasa.CasaApp;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,6 +24,12 @@ public class ElectionThread extends Thread
 		this.casaId = casaId;
 		this.casaElectionPort = listenPort;
 		this.electionObject = electionObject;
+
+		// logger levels
+		LOGGER.setLevel(CasaApp.LOGGER_LEVEL);
+		ConsoleHandler handler = new ConsoleHandler();
+		handler.setLevel(CasaApp.LOGGER_LEVEL);
+		LOGGER.addHandler(handler);
 	}
 
 	public void run()

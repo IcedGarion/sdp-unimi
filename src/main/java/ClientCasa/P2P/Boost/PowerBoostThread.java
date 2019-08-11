@@ -4,6 +4,7 @@ import ClientCasa.CasaApp;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,6 +23,12 @@ public class PowerBoostThread extends Thread
 		this.casaId = casaId;
 		this.boostPort = boostPort;
 		this.powerBoostState = powerBoostState;
+
+		// logger levels
+		LOGGER.setLevel(CasaApp.LOGGER_LEVEL);
+		ConsoleHandler handler = new ConsoleHandler();
+		handler.setLevel(CasaApp.LOGGER_LEVEL);
+		LOGGER.addHandler(handler);
 	}
 
 	public void run()
@@ -42,7 +49,7 @@ public class PowerBoostThread extends Thread
 					connectionSocket = welcomeSocket.accept();
 					powerWorker = new PowerBoostWorkerThread(connectionSocket, casaId, boostPort, powerBoostState);
 					powerWorker.start();
-					LOGGER.log(Level.FINER, "{ " + casaId + " } Received connection for Power Boost: launching worker thread");
+					LOGGER.log(Level.FINE, "{ " + casaId + " } Received connection for Power Boost: launching worker thread");
 
 
 					// check TERMINAZIONE
