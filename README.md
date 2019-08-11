@@ -1,10 +1,5 @@
 # TODO now
 
-[ LOGGER: Info viene loggato, ma FINE no! come impostare lvl giusto? ]
-FINE NON VANNO PIU.
-Trovare il modo di impostare LVL (Console handler o roba cosi')
-
-
 - power boost semplice con una casa sola (non 2 alla volta)
 
 ( sync anche request powerboost?)
@@ -69,11 +64,9 @@ Trovare il modo di impostare LVL (Console handler o roba cosi')
 ~ Classe REST per mandare TUTTE le richieste GET/POST al server (capita spesso e usano in tanti)
 - StatLocaliService ha un lock obj che puo' diventare sync (si puo togliere e metti sync method)
 - AdminApp e' un orrore, serve refactor e metodi comuni
-- metti a posto ogni try/catch + while(true) in modo che il try sia dentro il while (a volte succede il contrario)
 
 - FILE CONFIG (tipo SERVER_URL in giro ovunque)
 - TOGLI / CONTROLLA i TODO e FIXME
-- log level INFO per esame
 
 
 

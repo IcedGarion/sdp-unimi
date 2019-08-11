@@ -224,48 +224,55 @@ public class CasaApp
 		String choice;
 		while(true)
 		{
-			System.out.println("0) POWER BOOST\n1) EXIT\n");
-			choice = input.readLine();
-
-			// EXIT
-			// termina tutti i thread + informa il server che la casa sta per uscire
-			if(choice.equals("1"))
+			try
 			{
-				// post per cancellare la casa
-				url = new URL(SERVER_URL + "/condominio/delete");
-				conn = (HttpURLConnection) url.openConnection();
-				conn.setRequestMethod("POST");
-				conn.setRequestProperty("content-type", "application/xml");
-				conn.setDoOutput(true);
-				marshaller.marshal(myCasa, conn.getOutputStream());
-				assert conn.getResponseCode()== 204: "Error in removing casa " + CASA_ID;
+				System.out.println("0) POWER BOOST\n1) EXIT\n");
+				choice = input.readLine();
 
-
-				// se sta per uscire ed era il coordinatore delle stat globali, dice a tutti che molla (nuova elezione poi)
-				if(election.getState().equals(Election.ElectionOutcome.COORD))
+				// EXIT
+				// termina tutti i thread + informa il server che la casa sta per uscire
+				if(choice.equals("1"))
 				{
-					election.coordLeaving();
+					// post per cancellare la casa
+					url = new URL(SERVER_URL + "/condominio/delete");
+					conn = (HttpURLConnection) url.openConnection();
+					conn.setRequestMethod("POST");
+					conn.setRequestProperty("content-type", "application/xml");
+					conn.setDoOutput(true);
+					marshaller.marshal(myCasa, conn.getOutputStream());
+					assert conn.getResponseCode() == 204 : "Error in removing casa " + CASA_ID;
+
+
+					// se sta per uscire ed era il coordinatore delle stat globali, dice a tutti che molla (nuova elezione poi)
+					if(election.getState().equals(Election.ElectionOutcome.COORD))
+					{
+						election.coordLeaving();
+					}
+
+					// termina i suoi thread
+					// TODO: check se va terminato prima un thread di un altro (election / stat receiver? )
+					mean.interrupt();
+					simulator.interrupt();
+					statsReceiver.interrupt();
+					electionThread.interrupt();
+
+					LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Stopping CasaApp...");
+					break;
 				}
-
-				// termina i suoi thread
-				// TODO: check se va terminato prima un thread di un altro (election / stat receiver? )
-				mean.interrupt();
-				simulator.interrupt();
-				statsReceiver.interrupt();
-				electionThread.interrupt();
-
-				LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Stopping CasaApp...");
-				break;
+				// POWER BOOST
+				else if(choice.equals("0"))
+				{
+					LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Power boost requested... (Please wait)");
+					powerBoostState.requestPowerBoost();
+				} else
+				{
+					System.out.println("Inserire 0/1");
+				}
 			}
-			// POWER BOOST
-			else if(choice.equals("0"))
+			catch(Exception e)
 			{
-				LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Power boost requested... (Please wait)");
-				powerBoostState.requestPowerBoost();
-			}
-			else
-			{
-				System.out.println("Inserire 0/1");
+				LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Error in choice...");
+				e.printStackTrace();
 			}
 		}
 

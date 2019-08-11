@@ -37,17 +37,25 @@ public class PowerBoostThread extends Thread
 
 			while(true)
 			{
-				connectionSocket = welcomeSocket.accept();
-				powerWorker = new PowerBoostWorkerThread(connectionSocket, casaId, boostPort, powerBoostState);
-				powerWorker.start();
-				LOGGER.log(Level.FINE, "{ " + casaId + " } Received connection for Power Boost: launching worker thread");
-
-
-				// check TERMINAZIONE
-				if(interrupted())
+				try
 				{
-					LOGGER.log(Level.INFO, "{ " + casaId + " } Stopping PowerBoostThread... ");
-					return;
+					connectionSocket = welcomeSocket.accept();
+					powerWorker = new PowerBoostWorkerThread(connectionSocket, casaId, boostPort, powerBoostState);
+					powerWorker.start();
+					LOGGER.log(Level.FINE, "{ " + casaId + " } Received connection for Power Boost: launching worker thread");
+
+
+					// check TERMINAZIONE
+					if(interrupted())
+					{
+						LOGGER.log(Level.INFO, "{ " + casaId + " } Stopping PowerBoostThread... ");
+						return;
+					}
+				}
+				catch(Exception e)
+				{
+					LOGGER.log(Level.SEVERE, "{ " + casaId + " } Error in serving power boost request");
+					e.printStackTrace();
 				}
 			}
 		}

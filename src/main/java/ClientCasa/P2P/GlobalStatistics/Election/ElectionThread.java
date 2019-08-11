@@ -27,26 +27,35 @@ public class ElectionThread extends Thread
 
 	public void run()
 	{
+		ElectionWorkerThread electionWorker;
+		Socket listenSocket;
+		ServerSocket welcomeSocket;
+
 		try
 		{
-			ElectionWorkerThread electionWorker;
-
 			// crea server socket in ascolto
-			ServerSocket welcomeSocket = new ServerSocket(casaElectionPort);
-			Socket listenSocket;
+			welcomeSocket = new ServerSocket(casaElectionPort);
 
 			while(true)
 			{
-				// ascolta msg
-				listenSocket = welcomeSocket.accept();
-				electionWorker = new ElectionWorkerThread(listenSocket, casaId, casaElectionPort, electionObject);
-				electionWorker.start();
-
-				// check TERMINAZIONE
-				if(interrupted())
+				try
 				{
-					LOGGER.log(Level.INFO, "{ " + casaId + " } Stopping ElectionThread... ");
-					return;
+					// ascolta msg
+					listenSocket = welcomeSocket.accept();
+					electionWorker = new ElectionWorkerThread(listenSocket, casaId, casaElectionPort, electionObject);
+					electionWorker.start();
+
+					// check TERMINAZIONE
+					if(interrupted())
+					{
+						LOGGER.log(Level.INFO, "{ " + casaId + " } Stopping ElectionThread... ");
+						return;
+					}
+				}
+				catch(Exception e)
+				{
+					LOGGER.log(Level.SEVERE, "{ " + casaId + " } Error in serving election request");
+					e.printStackTrace();
 				}
 			}
 		}
