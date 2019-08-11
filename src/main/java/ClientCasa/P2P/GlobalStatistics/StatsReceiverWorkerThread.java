@@ -38,7 +38,7 @@ public class StatsReceiverWorkerThread extends Thread
 		{
 			message = (MeanMeasurement) unmarshaller.unmarshal(listenSocket.getInputStream());
 			listenSocket.close();
-			LOGGER.log(Level.FINE, "{ " + casaId + " } Statistic received from " + message.getCasaId());
+			LOGGER.log(Level.FINER, "{ " + casaId + " } Statistic received from " + message.getCasaId());
 
 			// salva la statistica appena ricevuta in un oggetto condiviso, così StatsReceiverThread poi le legge
 			condominioStats.addCasaStat(message);

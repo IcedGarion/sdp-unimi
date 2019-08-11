@@ -42,7 +42,7 @@ public class PowerBoostThread extends Thread
 					connectionSocket = welcomeSocket.accept();
 					powerWorker = new PowerBoostWorkerThread(connectionSocket, casaId, boostPort, powerBoostState);
 					powerWorker.start();
-					LOGGER.log(Level.FINE, "{ " + casaId + " } Received connection for Power Boost: launching worker thread");
+					LOGGER.log(Level.FINER, "{ " + casaId + " } Received connection for Power Boost: launching worker thread");
 
 
 					// check TERMINAZIONE

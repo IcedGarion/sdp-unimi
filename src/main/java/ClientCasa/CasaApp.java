@@ -29,8 +29,8 @@ public class CasaApp
 {
 	public static final String SERVER_URL = "http://localhost:1337";
 
-	// FINE (tutto) - INFO (solo start / stop e info che servono) - SEVERE (solo errori)
-	public static final Level LOGGER_LEVEL = Level.FINE;
+	// FINER (tutto) - FINE (info election / boost) - INFO (solo start / stop di thread) - SEVERE (solo errori)
+	public static final Level LOGGER_LEVEL = Level.FINER;
 
 	private static final String CASA_ID = "casa1";
 	private static final String CASA_IP = "localhost";
@@ -163,12 +163,12 @@ public class CasaApp
 		SimulatorBuffer myBuffer = new SimulatorBuffer();
 		SmartMeterSimulator simulator = new SmartMeterSimulator(myBuffer);
 		simulator.start();
-		LOGGER.log(Level.FINE, "{ " + CASA_ID + " } Smart meted launched");
+		LOGGER.log(Level.FINER, "{ " + CASA_ID + " } Smart meted launched");
 
 		// avvia thread che invia periodicamente le medie
 		MeanThread mean = new MeanThread(myBuffer, CASA_ID, SIMULATOR_DELAY);
 		mean.start();
-		LOGGER.log(Level.FINE, "{ " + CASA_ID + " } Local statistic (MeanThread) thread launched");
+		LOGGER.log(Level.FINER, "{ " + CASA_ID + " } Local statistic (MeanThread) thread launched");
 
 
 		///////////////////////////////////////////////////
@@ -205,18 +205,18 @@ public class CasaApp
 		// lancia thread "ascoltatore" elezione bully: riceve msg e risponde a dovere secondo alg BULLY
 		ElectionThread electionThread = new ElectionThread(CASA_ID, CASA_ELECTION_PORT, election);
 		electionThread.start();
-		LOGGER.log(Level.FINE, "{ " + CASA_ID + " } Election thread launched");
+		LOGGER.log(Level.FINER, "{ " + CASA_ID + " } Election thread launched");
 
 		// lancia thread che riceve le statistiche
 		StatsReceiverThread statsReceiver = new StatsReceiverThread(CASA_ID, CASA_STATS_PORT, election);
 		statsReceiver.start();
-		LOGGER.log(Level.FINE, "{ " + CASA_ID + " } Global statistics (StatsReceiver) thread launched");
+		LOGGER.log(Level.FINER, "{ " + CASA_ID + " } Global statistics (StatsReceiver) thread launched");
 
 		// lancia thread che riceve richieste di power boost e si coordina
 		PowerBoost powerBoostState = new PowerBoost(CASA_ID, CASA_BOOST_PORT, simulator);
 		PowerBoostThread powerBoostThread = new PowerBoostThread(CASA_ID, CASA_BOOST_PORT, powerBoostState);
 		powerBoostThread.start();
-		LOGGER.log(Level.FINE, "{ " + CASA_ID + " } Power Boost thread launched");
+		LOGGER.log(Level.FINER, "{ " + CASA_ID + " } Power Boost thread launched");
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/*	INTERFACCIA CLI BOOST + EXIT	*/

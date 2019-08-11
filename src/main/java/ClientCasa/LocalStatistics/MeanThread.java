@@ -53,7 +53,7 @@ public class MeanThread extends Thread
 				// all'inizio aspetta finche' il buffer si riempie
 				if(buffer.size() >= 24)
 				{
-					LOGGER.log(Level.FINE, "{ " + casaId + " } Receiving sensor data...");
+					LOGGER.log(Level.FINER, "{ " + casaId + " } Receiving sensor data...");
 
 					// prende i primi 24
 					sensorData = buffer.getTopBuffer();
@@ -84,9 +84,9 @@ public class MeanThread extends Thread
 					/*	AGGIUNGE STATISICA LOCALE AL SERVER	*/
 					// chiamata REST a StatisticheService passando ID_CASA + MeanMeasurement
 					// POST /statisticheLocali/add: inserisce nuova statistica
-					LOGGER.log(Level.FINE, "{ " + casaId + " } Sending computed statistic to Server...");
+					LOGGER.log(Level.FINER, "{ " + casaId + " } Sending computed statistic to Server...");
 					CasaApp.sendLocalStat(computedMeasure);
-					LOGGER.log(Level.FINE, "{ " + casaId + " } Statistic sent to server");
+					LOGGER.log(Level.FINER, "{ " + casaId + " } Statistic sent to server");
 
 
 					/*	MANDA STATISTICA LOCALE ALLE ALTRE CASE	(~BROADCAST: invia anche a se stessa così ognuno ha elenco completo uguale)*/
@@ -94,7 +94,7 @@ public class MeanThread extends Thread
 					MessageSenderThread localStatSender;
 
 					// scarica condominio
-					LOGGER.log(Level.FINE, "{ " + casaId + " } Requesting condominio...");
+					LOGGER.log(Level.FINER, "{ " + casaId + " } Requesting condominio...");
 					Condominio condominio = CasaApp.getCondominio();
 
 					// BROADCAST: crea e lancia thread che invia messaggio statistica a ogni casa

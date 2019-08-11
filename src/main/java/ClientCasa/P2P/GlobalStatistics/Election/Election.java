@@ -75,8 +75,7 @@ public class Election
 			// se c'e' solo una casa in rete allora fa subito coord
 			if(caseTot == 1)
 			{
-				// FIXME: remove print
-				System.out.println("{ " + casaId + " } [ START ELECTION ] Sono da solo e faccio io il coord");
+				LOGGER.log(Level.FINE, "{ " + casaId + " } [ ELECTION ] Sono da solo e faccio io il coord");
 				setState(ElectionOutcome.COORD);
 			}
 		}

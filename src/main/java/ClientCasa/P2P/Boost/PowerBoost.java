@@ -126,8 +126,7 @@ public class PowerBoost
 				boostMessageSender.start();
 			}
 
-			// FIXME: remove print
-			System.out.println("{ " + casaId + " } [ BOOST ] Inviato msg BOOST a tutte le " + getCaseAttive() + " case");
+			LOGGER.log(Level.FINE, "{ " + casaId + " } [ BOOST ] Inviato msg BOOST a tutte le " + getCaseAttive() + " case");
 		}
 		catch(Exception e)
 		{
@@ -176,8 +175,7 @@ public class PowerBoost
 			boostMessageSender = new MessageSenderThread(casaId, senderId, senderIp, senderPort, new P2PMessage(casaId, casaBoostPort, senderId, "OK"));
 			boostMessageSender.start();
 
-			// FIXME: remove print
-			System.out.println("{ " + casaId + " } [ BOOST ] Fine BOOST: mando OK a " + senderId);
+			LOGGER.log(Level.FINE, "{ " + casaId + " } [ BOOST ] Fine BOOST: mando OK a " + senderId);
 		}
 	}
 }

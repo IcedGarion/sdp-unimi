@@ -65,7 +65,7 @@ public class MessageSenderThread extends Thread
 			marshaller.marshal(message, socket.getOutputStream());
 			socket.close();
 
-			LOGGER.log(Level.FINE, "{ " + senderId + " } Message sent to " + senderId + " (" + ip + ": " + port + ")");
+			LOGGER.log(Level.FINER, "{ " + senderId + " } Message sent to " + senderId + " (" + ip + ": " + port + ")");
 		}
 		catch(Exception e)
 		{

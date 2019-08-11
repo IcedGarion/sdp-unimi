@@ -64,8 +64,7 @@ public class PowerBoostWorkerThread extends Thread
 						// se la mia richiesta e' piu vecchia, vado io: accoda l'altra richiesta (sempre se io ho fatto una richiesta (-1))
 						if(myMessageTimestamp != -1 && myMessageTimestamp <= senderTimestamp)
 						{
-							// FIXME: remove print
-							System.out.println("{ " + casaId + " } [ BOOST ] Ricevuto msg BOOST da " + senderId + ": timestamp della mia richiesta e' piu' vecchio, quindi vado io (aspetto OK) e accodo l'altra richiesta");
+							LOGGER.log(Level.FINE, "{ " + casaId + " } [ BOOST ] Ricevuto msg BOOST da " + senderId + ": timestamp della mia richiesta e' piu' vecchio, quindi vado io (aspetto OK) e accodo l'altra richiesta");
 
 							// accoda e basta, poi ricevera' degli OK
 							powerBoostObject.accodaRichiesta(senderId, senderIp, senderPort);
@@ -73,8 +72,7 @@ public class PowerBoostWorkerThread extends Thread
 						// se chi ha mandato msg e' piu' vecchia, va l'altro: OK
 						else
 						{
-							// FIXME: remove print
-							System.out.println("{ " + casaId + " } [ BOOST ] Ricevuto msg BOOST da " + senderId + ": timestamp della mia richiesta e' piu' recente, quindi rinuncio e rispondo OK");
+							LOGGER.log(Level.FINE, "{ " + casaId + " } [ BOOST ] Ricevuto msg BOOST da " + senderId + ": timestamp della mia richiesta e' piu' recente, quindi rinuncio e rispondo OK");
 
 							// risponde OK
 							boostMessageSender = new MessageSenderThread(casaId, senderId, senderIp, senderPort, new P2PMessage(casaId, casaBoostPort, senderId, "OK"));
@@ -85,16 +83,14 @@ public class PowerBoostWorkerThread extends Thread
 					// se sta usando il boost, non risponde e accoda la richiesta
 					else if(powerBoostObject.getState().equals(PowerBoost.PowerBoostState.USING))
 					{
-						// FIXME: remove print
-						System.out.println("{ " + casaId + " } [ BOOST ] Ricevuto msg BOOST da " + senderId + ": sto usando il boost e quindi accodo la richiesta");
+						LOGGER.log(Level.FINE, "{ " + casaId + " } [ BOOST ] Ricevuto msg BOOST da " + senderId + ": sto usando il boost e quindi accodo la richiesta");
 
 						powerBoostObject.accodaRichiesta(senderId, senderIp, senderPort);
 					}
 					// se non sta usando la risorsa e non e' interessato, manda indietro OK
 					else if(powerBoostObject.getState().equals(PowerBoost.PowerBoostState.NOT_INTERESTED))
 					{
-						// FIXME: remove print
-						System.out.println("{ " + casaId + " } [ BOOST ] Ricevuto msg BOOST da " + senderId + ": io non sono interessato al boost e quindi rispondo OK");
+						LOGGER.log(Level.FINE, "{ " + casaId + " } [ BOOST ] Ricevuto msg BOOST da " + senderId + ": io non sono interessato al boost e quindi rispondo OK");
 
 						// risponde OK
 						boostMessageSender = new MessageSenderThread(casaId, senderId, senderIp, senderPort, new P2PMessage(casaId, casaBoostPort, senderId, "OK"));
@@ -115,8 +111,7 @@ public class PowerBoostWorkerThread extends Thread
 						if(powerBoostObject.getOKCount() == powerBoostObject.getCaseAttive()-1)
 						{
 							// OK DA TUTTI: OTTIENE IL BOOST!
-							// FIXME: remove print
-							System.out.println("{ " + casaId + " } [ BOOST ] Ricevuto msg OK da " + senderId + ": ottenuti tutti gli OK necessari: USA BOOST!");
+							LOGGER.log(Level.FINE, "{ " + casaId + " } [ BOOST ] Ricevuto msg OK da " + senderId + ": ottenuti tutti gli OK necessari: USA BOOST!");
 
 							// setta stato, cosi' se riceve altre richieste BOOST nel frattempo, le accodera'
 							powerBoostObject.setState(PowerBoost.PowerBoostState.USING);
@@ -130,15 +125,13 @@ public class PowerBoostWorkerThread extends Thread
 						else
 						{
 							// Non ha ancora ricevuto tutti gli OK necessari: non fa piu' niente... aspetta il prossimo
-							// FIXME: remove print
-							System.out.println("{ " + casaId + " } [ BOOST ] Ricevuto msg OK da " + senderId + ": in attesa di altri OK (" + powerBoostObject.getOKCount() + " / " + (powerBoostObject.getCaseAttive()-1) + ")");
+							LOGGER.log(Level.FINE, "{ " + casaId + " } [ BOOST ] Ricevuto msg OK da " + senderId + ": in attesa di altri OK (" + powerBoostObject.getOKCount() + " / " + (powerBoostObject.getCaseAttive()-1) + ")");
 						}
 					}
 					// se ricevi OK ma non hai fatto richiesta (NOT_INTERESTED) oppure stai gia' usando (USING)? Errore?
 					else
 					{
-						// FIXME: remove print
-						System.out.println("{ " + casaId + " } [ BOOST ] Ricevuto msg OK da " + senderId + ": non sono in coda ne' interessato al boost... (?)");
+						LOGGER.log(Level.FINE, "{ " + casaId + " } [ BOOST ] Ricevuto msg OK da " + senderId + ": non sono in coda ne' interessato al boost... (?)");
 					}
 					break;
 			}

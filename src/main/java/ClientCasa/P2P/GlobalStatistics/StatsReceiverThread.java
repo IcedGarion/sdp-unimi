@@ -63,14 +63,14 @@ public class StatsReceiverThread extends Thread
 					connectionSocket = welcomeSocket.accept();
 					receiver = new StatsReceiverWorkerThread(connectionSocket, casaId, condominioStats);
 					receiver.start();
-					LOGGER.log(Level.FINE, "{ " + casaId + " } Received connection for GlobalStatistics: launching worker thread");
+					LOGGER.log(Level.FINER, "{ " + casaId + " } Received connection for GlobalStatistics: launching worker thread");
 
 					// da il tempo al thread di gestire la richiesta e salvare la statistica ricevuta
 					Thread.sleep(DELAY);
 
 					// check se sono arrivate le statistiche da tutte le case
 					// scarica condominio
-					LOGGER.log(Level.FINE, "{ " + casaId + " } Requesting condominio...");
+					LOGGER.log(Level.FINER, "{ " + casaId + " } Requesting condominio...");
 					condominio = CasaApp.getCondominio();
 
 					// confronta le stat ricevute fin ora con le case registrate (ci sono tutte per questo giro?)
@@ -91,7 +91,7 @@ public class StatsReceiverThread extends Thread
 						// se ci sono tutte: calcola consumo complessivo e resetta le stat ricevute fin ora (pronto per prossimo giro di calcolo complessivo)
 						if(ciSonoTutte)
 						{
-							LOGGER.log(Level.FINE, "{ " + casaId + " } received all GlobalStatistics");
+							LOGGER.log(Level.FINER, "{ " + casaId + " } received all GlobalStatistics");
 
 							double globalTot = 0;
 							long timestampMin = Long.MAX_VALUE, timestampMax = Long.MIN_VALUE;
@@ -110,7 +110,9 @@ public class StatsReceiverThread extends Thread
 
 								n++;
 							}
+							// FIXME: dopo questa stampa dovrebbe ripartire il menu' di CASAAPP
 							System.out.println("Consumo globale condominiale aggiornato a " + new Timestamp(timestampMax) + ": " + globalTot + " (" + n + " misure)");
+
 							globalComsumption = new MeanMeasurement("Condominio", globalTot, timestampMin, timestampMax);
 
 							// azzera per ricominziare il prossimo giro di calcolo complessivo
@@ -125,29 +127,25 @@ public class StatsReceiverThread extends Thread
 							// elezione parte soltanto se "tutti" sono in NEED_ELECTION, cioè all'inizio, oppure quando esce coord
 							if(election.getState().equals(Election.ElectionOutcome.NEED_ELECTION))
 							{
-								// FIXME: remove print
-								System.out.println("{ " + casaId + " } [ STATSRECEIVER ] Serve elezione");
+								LOGGER.log(Level.FINE, "{ " + casaId + " } Serve elezione per inviare la stat globale");
 
 								election.startElection();
 							}
 							// se c'e gia'/appena stata elezione e sei tu coord, invia le statistiche al server
 							else if(election.getState().equals(Election.ElectionOutcome.COORD))
 							{
-								// FIXME: remove print
-								System.out.println("{ " + casaId + " } [ STATSRECEIVER ] Sono io il coord e sto mandando le stat globali al server");
+								LOGGER.log(Level.FINE, "{ " + casaId + " } Sono io il coord e sto mandando le stat globali al server");
 
 								// Manda la stat globale appena calcolata al server rest tramite metodo in CasaApp (conosce lei info su server)
 								CasaApp.sendGlobalStat(globalComsumption);
 
-								// FIXME: remove print
-								System.out.println("{ " + casaId + " } [ STATSRECEIVER ] Stat globali inviate");
+								LOGGER.log(Level.FINE, "{ " + casaId + " } Stat globali inviate");
 							}
 							// se invece non e' il primo giro (need election) / la casa non si e' appena unita (need election)
 							// allora in teoria c'e' gia' un coordinatore, e se non e' lui allora non fa piu' niente
 							else
 							{
-								// FIXME: remove print
-								System.out.println("{ " + casaId + " } [ STATSRECEIVER ] Non sono io il coord: non mando info al server");
+								LOGGER.log(Level.FINE, "{ " + casaId + " } Non sono io il coord: non mando stat globale al server");
 							}
 
 						}
