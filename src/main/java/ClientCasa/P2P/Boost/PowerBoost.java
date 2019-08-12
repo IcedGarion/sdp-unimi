@@ -134,11 +134,8 @@ public class PowerBoost
 			{
 				LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Sono l'unica casa attiva e quindi ottengo BOOST!");
 
-				// chiama metodo simulatore per fare effettivamente POWER BOOST
+				// chiama metodo per fare POWER BOOST
 				beginPowerBoost();
-
-				// finito il tempo in cui usa BOOST, rilascia risorsa e resetta lo stato
-				endPowerBoost();
 			}
 			else
 			{
@@ -158,7 +155,8 @@ public class PowerBoost
 		}
 	}
 
-	// chiama metodo simulatore per il power boost
+	// fa partire un thread che chiama il metodo del simulatore e, finito il tempo, chiama endPowerBoost
+	// serve un thread separato, altrimenti questo rimarrebbe qua ad aspettare 5 sec boost, tenendo impegnato il lock
 	public synchronized void beginPowerBoost() throws InterruptedException
 	{
 		// setta stato, cosi' se riceve altre richieste BOOST nel frattempo, le accodera'
@@ -168,8 +166,10 @@ public class PowerBoost
 		this.boostCount += 1;
 
 		System.out.println("{ " + casaId + " } POWER BOOST iniziato");
-		this.simulator.boost();
-		System.out.println("{ " + casaId + " } POWER BOOST terminato");
+
+		// fa partire il thread che inizia e finisce il boost
+		PowerBoostWaiterThread waiter = new PowerBoostWaiterThread(this, this.simulator);
+		waiter.start();
 	}
 
 	// finito il power boost, rilascia la risorsa (sync perche' modifica tanti campi ed e' meglio farlo in modo "atomico"
@@ -180,6 +180,8 @@ public class PowerBoost
 		String senderId, senderIp;
 		int senderPort;
 		MessageSenderThread boostMessageSender;
+
+		System.out.println("{ " + casaId + " } POWER BOOST terminato");
 
 		// azzera timestamp utlima richiesta (-1)
 		this.messageTimestamp = -1;

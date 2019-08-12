@@ -137,9 +137,6 @@ public class PowerBoostWorkerThread extends Thread
 
 							// chiama metodo simulatore per fare effettivamente POWER BOOST
 							powerBoostObject.beginPowerBoost();
-
-							// finito il tempo in cui usa BOOST, rilascia risorsa e resetta lo stato
-							powerBoostObject.endPowerBoost();
 						}
 						else
 						{

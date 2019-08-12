@@ -3,12 +3,6 @@
 - POWER BOOST 2 ALLA VOLTA
 
 
-QUESTO E' DA SISTEMARE SICURO:
-[ PROBLEMA COMUNE: quando ottieni BOOST, thread va in sleep e tiene occupato il LOCK di PowerBoost(obj)
-  Quindi anche se riceve altri msg PowerBoostWorker, non puo' fare niente perche' e' tutto bloccato....
-  Va lanciato un altro thread che aspetta il boost e poi, finito, setta lo stato ]
-
-
 - caso in cui sei in attesa degli OK (stai per ottenere boost) ma un altro chiede BOOST?
   dovrebbe essere come se lo stai gia usando: accoda
 
