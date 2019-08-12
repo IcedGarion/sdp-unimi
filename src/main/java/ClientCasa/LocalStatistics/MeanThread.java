@@ -6,6 +6,8 @@ import ClientCasa.P2P.MessageSenderThread;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 import ServerREST.beans.MeanMeasurement;
+import Shared.Configuration;
+import Shared.Http;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -24,13 +26,11 @@ public class MeanThread extends Thread
 	private String casaId;
 	private JAXBContext jaxbContext;
 	private Marshaller marshaller;
-	private int delay;
 
-	public MeanThread(SimulatorBuffer buffer, String casaId, int delay) throws JAXBException
+	public MeanThread(SimulatorBuffer buffer) throws JAXBException
 	{
 		this.buffer = buffer;
-		this.casaId = casaId;
-		this.delay = delay;
+		this.casaId = Configuration.CASA_ID;
 
 		// setup marshaller per invio statistiche
 		jaxbContext = JAXBContext.newInstance(MeanMeasurement.class);
@@ -38,9 +38,9 @@ public class MeanThread extends Thread
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 
 		// logger levels
-		LOGGER.setLevel(CasaApp.LOGGER_LEVEL);
+		LOGGER.setLevel(Configuration.LOGGER_LEVEL);
 		ConsoleHandler handler = new ConsoleHandler();
-		handler.setLevel(CasaApp.LOGGER_LEVEL);
+		handler.setLevel(Configuration.LOGGER_LEVEL);
 		LOGGER.addHandler(handler);
 		LOGGER.setUseParentHandlers(false);
 	}
@@ -93,7 +93,7 @@ public class MeanThread extends Thread
 					// chiamata REST a StatisticheService passando ID_CASA + MeanMeasurement
 					// POST /statisticheLocali/add: inserisce nuova statistica
 					LOGGER.log(Level.FINE, "{ " + casaId + " } Sending computed statistic to Server...");
-					CasaApp.sendLocalStat(computedMeasure);
+					Http.sendLocalStat(computedMeasure, casaId);
 					LOGGER.log(Level.FINE, "{ " + casaId + " } Statistic sent to server");
 
 
@@ -103,7 +103,7 @@ public class MeanThread extends Thread
 
 					// scarica condominio
 					LOGGER.log(Level.FINE, "{ " + casaId + " } Requesting condominio...");
-					Condominio condominio = CasaApp.getCondominio();
+					Condominio condominio = Http.getCondominio();
 
 					// BROADCAST: crea e lancia thread che invia messaggio statistica a ogni casa
 					for(Casa c : condominio.getCaselist())
@@ -118,7 +118,6 @@ public class MeanThread extends Thread
 						LOGGER.log(Level.INFO, "{ " + casaId + " } Stopping MeanThread... ");
 						return;
 					}
-					sleep(delay);
 				}
 			}
 			catch(Exception e)

@@ -5,6 +5,8 @@ import ClientCasa.P2P.GlobalStatistics.Election.Election;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 import ServerREST.beans.MeanMeasurement;
+import Shared.Configuration;
+import Shared.Http;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -32,16 +34,16 @@ public class StatsReceiverThread extends Thread
 	private Election election;
 
 	// riceve anche oggetto Elezione con info su chi e' l'eletto e su come eleggerne un altro
-	public StatsReceiverThread(String casaId, int statsPort, Election election)
+	public StatsReceiverThread(int statsPort, Election election)
 	{
-		this.casaId = casaId;
+		this.casaId = Configuration.CASA_ID;
 		this.statsPort = statsPort;
 		this.election = election;
 
 		// logger levels
-		LOGGER.setLevel(CasaApp.LOGGER_LEVEL);
+		LOGGER.setLevel(Configuration.LOGGER_LEVEL);
 		ConsoleHandler handler = new ConsoleHandler();
-		handler.setLevel(CasaApp.LOGGER_LEVEL);
+		handler.setLevel(Configuration.LOGGER_LEVEL);
 		LOGGER.addHandler(handler);
 		LOGGER.setUseParentHandlers(false);
 	}
@@ -69,7 +71,7 @@ public class StatsReceiverThread extends Thread
 				try
 				{
 					connectionSocket = welcomeSocket.accept();
-					receiver = new StatsReceiverWorkerThread(connectionSocket, casaId, condominioStats);
+					receiver = new StatsReceiverWorkerThread(connectionSocket, condominioStats);
 					receiver.start();
 					LOGGER.log(Level.FINE, "{ " + casaId + " } Received connection for GlobalStatistics: launching worker thread");
 
@@ -78,8 +80,7 @@ public class StatsReceiverThread extends Thread
 
 					// check se sono arrivate le statistiche da tutte le case
 					// scarica condominio
-					LOGGER.log(Level.FINE, "{ " + casaId + " } Requesting condominio...");
-					condominio = CasaApp.getCondominio();
+					condominio = Http.getCondominio();
 
 					// confronta le stat ricevute fin ora con le case registrate (ci sono tutte per questo giro?)
 					if(condominio.getCaselist().size() == condominioStats.size())
@@ -146,7 +147,7 @@ public class StatsReceiverThread extends Thread
 								LOGGER.log(Level.FINE, "{ " + casaId + " } Sono io il coord e sto mandando le stat globali al server");
 
 								// Manda la stat globale appena calcolata al server rest tramite metodo in CasaApp (conosce lei info su server)
-								CasaApp.sendGlobalStat(globalComsumption);
+								Http.sendGlobalStat(globalComsumption);
 
 								LOGGER.log(Level.FINE, "{ " + casaId + " } Stat globali inviate");
 							}

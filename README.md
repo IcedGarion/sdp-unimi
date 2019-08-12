@@ -3,6 +3,12 @@
 - POWER BOOST 2 ALLA VOLTA
 
 
+QUESTO E' DA SISTEMARE SICURO:
+[ PROBLEMA COMUNE: quando ottieni BOOST, thread va in sleep e tiene occupato il LOCK di PowerBoost(obj)
+  Quindi anche se riceve altri msg PowerBoostWorker, non puo' fare niente perche' e' tutto bloccato....
+  Va lanciato un altro thread che aspetta il boost e poi, finito, setta lo stato ]
+
+
 - caso in cui sei in attesa degli OK (stai per ottenere boost) ma un altro chiede BOOST?
   dovrebbe essere come se lo stai gia usando: accoda
 
@@ -53,8 +59,7 @@
 
 
 # REFACTOR
-- si puo' togliere RECEIVER_ID da P2PMessage
-~ Classe REST per mandare TUTTE le richieste GET/POST al server (capita spesso e usano in tanti)
+- Anche AdminApp dovrebbe usare la classe HTTP comune
 - StatLocaliService ha un lock obj che puo' diventare sync (si puo togliere e metti sync method)
 - AdminApp e' un orrore, serve refactor e metodi comuni
 

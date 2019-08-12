@@ -5,6 +5,8 @@ import ClientCasa.P2P.MessageSenderThread;
 import ClientCasa.P2P.P2PMessage;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
+import Shared.Configuration;
+import Shared.Http;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -22,18 +24,18 @@ public class ElectionWorkerThread extends Thread
 	private int casaElectionPort;
 	private Election electionObject;
 
-	public ElectionWorkerThread(Socket listenSocket, String casaId, int casaElectionPort, Election electionObject)
+	public ElectionWorkerThread(Socket listenSocket, int casaElectionPort, Election electionObject)
 	{
 		this.listenSocket = listenSocket;
-		this.casaId = casaId;
+		this.casaId = Configuration.CASA_ID;
 		this.casaElectionPort = casaElectionPort;
 		this.electionObject = electionObject;
 
 		// logger levels
-		LOGGER.setLevel(CasaApp.LOGGER_LEVEL);
+		LOGGER.setLevel(Configuration.LOGGER_LEVEL);
 		for (Handler handler : LOGGER.getHandlers()) { LOGGER.removeHandler(handler);}
 		ConsoleHandler handler = new ConsoleHandler();
-		handler.setLevel(CasaApp.LOGGER_LEVEL);
+		handler.setLevel(Configuration.LOGGER_LEVEL);
 		LOGGER.addHandler(handler);
 		LOGGER.setUseParentHandlers(false);
 	}
@@ -82,7 +84,7 @@ public class ElectionWorkerThread extends Thread
 
 						// salta step di rispondere OK, tanto uscite sono controllate: passa direttamente a inviare ELECTION ai suoi superiori
 						// lista case
-						condominio = CasaApp.getCondominio();
+						condominio = Http.getCondominio();
 
 						// se si accorge che non ci sono altre case con ID maggiore, si proclama eletto, altrimenti scrive a loro e basta
 						int superiori = 0;
@@ -110,7 +112,7 @@ public class ElectionWorkerThread extends Thread
 							electionObject.setState(Election.ElectionOutcome.COORD);
 
 							// manda a tutti il messaggio che e' lui il coord
-							condominio = CasaApp.getCondominio();
+							condominio = Http.getCondominio();
 							for(Casa c : condominio.getCaselist())
 							{
 								// non lo deve mandare anche a se stesso seno' quando lo riceve si mete NOT_COORD!

@@ -6,6 +6,8 @@ import ClientCasa.P2P.P2PMessage;
 import ClientCasa.LocalStatistics.smartMeter.SmartMeterSimulator;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
+import Shared.Configuration;
+import Shared.Http;
 
 import javax.xml.bind.JAXBException;
 import java.util.ArrayList;
@@ -37,9 +39,9 @@ public class PowerBoost
 	// timestamp del messaggio di richiesta appena inviato
 	private long messageTimestamp;
 
-	public PowerBoost(String casaId, int casaBoostPort, SmartMeterSimulator simulator)
+	public PowerBoost(int casaBoostPort, SmartMeterSimulator simulator)
 	{
-		this.casaId = casaId;
+		this.casaId = Configuration.CASA_ID;
 		this.casaBoostPort = casaBoostPort;
 		this.simulator = simulator;
 		this.state = PowerBoostState.NOT_INTERESTED;
@@ -50,9 +52,9 @@ public class PowerBoost
 		this.messageTimestamp = -1;
 
 		// logger levels
-		LOGGER.setLevel(CasaApp.LOGGER_LEVEL);
+		LOGGER.setLevel(Configuration.LOGGER_LEVEL);
 		ConsoleHandler handler = new ConsoleHandler();
-		handler.setLevel(CasaApp.LOGGER_LEVEL);
+		handler.setLevel(Configuration.LOGGER_LEVEL);
 		LOGGER.addHandler(handler);
 		LOGGER.setUseParentHandlers(false);
 	}
@@ -121,7 +123,7 @@ public class PowerBoost
 
 			// MANDA A TUTTI MSG BOOST REQUEST
 			// chiede elenco case e si salva il numero, per contare poi gli OK
-			condominio = CasaApp.getCondominio();
+			condominio = Http.getCondominio();
 			setCaseAttive(condominio.size());
 
 			// invia "BOOST" a tutti compreso se stesso, con anche timestamp

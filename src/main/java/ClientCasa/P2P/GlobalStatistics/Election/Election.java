@@ -5,6 +5,8 @@ import ClientCasa.P2P.MessageSenderThread;
 import ClientCasa.P2P.P2PMessage;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
+import Shared.Configuration;
+import Shared.Http;
 
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -26,16 +28,16 @@ public class Election
 	// dati condivisi (con relativi metodi per accedere: stato (se sei coord)
 	public ElectionOutcome state;
 
-	public Election(String casaId, int casaElectionPort)
+	public Election(int casaElectionPort)
 	{
-		this.casaId = casaId;
+		this.casaId = Configuration.CASA_ID;
 		this.casaElectionPort = casaElectionPort;
 		setState(ElectionOutcome.NEED_ELECTION);
 
 		// logger levels
-		LOGGER.setLevel(CasaApp.LOGGER_LEVEL);
+		LOGGER.setLevel(Configuration.LOGGER_LEVEL);
 		ConsoleHandler handler = new ConsoleHandler();
-		handler.setLevel(CasaApp.LOGGER_LEVEL);
+		handler.setLevel(Configuration.LOGGER_LEVEL);
 		LOGGER.addHandler(handler);
 		LOGGER.setUseParentHandlers(false);
 	}
@@ -65,7 +67,7 @@ public class Election
 
 			/* INIZIA ELEZIONE: manda msg ELECTION a ~tutti; poi electionThread se ne occupa*/
 			// lista case coinvolte in elezione
-			condominio = CasaApp.getCondominio();
+			condominio = Http.getCondominio();
 
 			// manda msg elezione a TUTTI, tranne se stesso (informa tutti che e' entrato: se c'e' un coord gli risponde, se non c'e allora si fa elezione)
 			// se e' l'unica casa a entrare qua (da sola), allora si autoproclama coord di se stesso e basta
@@ -102,7 +104,7 @@ public class Election
 
 		try
 		{
-			condominio = CasaApp.getCondominio();
+			condominio = Http.getCondominio();
 
 			// manda msg elezione a TUTTI, tranne se stesso (informa tutti che sta per uscire)
 			for(Casa c : condominio.getCaselist())

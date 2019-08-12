@@ -1,6 +1,7 @@
 package ClientCasa.P2P.GlobalStatistics.Election;
 
 import ClientCasa.CasaApp;
+import Shared.Configuration;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -19,16 +20,16 @@ public class ElectionThread extends Thread
 	private int casaElectionPort;
 	private Election electionObject;
 
-	public ElectionThread(String casaId, int listenPort, Election electionObject)
+	public ElectionThread(int listenPort, Election electionObject)
 	{
-		this.casaId = casaId;
+		this.casaId = Configuration.CASA_ID;
 		this.casaElectionPort = listenPort;
 		this.electionObject = electionObject;
 
 		// logger levels
-		LOGGER.setLevel(CasaApp.LOGGER_LEVEL);
+		LOGGER.setLevel(Configuration.LOGGER_LEVEL);
 		ConsoleHandler handler = new ConsoleHandler();
-		handler.setLevel(CasaApp.LOGGER_LEVEL);
+		handler.setLevel(Configuration.LOGGER_LEVEL);
 		LOGGER.addHandler(handler);
 		LOGGER.setUseParentHandlers(false);
 	}
@@ -50,7 +51,7 @@ public class ElectionThread extends Thread
 				{
 					// ascolta msg
 					listenSocket = welcomeSocket.accept();
-					electionWorker = new ElectionWorkerThread(listenSocket, casaId, casaElectionPort, electionObject);
+					electionWorker = new ElectionWorkerThread(listenSocket, casaElectionPort, electionObject);
 					electionWorker.start();
 
 					// check TERMINAZIONE

@@ -1,6 +1,7 @@
 package ClientCasa.P2P.Boost;
 
 import ClientCasa.CasaApp;
+import Shared.Configuration;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -18,16 +19,16 @@ public class PowerBoostThread extends Thread
 	private int boostPort;
 	private PowerBoost powerBoostState;
 
-	public PowerBoostThread(String casaId, int boostPort, PowerBoost powerBoostState)
+	public PowerBoostThread(int boostPort, PowerBoost powerBoostState)
 	{
-		this.casaId = casaId;
+		this.casaId = Configuration.CASA_ID;
 		this.boostPort = boostPort;
 		this.powerBoostState = powerBoostState;
 
 		// logger levels
-		LOGGER.setLevel(CasaApp.LOGGER_LEVEL);
+		LOGGER.setLevel(Configuration.LOGGER_LEVEL);
 		ConsoleHandler handler = new ConsoleHandler();
-		handler.setLevel(CasaApp.LOGGER_LEVEL);
+		handler.setLevel(Configuration.LOGGER_LEVEL);
 		LOGGER.addHandler(handler);
 		LOGGER.setUseParentHandlers(false);
 	}
@@ -48,7 +49,7 @@ public class PowerBoostThread extends Thread
 				try
 				{
 					connectionSocket = welcomeSocket.accept();
-					powerWorker = new PowerBoostWorkerThread(connectionSocket, casaId, boostPort, powerBoostState);
+					powerWorker = new PowerBoostWorkerThread(connectionSocket, boostPort, powerBoostState);
 					powerWorker.start();
 					LOGGER.log(Level.FINE, "{ " + casaId + " } Received connection for Power Boost: launching worker thread");
 

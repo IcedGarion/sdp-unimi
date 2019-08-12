@@ -4,6 +4,7 @@ import ServerREST.beans.Casa;
 import ServerREST.beans.CasaMeasurement;
 import ServerREST.beans.Condominio;
 import ServerREST.beans.MeanMeasurement;
+import Shared.Configuration;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -20,8 +21,6 @@ import java.util.logging.Logger;
 
 public class AdminApp
 {
-	private static final String SERVER_URL = "http://localhost:1337";
-	private static final int RETRY_TIMEOUT = 250;
 	private static final Logger LOGGER = Logger.getLogger(AdminApp.class.getName());
 
 	// funzioni per calcolo media / deviazione standard
@@ -65,6 +64,10 @@ public class AdminApp
 		Condominio c = new Condominio();
 		CasaMeasurement misure = new CasaMeasurement();
 
+		// SETUP CONFIGURATION
+		Configuration.loadProperties();
+		String serverURL = Configuration.SERVER_URL;
+
 		while(true)
 		{
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,14 +89,14 @@ public class AdminApp
 				{
 					try
 					{
-						url = new URL(SERVER_URL + "/condominio");
+						url = new URL(serverURL + "/condominio");
 						conn = (HttpURLConnection) url.openConnection();
 						conn.setRequestMethod("GET");
 						c = (Condominio) jaxbUnmarshallerCondominio.unmarshal(conn.getInputStream());
 					}
 					catch(Exception e)
 					{
-						LOGGER.log(Level.WARNING, "Failed to connect to Admin Server ( GET " + SERVER_URL + "/condominio )");
+						LOGGER.log(Level.WARNING, "Failed to connect to Admin Server ( GET " + serverURL + "/condominio )");
 						break;
 					}
 
@@ -135,7 +138,7 @@ public class AdminApp
 
 					try
 					{
-						url = new URL(SERVER_URL + "/statisticheLocali/get/" + casaId + "/" + n);
+						url = new URL(serverURL + "/statisticheLocali/get/" + casaId + "/" + n);
 						conn = (HttpURLConnection) url.openConnection();
 						conn.setRequestMethod("GET");
 						misure = (CasaMeasurement) jaxbUnmarshallerStatLocali.unmarshal(conn.getInputStream());
@@ -175,7 +178,7 @@ public class AdminApp
 
 					try
 					{
-						url = new URL(SERVER_URL + "/statisticheGlobali/get/"+ n);
+						url = new URL(serverURL + "/statisticheGlobali/get/"+ n);
 						conn = (HttpURLConnection) url.openConnection();
 						conn.setRequestMethod("GET");
 						misure = (CasaMeasurement) jaxbUnmarshallerStatLocali.unmarshal(conn.getInputStream());
@@ -218,7 +221,7 @@ public class AdminApp
 
 					try
 					{
-						url = new URL(SERVER_URL + "/statisticheLocali/get/" + casaId + "/" + n);
+						url = new URL(serverURL + "/statisticheLocali/get/" + casaId + "/" + n);
 						conn = (HttpURLConnection) url.openConnection();
 						conn.setRequestMethod("GET");
 						misure = (CasaMeasurement) jaxbUnmarshallerStatLocali.unmarshal(conn.getInputStream());
@@ -255,7 +258,7 @@ public class AdminApp
 
 					try
 					{
-						url = new URL(SERVER_URL + "/statisticheGlobali/get/" + n);
+						url = new URL(serverURL + "/statisticheGlobali/get/" + n);
 						conn = (HttpURLConnection) url.openConnection();
 						conn.setRequestMethod("GET");
 						misure = (CasaMeasurement) jaxbUnmarshallerStatLocali.unmarshal(conn.getInputStream());

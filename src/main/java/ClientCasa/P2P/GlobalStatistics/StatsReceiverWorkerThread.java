@@ -2,6 +2,7 @@ package ClientCasa.P2P.GlobalStatistics;
 
 import ClientCasa.CasaApp;
 import ServerREST.beans.MeanMeasurement;
+import Shared.Configuration;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -22,20 +23,20 @@ public class StatsReceiverWorkerThread extends Thread
 	private String casaId;
 	private CondominioStats condominioStats;
 
-	public StatsReceiverWorkerThread(Socket listenSocket, String casaId, CondominioStats condominioStats) throws JAXBException
+	public StatsReceiverWorkerThread(Socket listenSocket, CondominioStats condominioStats) throws JAXBException
 	{
 		this.listenSocket = listenSocket;
-		this.casaId = casaId;
+		this.casaId = Configuration.CASA_ID;
 		this.condominioStats = condominioStats;
 
 		jaxbContext = JAXBContext.newInstance(MeanMeasurement.class);
 		unmarshaller = jaxbContext.createUnmarshaller();
 
 		// logger levels
-		LOGGER.setLevel(CasaApp.LOGGER_LEVEL);
+		LOGGER.setLevel(Configuration.LOGGER_LEVEL);
 		for (Handler handler : LOGGER.getHandlers()) { LOGGER.removeHandler(handler);}
 		ConsoleHandler handler = new ConsoleHandler();
-		handler.setLevel(CasaApp.LOGGER_LEVEL);
+		handler.setLevel(Configuration.LOGGER_LEVEL);
 		LOGGER.addHandler(handler);
 		LOGGER.setUseParentHandlers(false);
 	}

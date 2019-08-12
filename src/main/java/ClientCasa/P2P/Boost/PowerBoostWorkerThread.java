@@ -3,6 +3,7 @@ package ClientCasa.P2P.Boost;
 import ClientCasa.CasaApp;
 import ClientCasa.P2P.MessageSenderThread;
 import ClientCasa.P2P.P2PMessage;
+import Shared.Configuration;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -20,18 +21,18 @@ public class PowerBoostWorkerThread extends Thread
 	private int casaBoostPort;
 	private PowerBoost powerBoostObject;
 
-	public PowerBoostWorkerThread(Socket listenSocket, String casaId, int casaBoostPort, PowerBoost powerBoostState)
+	public PowerBoostWorkerThread(Socket listenSocket, int casaBoostPort, PowerBoost powerBoostState)
 	{
 		this.listenSocket = listenSocket;
-		this.casaId = casaId;
+		this.casaId = Configuration.CASA_ID;
 		this.casaBoostPort = casaBoostPort;
 		this.powerBoostObject = powerBoostState;
 
 		// logger levels
-		LOGGER.setLevel(CasaApp.LOGGER_LEVEL);
+		LOGGER.setLevel(Configuration.LOGGER_LEVEL);
 		for (Handler handler : LOGGER.getHandlers()) { LOGGER.removeHandler(handler);}
 		ConsoleHandler handler = new ConsoleHandler();
-		handler.setLevel(CasaApp.LOGGER_LEVEL);
+		handler.setLevel(Configuration.LOGGER_LEVEL);
 		LOGGER.addHandler(handler);
 		LOGGER.setUseParentHandlers(false);
 	}
