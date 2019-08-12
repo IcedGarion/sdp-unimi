@@ -8,6 +8,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.net.Socket;
 import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,6 +33,7 @@ public class StatsReceiverWorkerThread extends Thread
 
 		// logger levels
 		LOGGER.setLevel(CasaApp.LOGGER_LEVEL);
+		for (Handler handler : LOGGER.getHandlers()) { LOGGER.removeHandler(handler);}
 		ConsoleHandler handler = new ConsoleHandler();
 		handler.setLevel(CasaApp.LOGGER_LEVEL);
 		LOGGER.addHandler(handler);

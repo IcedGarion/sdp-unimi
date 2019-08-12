@@ -32,11 +32,11 @@ public class CasaApp
 	// FINE (tutto, tracing) - INFO (start/stop thread + election / boost) - SEVERE (solo errori)
 	public static final Level LOGGER_LEVEL = Level.INFO;
 
-	private static final String CASA_ID = "casa1";
+	private static final String CASA_ID = "casa2";
 	private static final String CASA_IP = "localhost";
-	private static final int CASA_STATS_PORT = 8081;
-	private static final int CASA_ELECTION_PORT = 8091;
-	private static final int CASA_BOOST_PORT = 8071;
+	private static final int CASA_STATS_PORT = 8082;
+	private static final int CASA_ELECTION_PORT = 8092;
+	private static final int CASA_BOOST_PORT = 8072;
 
 	private static final int RETRY_TIMEOUT = 250;
 	private static final int SIMULATOR_DELAY = 100;
