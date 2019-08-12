@@ -92,7 +92,7 @@ public class PowerBoostWorkerThread extends Thread
 							LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg BOOST da " + senderId + ": timestamp della mia richiesta e' piu' recente, quindi rinuncio e rispondo OK");
 
 							// risponde OK
-							boostMessageSender = new MessageSenderThread(casaId, senderId, senderIp, senderPort, new P2PMessage(casaId, casaBoostPort, senderId, "OK"));
+							boostMessageSender = new MessageSenderThread(casaId, senderIp, senderPort, new P2PMessage(casaId, casaBoostPort, "OK"));
 							boostMessageSender.start();
 						}
 					}
@@ -110,7 +110,7 @@ public class PowerBoostWorkerThread extends Thread
 						LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg BOOST da " + senderId + ": io non sono interessato al boost e quindi rispondo OK");
 
 						// risponde OK
-						boostMessageSender = new MessageSenderThread(casaId, senderId, senderIp, senderPort, new P2PMessage(casaId, casaBoostPort, senderId, "OK"));
+						boostMessageSender = new MessageSenderThread(casaId, senderIp, senderPort, new P2PMessage(casaId, casaBoostPort,"OK"));
 						boostMessageSender.start();
 					}
 					break;

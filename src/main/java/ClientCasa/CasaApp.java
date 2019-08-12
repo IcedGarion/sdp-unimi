@@ -30,7 +30,7 @@ public class CasaApp
 	public static final String SERVER_URL = "http://localhost:1337";
 
 	// FINE (tutto, tracing) - INFO (start/stop thread + election / boost) - SEVERE (solo errori)
-	public static final Level LOGGER_LEVEL = Level.FINE;
+	public static final Level LOGGER_LEVEL = Level.INFO;
 
 	private static final String CASA_ID = "casa1";
 	private static final String CASA_IP = "localhost";

@@ -17,9 +17,6 @@ public class P2PMessage
 	@XmlElement(name = "senderPort")
 	private int senderPort;
 
-	@XmlElement(name = "receiverId")
-	private String receiverId;
-
 	@XmlElement(name = "message")
 	private String message;
 
@@ -28,23 +25,21 @@ public class P2PMessage
 
 	public P2PMessage() {}
 
-	public P2PMessage(String senderId, int senderPort, String receiverId, String message)
+	public P2PMessage(String senderId, int senderPort, String message)
 	{
-		this(senderId, senderPort, receiverId, message, 0);
+		this(senderId, senderPort, message, 0);
 	}
 
-	public P2PMessage(String senderId, int senderPort, String receiverId, String message, long timestamp)
+	public P2PMessage(String senderId, int senderPort, String message, long timestamp)
 	{
 		this.senderId = senderId;
 		this.senderPort = senderPort;
-		this.receiverId = receiverId;
 		this.message = message;
 		this.timestamp = timestamp;
 	}
 
 	public String getSenderId() { return senderId; }
 	public int getSenderPort() { return senderPort; }
-	public String getReceiverId() { return receiverId; }
 	public String getMessage() { return message; }
 	public long getTimestamp() { return timestamp; }
 }

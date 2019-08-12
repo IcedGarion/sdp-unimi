@@ -108,7 +108,7 @@ public class MeanThread extends Thread
 					// BROADCAST: crea e lancia thread che invia messaggio statistica a ogni casa
 					for(Casa c : condominio.getCaselist())
 					{
-						localStatSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getStatsPort(), computedMeasure);
+						localStatSender = new MessageSenderThread(casaId, c.getIp(), c.getStatsPort(), computedMeasure);
 						localStatSender.start();
 					}
 

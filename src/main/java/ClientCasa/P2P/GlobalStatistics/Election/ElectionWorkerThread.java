@@ -68,7 +68,7 @@ public class ElectionWorkerThread extends Thread
 						LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Ricevuto msg ELECTION da " + senderId + ": sono io il coord e glielo dico");
 
 						// risponde ELECTED: informa che e' lui il coord
-						electionMessageSender = new MessageSenderThread(casaId, senderId, senderIp, senderPort, new P2PMessage(casaId, casaElectionPort, senderId, "ELECTED"));
+						electionMessageSender = new MessageSenderThread(casaId, senderIp, senderPort, new P2PMessage(casaId, casaElectionPort, "ELECTED"));
 						electionMessageSender.start();
 
 						LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Risposto a " + senderId + " che sono io il coord");
@@ -92,7 +92,7 @@ public class ElectionWorkerThread extends Thread
 								LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Invio msg elezione al superiore " + c.getId());
 
 								// invia "ELECTION": chiede ai superiori di prendersi carico coordinatore
-								electionMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getElectionPort(), new P2PMessage(casaId, casaElectionPort, c.getId(), "ELECTION"));
+								electionMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getElectionPort(), new P2PMessage(casaId, casaElectionPort, "ELECTION"));
 								electionMessageSender.start();
 								superiori++;
 							}
@@ -117,7 +117,7 @@ public class ElectionWorkerThread extends Thread
 									LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Invio ELECTED a " + c.getId());
 
 									// invia "ELECTED"
-									electionMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getElectionPort(), new P2PMessage(casaId, casaElectionPort, c.getId(), "ELECTED"));
+									electionMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getElectionPort(), new P2PMessage(casaId, casaElectionPort, "ELECTED"));
 									electionMessageSender.start();
 								}
 							}

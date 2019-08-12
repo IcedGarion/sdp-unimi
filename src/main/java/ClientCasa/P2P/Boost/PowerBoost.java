@@ -142,7 +142,7 @@ public class PowerBoost
 			{
 				for(Casa c : condominio.getCaselist())
 				{
-					boostMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getBoostPort(), new P2PMessage(casaId, casaBoostPort, c.getId(), "BOOST", getMessageTimestamp()));
+					boostMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getBoostPort(), new P2PMessage(casaId, casaBoostPort, "BOOST", getMessageTimestamp()));
 					boostMessageSender.start();
 				}
 
@@ -199,7 +199,7 @@ public class PowerBoost
 			senderPort = Integer.parseInt(richiesta[2]);
 
 			// risponde OK
-			boostMessageSender = new MessageSenderThread(casaId, senderId, senderIp, senderPort, new P2PMessage(casaId, casaBoostPort, senderId, "OK"));
+			boostMessageSender = new MessageSenderThread(casaId, senderIp, senderPort, new P2PMessage(casaId, casaBoostPort, "OK"));
 			boostMessageSender.start();
 
 			LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Fine BOOST: mando OK a " + senderId);

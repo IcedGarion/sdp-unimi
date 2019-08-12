@@ -1,11 +1,7 @@
 # TODO now
 
-- power boost semplice con una casa sola (non 2 alla volta)
+- POWER BOOST 2 ALLA VOLTA
 
-( sync anche request powerboost?)
-
-- caso base in cui c'e' solo UNA (o DUE) case attive: ottieni subito il BOOST. Come Election
-  NON RICEVE L'OK DA SE STESSO	
 
 - caso in cui sei in attesa degli OK (stai per ottenere boost) ma un altro chiede BOOST?
   dovrebbe essere come se lo stai gia usando: accoda
@@ -17,7 +13,6 @@
 
 - Power boost 2 alla volta
 
-- un costruttore overload da qualche parte e' fatto male
 
 (una cosa da sistemare indietro, poi quando avrai finito election):
 --------- "una stat non deve contribuire piu di una volta nel calcolo globale -->> vai in CondominioStats e 

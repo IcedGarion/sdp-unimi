@@ -18,16 +18,14 @@ public class MessageSenderThread extends Thread
 
 	private String ip;
 	private String senderId;
-	private String destId;
 	private int port;
 	private Object message;
 	private JAXBContext jaxbContext;
 	private Marshaller marshaller;
 
-	public MessageSenderThread(String senderId, String destId, String ip, int port)
+	private MessageSenderThread(String senderId, String ip, int port)
 	{
 		this.senderId = senderId;
-		this.destId = destId;
 		this.ip = ip;
 		this.port = port;
 
@@ -39,9 +37,9 @@ public class MessageSenderThread extends Thread
 		LOGGER.setUseParentHandlers(false);
 	}
 
-	public MessageSenderThread(String senderId, String destId, String ip, int port, MeanMeasurement message) throws JAXBException
+	public MessageSenderThread(String senderId, String ip, int port, MeanMeasurement message) throws JAXBException
 	{
-		this(senderId, destId, ip, port);
+		this(senderId, ip, port);
 		this.message = message;
 
 		// setup marshaller per invio statistiche
@@ -50,9 +48,9 @@ public class MessageSenderThread extends Thread
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 	}
 
-	public MessageSenderThread(String senderId, String destId, String ip, int port, P2PMessage message) throws JAXBException
+	public MessageSenderThread(String senderId, String ip, int port, P2PMessage message) throws JAXBException
 	{
-		this(senderId, destId, ip, port);
+		this(senderId, ip, port);
 		this.message = message;
 
 		// setup marshaller per invio statistiche

@@ -76,7 +76,7 @@ public class Election
 				if(c.getId().compareTo(casaId) != 0)
 				{
 					// invia "ELECTION": chiede ai superiori di prendersi carico coordinatore
-					electionMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getElectionPort(), new P2PMessage(casaId, casaElectionPort, c.getId(), "ELECTION"));
+					electionMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getElectionPort(), new P2PMessage(casaId, casaElectionPort, "ELECTION"));
 					electionMessageSender.start();
 				}
 			}
@@ -110,7 +110,7 @@ public class Election
 				if(c.getId().compareTo(casaId) != 0)
 				{
 					// invia "ELECTION": chiede ai superiori di prendersi carico coordinatore
-					electionMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getElectionPort(), new P2PMessage(casaId, casaElectionPort, c.getId(), "NEED_REELECTION"));
+					electionMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getElectionPort(), new P2PMessage(casaId, casaElectionPort, "NEED_REELECTION"));
 					electionMessageSender.start();
 				}
 			}
