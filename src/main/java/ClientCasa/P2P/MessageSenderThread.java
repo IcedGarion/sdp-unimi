@@ -36,6 +36,7 @@ public class MessageSenderThread extends Thread
 		ConsoleHandler handler = new ConsoleHandler();
 		handler.setLevel(CasaApp.LOGGER_LEVEL);
 		LOGGER.addHandler(handler);
+		LOGGER.setUseParentHandlers(false);
 	}
 
 	public MessageSenderThread(String senderId, String destId, String ip, int port, MeanMeasurement message) throws JAXBException

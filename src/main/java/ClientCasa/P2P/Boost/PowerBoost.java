@@ -54,6 +54,7 @@ public class PowerBoost
 		ConsoleHandler handler = new ConsoleHandler();
 		handler.setLevel(CasaApp.LOGGER_LEVEL);
 		LOGGER.addHandler(handler);
+		LOGGER.setUseParentHandlers(false);
 	}
 
 	public synchronized void setState(PowerBoostState state)

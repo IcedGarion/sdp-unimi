@@ -33,6 +33,7 @@ public class ElectionWorkerThread extends Thread
 		ConsoleHandler handler = new ConsoleHandler();
 		handler.setLevel(CasaApp.LOGGER_LEVEL);
 		LOGGER.addHandler(handler);
+		LOGGER.setUseParentHandlers(false);
 	}
 
 	public void run()

@@ -37,6 +37,7 @@ public class Election
 		ConsoleHandler handler = new ConsoleHandler();
 		handler.setLevel(CasaApp.LOGGER_LEVEL);
 		LOGGER.addHandler(handler);
+		LOGGER.setUseParentHandlers(false);
 	}
 
 	public synchronized void setState(ElectionOutcome state)

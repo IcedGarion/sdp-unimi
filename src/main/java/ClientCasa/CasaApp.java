@@ -30,7 +30,7 @@ public class CasaApp
 	public static final String SERVER_URL = "http://localhost:1337";
 
 	// FINE (tutto, tracing) - INFO (start/stop thread + election / boost) - SEVERE (solo errori)
-	public static final Level LOGGER_LEVEL = Level.INFO;
+	public static final Level LOGGER_LEVEL = Level.FINE;
 
 	private static final String CASA_ID = "casa1";
 	private static final String CASA_IP = "localhost";
@@ -161,6 +161,7 @@ public class CasaApp
 		ConsoleHandler handler = new ConsoleHandler();
 		handler.setLevel(LOGGER_LEVEL);
 		LOGGER.addHandler(handler);
+		LOGGER.setUseParentHandlers(false);
 
 		LOGGER.log(Level.INFO, "{ " + CASA_ID + " } Started Casa Application with ID " + CASA_ID);
 
