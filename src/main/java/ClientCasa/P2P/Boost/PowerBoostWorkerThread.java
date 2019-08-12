@@ -68,13 +68,22 @@ public class PowerBoostWorkerThread extends Thread
 						// confronta timestamp della sua richiesta con quella di chi lo ha mandato (usa info salvate)
 						myMessageTimestamp = powerBoostObject.getMessageTimestamp();
 
-						// se la mia richiesta e' piu vecchia, vado io: accoda l'altra richiesta (sempre se io ho fatto una richiesta (-1))
+						// se la mia richiesta esiste (timestamp salvato != -1) ed e' piu vecchia, vado io: accoda l'altra richiesta e auto-invia OK
 						if(myMessageTimestamp != -1 && myMessageTimestamp <= senderTimestamp)
 						{
-							LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg BOOST da " + senderId + ": timestamp della mia richiesta e' piu' vecchio, quindi vado io (aspetto OK) e accodo l'altra richiesta");
+							// se l'altra richiesta era la MIA, non la accodo (perche' sto per usare boost: non voglio auto mandarmi OK una volta finito)
+							if(! senderId.equals(casaId))
+							{
+								LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg BOOST da " + senderId + ": timestamp della mia richiesta e' piu' vecchio, quindi vado io (aspetto OK) e accodo l'altra richiesta");
 
-							// accoda e basta, poi ricevera' degli OK
-							powerBoostObject.accodaRichiesta(senderId, senderIp, senderPort);
+								// accoda l'altra richiesta... Poi ricevera' l'ok
+								powerBoostObject.accodaRichiesta(senderId, senderIp, senderPort);
+							}
+							// altrimenti non accoda, perche' sono io
+							else
+							{
+								LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg BOOST da me stesso: non faccio niente e aspetto OK degli altri");
+							}
 						}
 						// se chi ha mandato msg e' piu' vecchia, va l'altro: OK
 						else
@@ -120,8 +129,7 @@ public class PowerBoostWorkerThread extends Thread
 							// OK DA TUTTI: OTTIENE IL BOOST!
 							LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg OK da " + senderId + ": ottenuti tutti gli OK necessari: USA BOOST!");
 
-							// setta stato, cosi' se riceve altre richieste BOOST nel frattempo, le accodera'
-							powerBoostObject.setState(PowerBoost.PowerBoostState.USING);
+							// setta stato, cosi' se riceve altre richieste BOOST nel frattempo, le accodera' (in beginPowerBoost)
 
 							// chiama metodo simulatore per fare effettivamente POWER BOOST
 							powerBoostObject.beginPowerBoost();

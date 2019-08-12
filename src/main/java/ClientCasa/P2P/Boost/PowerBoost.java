@@ -112,7 +112,6 @@ public class PowerBoost
 	{
 		Condominio condominio;
 		MessageSenderThread boostMessageSender;
-		long timestamp;
 
 		try
 		{
@@ -127,13 +126,27 @@ public class PowerBoost
 			// invia "BOOST" a tutti compreso se stesso, con anche timestamp
 			setMessageTimestamp(new Date().getTime());
 
-			for(Casa c : condominio.getCaselist())
+			// se c'e' solo una casa (o 2), sa gia' per certo di poter richiedere subito BOOST
+			if(condominio.size() == 1)
 			{
-				boostMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getBoostPort(), new P2PMessage(casaId, casaBoostPort, c.getId(), "BOOST", getMessageTimestamp()));
-				boostMessageSender.start();
-			}
+				LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Sono l'unica casa attiva e quindi ottengo BOOST!");
 
-			LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Inviato msg BOOST a tutte le " + getCaseAttive() + " case");
+				// chiama metodo simulatore per fare effettivamente POWER BOOST
+				beginPowerBoost();
+
+				// finito il tempo in cui usa BOOST, rilascia risorsa e resetta lo stato
+				endPowerBoost();
+			}
+			else
+			{
+				for(Casa c : condominio.getCaselist())
+				{
+					boostMessageSender = new MessageSenderThread(casaId, c.getId(), c.getIp(), c.getBoostPort(), new P2PMessage(casaId, casaBoostPort, c.getId(), "BOOST", getMessageTimestamp()));
+					boostMessageSender.start();
+				}
+
+				LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Inviato msg BOOST a tutte le " + getCaseAttive() + " case");
+			}
 		}
 		catch(Exception e)
 		{
@@ -145,9 +158,15 @@ public class PowerBoost
 	// chiama metodo simulatore per il power boost
 	public synchronized void beginPowerBoost() throws InterruptedException
 	{
+		// setta stato, cosi' se riceve altre richieste BOOST nel frattempo, le accodera'
+		this.state = PowerBoost.PowerBoostState.USING;
+
 		// aumenta di 1 il numero di case che stanno usando il boost
 		this.boostCount += 1;
+
+		System.out.println("{ " + casaId + " } POWER BOOST iniziato");
 		this.simulator.boost();
+		System.out.println("{ " + casaId + " } POWER BOOST terminato");
 	}
 
 	// finito il power boost, rilascia la risorsa (sync perche' modifica tanti campi ed e' meglio farlo in modo "atomico"
