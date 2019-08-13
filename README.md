@@ -1,6 +1,6 @@
 # TODO now
 
-- CASI PARTICOLARI POWER BOOST / TANTO TEST
+------- CASI PARTICOLARI POWER BOOST / TANTO TEST
 
 - caso in cui sei in attesa degli OK (stai per ottenere boost) ma un altro chiede BOOST?
   dovrebbe essere come se lo stai gia usando: accoda
@@ -8,8 +8,8 @@
 - caso in cui ti arrivano gli OK ma non sei in USING? cosa significa / come ci entri?
 
 
-- PORTA UNICA? UNICO SERVER CHE ASCOLTA E POI LANCIA I THREAD WORKER GIUSTI A SECOND DEL MSG?
-
+------- PORTA UNICA? UNICO SERVER CHE ASCOLTA E POI LANCIA I THREAD WORKER GIUSTI A SECOND DEL MSG?
+------- DOCUMENTAZIONE / SLIDE
 
 
 
@@ -39,10 +39,6 @@
    -> dovrebbe essere ok questa parte, perche' si scarica condominio gia' di suo ogni volta che manda / riceve stats
 
 
-- invece per power boost va usato algoritmo mutua esclusione distribuita (ricart&agrawala) o ring
-
-
-
 # COSE DA TENERE SEMPRE A MENTE
 - Quando mandi una richiesta al server, se non leggi la risposta (url-rest)
 (conn.getResponseMessage / Code) e' come se non l'avessi inviata... va ignorata boh
@@ -57,24 +53,12 @@
 - AdminApp e' un orrore, serve refactor e metodi comuni
 
 - TOGLI / CONTROLLA i TODO e FIXME
+- PORTA UNICA
 
 
-
-
-
-
-**CORRENTE EXTRA**
-TOKEN RING
-con wait e notify va gestita una coda di attesa:
-tanti richiedono BOOST ma solo 2 alla volta possono usarlo.
-Quando uno finisce, rilascia lock e entra il prossimo
-(Syncro per chiamare localmente un metodo)
 
 
 =================================================================================================
-
-**DOMANDE**
-
 
 **ESAME**
 - schema architettura da spiegare, con anche casi limite
@@ -165,7 +149,7 @@ di MeanMeasurement, cioe' una lista di medie calcolate. (Calcolo fatto da CasaAp
     - StatsReceiverThread tira le somme: controlla questo oggetto dopo ogni richiesta ricevuta e si assicura che ci siano
          stat da tutte le case... Poi, quando succede, stampa il consumo globale e "azzera" l'oggetto condiviso, per ricominciare.
     - E se non arrivano tutte le case per bene ma, mentre aspetti l'ultima, arriva di nuovo stat di qualcun altra???
-      -> la ignora e aspetta il ritardatario (si puo' cambiare in CondominioStats)
+      -> aggiorna la stat esistente per avere le misure piu' aggiornate possibile.
     - Una volta che ogni casa possiede le stesse stat globali in ogni "momento", qualcuno deve inviarle al server. Vedi sotto
 
 
@@ -198,6 +182,42 @@ con id maggiore, accetta il vecchio coord).
 
 
 # POWER BOOST
+Simile a election. Oggetto condiviso PowerBoost (stato e altre info) che serve ai vari Thread PowerBoostWorker. Questi sono lanciati
+da PowerBoostThread, un server concorrente che gestisce le richieste.
+MUTUA ESCLUSIONE 2 ALLA VOLTA: SU N CASE BASTANO (N-2) OK PER ANDARE.
+
+- Parte tutto in PowerBoost.requestPowerBoost: setta stato in PowerBoost (REQUESTED), setta timestamp della richiesta (serve dopo) e conta
+    le case attive in quel momento (serve dopo). Poi invia messaggio BOOST a tutte le case attive.
+
+- PowerBoostWorker riceve e gestisce tutti i messaggi di BOOST: a fronte del BOOST appena inviato (e ricevuto) controlla lo stato attuale della
+    casa: se NOT_INTERESTED non ha richiesto boost quindi risponde OK; 
+          se USING sta usando lui il boost e quindi accoda la richiesta
+          se REQUESTED: ci sono in giro 2 richieste nello stesso momento (oppure era la mia appena mandata): check timestamp per chi va prima
+	      se timestamp della mia richesta (salvato prima) e' piu' vecchio / uguale a quello del msg, vado io: accodo l'altro
+	      se timestamp mio e' piu' recente, faccio andare l'altro (mando OK). Poi lui, che ha ricevuto la mia, la avra' accodata e mi svegliera' con OK
+
+    Risolto chi puo' andare prima di chi, ora resta da attendere gli OK che fanno partire il boost vero e proprio:
+    A fronte di un messaggio di OK ricevuto, controlla lo stato attuale della casa:
+          se REQUESTED: hai chiesto boost, sei in attesa che ti mandino gli OK e ne hai appena ricevuto uno:
+              se numero ok ricevuti (salvato in obj condiviso e appena incrementato qua) e' pari a (numero di case -2) allora "puoi andare"
+              altrimenti non fai piu' niente e aspetti degli altri OK
+          se USING / NOT_INTERESTED: hai gia' ricevuto abbastanza OK, puoi ignorare
+	  (esempio 3 case: 1 OK basta gia', stai gia' facendo boost ma ti arriva anche OK dalla rimanente casa)
+
+   Una volta che "puoi andare": richiami PowerBoost.beginBoost(), il quale fa partire un thread che chiama il metodo boost vero e proprio
+   del simulatore. Questo thread attende per tutto il tempo che serve e poi rilascia la risorsa (endBoost()). Serve un thread a parte perche'
+   non si puo' tenere impegnato il lock di PowerBoost!
+
+   Finito il boost, viene risettato lo stato NOT_INTERESTED, azzerati i campi tipo timestamp richiesta e numeroOK ricevuti... E infine
+   manda messaggio OK a tutti quelli che erano in coda ad aspettare (se ce n'erano)
+
+- WAIT/NOTIFY: per non permettere di mandare continuamente richieste di BOOST inutili (se per esempio hai appena chiesto e stai aspettando
+  lo scambio messaggi oppure aspetti che si liberi la risorsa), allora c'e' un lock in PoweBoost: quando invii il primo BOOST (requestPowerBoost),
+  appena prima viene controllato lo stato: se sei USING o REQUESTED vai in WAIT e devi prima aspettare che esca (endPowerBoost). 
+  Quando finalmente riuscirai ad ottenere il boost (oppure lo avevi gia' ottenuto) e poi uscirai, NOTIFY sveglia se c'era un altra richiesta
+  in attesa
+
+
 
 # NOTIFICHE PUSH
 Entrata / uscita casa sono gestite dal server amministratore: quando riceve la richiesta HTTP da una casa che informa l'entrata / uscita

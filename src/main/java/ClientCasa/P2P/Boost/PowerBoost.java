@@ -30,8 +30,7 @@ public class PowerBoost
 	private int casaBoostPort;
 	private SmartMeterSimulator simulator;
 	private PowerBoostState state;
-	// numero case che stanno usando il boost (0-2)
-	private int boostCount;
+
 	// coda di case che hanno richiesto boost mentre lo stavi usando
 	private List<String[]> queue;
 	// numero case in gioco quando manda la prima richiesta boost
@@ -47,7 +46,6 @@ public class PowerBoost
 		this.casaBoostPort = casaBoostPort;
 		this.simulator = simulator;
 		this.state = PowerBoostState.NOT_INTERESTED;
-		this.boostCount = 0;
 		this.caseAttive = 1;
 		this.OKCount = 0;
 		this.queue = new ArrayList<>();
@@ -179,9 +177,6 @@ public class PowerBoost
 		// setta stato, cosi' se riceve altre richieste BOOST nel frattempo, le accodera'
 		this.state = PowerBoost.PowerBoostState.USING;
 
-		// aumenta di 1 il numero di case che stanno usando il boost
-		this.boostCount += 1;
-
 		System.out.println("{ " + casaId + " } POWER BOOST iniziato");
 
 		// informa il server amministratore inviando notifica PUSH
@@ -208,9 +203,6 @@ public class PowerBoost
 
 		// resetta il conto degli OK ricevuti (0)
 		this.OKCount = 0;
-
-		// diminuisce di 1 il numero di case che stanno usando il boost
-		this.boostCount -= 1;
 
 		// setta stato iniziale
 		this.state = PowerBoostState.NOT_INTERESTED;
