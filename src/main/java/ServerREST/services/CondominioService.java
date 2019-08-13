@@ -2,11 +2,15 @@ package ServerREST.services;
 
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
+import ServerREST.beans.Notifica;
+import Shared.Configuration;
+import Shared.MessageSenderThread;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,6 +47,9 @@ public class CondominioService
 
 		synchronized(condominioLock)
 		{
+			MessageSenderThread sender;
+			Notifica notifica;
+
 			// esiste gia'
 			if(Condominio.getInstance().getByName(c.getId()) != null)
 			{
@@ -52,6 +59,19 @@ public class CondominioService
 			else
 			{
 				Condominio.getInstance().add(c);
+
+				// inoltra la notifica alla ADMIN APP (nuova casa)
+				try
+				{
+					notifica = new Notifica(c.getId(), "[ NEW ] Nuova casa aggiunta al condominio: " + c.getId(), new Date().getTime());
+					sender = new MessageSenderThread(c.getId(), Configuration.ADMIN_IP, Configuration.ADMIN_NOTIFY_PORT, notifica);
+					sender.start();
+				}
+				catch(Exception e)
+				{
+					LOGGER.log(Level.INFO, "Admin app OFFLINE");
+				}
+
 				return Response.created(new URI("")).build();
 			}
 		}
@@ -64,6 +84,9 @@ public class CondominioService
 	@Consumes({"application/xml"})
 	public Response removeCasa(Casa c)
 	{
+		MessageSenderThread sender;
+		Notifica notifica;
+
 		LOGGER.log(Level.INFO, "POST /condominio/delete/" + c.getId() + "\n");
 
 		synchronized(condominioLock)
@@ -72,6 +95,19 @@ public class CondominioService
 			if(Condominio.getInstance().getByName(c.getId()) != null)
 			{
 				Condominio.getInstance().delete(c);
+
+				// inoltra la notifica alla ADMIN APP (nuova casa)
+				try
+				{
+					notifica = new Notifica(c.getId(), "[ EXIT ] Una casa e' uscita dal condominio: " + c.getId(), new Date().getTime());
+					sender = new MessageSenderThread(c.getId(), Configuration.ADMIN_IP, Configuration.ADMIN_NOTIFY_PORT, notifica);
+					sender.start();
+				}
+				catch(Exception e)
+				{
+					LOGGER.log(Level.INFO, "Admin app OFFLINE");
+				}
+
 				return Response.noContent().build();
 			}
 			// non esiste: errore

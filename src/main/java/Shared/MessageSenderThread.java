@@ -1,8 +1,8 @@
-package ClientCasa.P2P;
+package Shared;
 
-import ClientCasa.CasaApp;
+import ClientCasa.P2P.P2PMessage;
 import ServerREST.beans.MeanMeasurement;
-import Shared.Configuration;
+import ServerREST.beans.Notifica;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -12,7 +12,7 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-// Thread per mandare messaggi; per ora fa marshal solo di MeanMeasurement e P2PMessage; ma puo' essere riutilizzato per altri msg
+// Thread per mandare messaggi; per ora fa marshal solo di MeanMeasurement, P2PMessage e Notifica; ma puo' essere riutilizzato per altri msg
 public class MessageSenderThread extends Thread
 {
 	private static final Logger LOGGER = Logger.getLogger(MessageSenderThread.class.getName());
@@ -56,6 +56,17 @@ public class MessageSenderThread extends Thread
 
 		// setup marshaller per invio statistiche
 		jaxbContext = JAXBContext.newInstance(P2PMessage.class);
+		marshaller = jaxbContext.createMarshaller();
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+	}
+
+	public MessageSenderThread(String senderId, String ip, int port, Notifica message) throws JAXBException
+	{
+		this(senderId, ip, port);
+		this.message = message;
+
+		// setup marshaller per invio statistiche
+		jaxbContext = JAXBContext.newInstance(Notifica.class);
 		marshaller = jaxbContext.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 	}

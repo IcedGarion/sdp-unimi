@@ -12,6 +12,8 @@ public class Configuration
 	public static final String CONFIGURATION_FILE = "resources/properties.config";
 
 	public static String SERVER_URL;
+	public static String ADMIN_IP;
+	public static int ADMIN_NOTIFY_PORT;
 	public static String CASA_ID;
 	public static String CASA_IP;
 	public static int CASA_STATS_PORT;
@@ -28,6 +30,8 @@ public class Configuration
 			properties.load(input);
 
 			SERVER_URL = properties.getProperty("SERVER_URL");
+			ADMIN_IP = properties.getProperty("ADMIN_IP");
+			ADMIN_NOTIFY_PORT = Integer.parseInt(properties.getProperty("ADMIN_NOTIFY_PORT"));
 			CASA_ID = properties.getProperty("CASA_ID");
 			CASA_IP = properties.getProperty("CASA_IP");
 			CASA_STATS_PORT = Integer.parseInt(properties.getProperty("CASA_STATS_PORT"));

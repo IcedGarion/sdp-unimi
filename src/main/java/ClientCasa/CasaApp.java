@@ -32,7 +32,7 @@ public class CasaApp
 	// chiamato quando avvengono altre stampe, per riportare il menu' davanti
 	public static void refreshMenu()
 	{
-		System.out.println("\nMENU'\n======================================\n\n0) POWER BOOST\n\n1) EXIT\n\n======================================\n\n");
+		System.out.println("\nMENU'\n======================================\n\n0) POWER BOOST\n\n1) EXIT\n\n======================================\n");
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

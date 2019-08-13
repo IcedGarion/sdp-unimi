@@ -1,5 +1,6 @@
 package ClientAdmin;
 
+import ClientAdmin.Notify.NotifyThread;
 import ServerREST.beans.Casa;
 import ServerREST.beans.CasaMeasurement;
 import ServerREST.beans.Condominio;
@@ -49,6 +50,18 @@ public class AdminApp
 		return acc / misure.size();
 	}
 
+	public static void refreshMenu()
+	{
+		System.out.println("\n===================================================================================\n" +
+				"ADMIN INTERFACE\n" +
+				"0) Elenco case presenti nella rete\n" +
+				"1) Ultime <n> statistiche relative ad una specifica <casa>\n" +
+				"2) Ultime <n> statistiche condominiali\n" +
+				"3) Deviazione standard e media delle ultime <n> statistiche prodotte da una specifica <casa>\n" +
+				"4) Deviazione standard e media delle ultime <n> statistiche complessive condominiali\n");
+
+	}
+
 	// MAIN interfaccia admin
 	public static void main(String[] args) throws IOException, JAXBException, InterruptedException
 	{
@@ -63,23 +76,24 @@ public class AdminApp
 		double mean;
 		Condominio c = new Condominio();
 		CasaMeasurement misure = new CasaMeasurement();
+		NotifyThread notify;
+		int notifyPort;
+		String serverURL;
 
 		// SETUP CONFIGURATION
 		Configuration.loadProperties();
-		String serverURL = Configuration.SERVER_URL;
+		serverURL = Configuration.SERVER_URL;
+		notifyPort = Configuration.ADMIN_NOTIFY_PORT;
+
+		// lancia thread che riceve e stampa le notifiche dal server
+		notify = new NotifyThread(notifyPort);
+		notify.start();
 
 		while(true)
 		{
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			/*	MENU'	*/
-			System.out.println("\n===================================================================================\n" +
-					"ADMIN INTERFACE\n" +
-					"0) Elenco case presenti nella rete\n" +
-					"1) Ultime <n> statistiche relative ad una specifica <casa>\n" +
-					"2) Ultime <n> statistiche condominiali\n" +
-					"3) Deviazione standard e media delle ultime <n> statistiche prodotte da una specifica <casa>\n" +
-					"4) Deviazione standard e media delle ultime <n> statistiche complessive condominiali\n");
-
+			refreshMenu();
 			choice = in.readLine();
 
 			switch(choice)

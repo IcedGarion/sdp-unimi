@@ -1,5 +1,6 @@
 package ServerREST;
 
+import Shared.Configuration;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.net.httpserver.HttpServer;
 
@@ -14,6 +15,9 @@ public class ServerAmministratore
 
 	public static void main(String[] args) throws IOException
 	{
+		// carica Configurazioni
+		Configuration.loadProperties();
+
 		// crea e lancia server REST
 		HttpServer server = HttpServerFactory.create("http://" + HOST + ":" + PORT + "/");
 		server.start();

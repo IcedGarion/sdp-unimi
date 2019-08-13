@@ -196,6 +196,18 @@ Elezione parte solo quando tutti sono in NEED_ELECTION, cioe' all'inizio OPPURE 
 Questo vuol dire che coord non e' per forza sempre quello con id maggiore in ogni momento, ma si tiene quello che esisteva gia (se entra una casa
 con id maggiore, accetta il vecchio coord).
 
+
+# POWER BOOST
+
+# NOTIFICHE PUSH
+Entrata / uscita casa sono gestite dal server amministratore: quando riceve la richiesta HTTP da una casa che informa l'entrata / uscita
+della stessa, il server contatta ADMIN APP su IP e PORTA noti (file di configurazione), inviando come messaggio jaxb + socket la notifica.
+(CondominioService: aggiunge solo del codice a quello che gia' esisteva)
+
+Invece la notifica del power boost deve arrivare per forza dalla rete (il server amministratore non e' a conoscenza dei boost), non si puo'
+riutilizzare un metodo gia' esistente.
+Quando una casa ottiene il boost, manda ad-hoc un messaggio HTTP al server; NotificheService un servizio apposta per ricevere la notifica di 
+boost dalla rete. Questo la riceve e inoltra alla ADMIN APP, come per entrata / uscita case.
 ======================================================================================================================================
 **APPUNTI**
 

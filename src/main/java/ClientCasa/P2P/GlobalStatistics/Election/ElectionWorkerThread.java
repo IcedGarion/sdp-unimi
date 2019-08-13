@@ -1,7 +1,6 @@
 package ClientCasa.P2P.GlobalStatistics.Election;
 
-import ClientCasa.CasaApp;
-import ClientCasa.P2P.MessageSenderThread;
+import Shared.MessageSenderThread;
 import ClientCasa.P2P.P2PMessage;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;

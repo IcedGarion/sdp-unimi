@@ -1,7 +1,7 @@
 package ClientCasa.P2P.Boost;
 
 import ClientCasa.LocalStatistics.smartMeter.SmartMeterSimulator;
-import ClientCasa.P2P.MessageSenderThread;
+import Shared.MessageSenderThread;
 import ClientCasa.P2P.P2PMessage;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
@@ -183,6 +183,9 @@ public class PowerBoost
 		this.boostCount += 1;
 
 		System.out.println("{ " + casaId + " } POWER BOOST iniziato");
+
+		// informa il server amministratore inviando notifica PUSH
+		Http.notifyBoost(casaId);
 
 		// fa partire il thread che inizia e finisce il boost
 		PowerBoostWaiterThread waiter = new PowerBoostWaiterThread(this, this.simulator);
