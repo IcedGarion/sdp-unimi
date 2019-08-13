@@ -11,7 +11,6 @@
 
 
 
-- Power boost 2 alla volta
 
 
 (una cosa da sistemare indietro, poi quando avrai finito election):

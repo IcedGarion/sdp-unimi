@@ -1,9 +1,8 @@
 package ClientCasa.P2P.Boost;
 
-import ClientCasa.CasaApp;
+import ClientCasa.LocalStatistics.smartMeter.SmartMeterSimulator;
 import ClientCasa.P2P.MessageSenderThread;
 import ClientCasa.P2P.P2PMessage;
-import ClientCasa.LocalStatistics.smartMeter.SmartMeterSimulator;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 import Shared.Configuration;
@@ -23,6 +22,9 @@ public class PowerBoost
 {
 	private static final Logger LOGGER = Logger.getLogger(PowerBoost.class.getName());
 	public enum PowerBoostState { REQUESTED, USING, NOT_INTERESTED };
+
+	// lock per non richiedere 2 boost allo stesso tempo (stessa casa)
+	private Object boostLock;
 
 	private String casaId;
 	private int casaBoostPort;
@@ -50,6 +52,7 @@ public class PowerBoost
 		this.OKCount = 0;
 		this.queue = new ArrayList<>();
 		this.messageTimestamp = -1;
+		this.boostLock = new Object();
 
 		// logger levels
 		LOGGER.setLevel(Configuration.LOGGER_LEVEL);
@@ -115,9 +118,23 @@ public class PowerBoost
 	{
 		Condominio condominio;
 		MessageSenderThread boostMessageSender;
+		PowerBoostState currentState;
 
 		try
 		{
+			// check semaforo in modo che non puoi richiedere un altro boost mentre questo e' gia' attivo, ma dovrai aspettare
+			synchronized(boostLock)
+			{
+				// se ha gia' richiesto / sta gia' usando, deve aspettare
+				if(getState().equals(PowerBoostState.USING) || getState().equals(PowerBoostState.REQUESTED))
+				{
+					LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Hai gia' richiesto il boost! Devi aspettare di terminare");
+
+					boostLock.wait();
+				}
+			}
+
+			// ORA PUO INIZIARE
 			// setta il proprio stato interno: ha richiesto il boost
 			setState(PowerBoostState.REQUESTED);
 
@@ -176,7 +193,7 @@ public class PowerBoost
 	public synchronized void endPowerBoost() throws JAXBException
 	{
 		// riazzera tutto per poter ricominciare: come da oggetto nuobo (costruttore)
-		String richiesta[];
+		String[] richiesta;
 		String senderId, senderIp;
 		int senderPort;
 		MessageSenderThread boostMessageSender;
@@ -194,6 +211,12 @@ public class PowerBoost
 
 		// setta stato iniziale
 		this.state = PowerBoostState.NOT_INTERESTED;
+
+		// rilascia il semaforo in modo da poter richiedere di nuovo il boost (o svegliare se eri in attesa)
+		synchronized(boostLock)
+		{
+			boostLock.notify();
+		}
 
 		// svuota coda di attesa, inviando OK a tutti i presenti
 		while((richiesta = deaccodaRichiesta()) != null)
