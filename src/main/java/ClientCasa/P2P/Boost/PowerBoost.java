@@ -147,7 +147,7 @@ public class PowerBoost
 			setMessageTimestamp(new Date().getTime());
 
 			// se c'e' solo una casa (o 2), sa gia' per certo di poter richiedere subito BOOST
-			if(condominio.size() == 1)
+			if(condominio.size() <= 2)
 			{
 				LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Sono l'unica casa attiva e quindi ottengo BOOST!");
 

@@ -127,8 +127,8 @@ public class PowerBoostWorkerThread extends Thread
 						powerBoostObject.incrOKCount();
 
 						// usa il count settato all'inizio da PowerBoost, quando aveva mandato la prima richiesta boost: numero case attive in quel momento
-						// si aspetta di ricevere tanti OK quante le case attive quando aveva mandato la richiesta (meno se stessa)
-						if(powerBoostObject.getOKCount() == powerBoostObject.getCaseAttive()-1)
+						// si aspetta di ricevere tanti OK quante le case attive quando aveva mandato la richiesta (meno 2: POSSONO USARE IL BOOST IN 2)
+						if(powerBoostObject.getOKCount() == powerBoostObject.getCaseAttive()-2)
 						{
 							// OK DA TUTTI: OTTIENE IL BOOST!
 							LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg OK da " + senderId + ": ottenuti tutti gli OK necessari: USA BOOST!");
@@ -141,13 +141,14 @@ public class PowerBoostWorkerThread extends Thread
 						else
 						{
 							// Non ha ancora ricevuto tutti gli OK necessari: non fa piu' niente... aspetta il prossimo
-							LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg OK da " + senderId + ": in attesa di altri OK (" + powerBoostObject.getOKCount() + " / " + (powerBoostObject.getCaseAttive()-1) + ")");
+							LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg OK da " + senderId + ": in attesa di altri OK (" + powerBoostObject.getOKCount() + " / " + (powerBoostObject.getCaseAttive()-2) + ")");
 						}
 					}
-					// se ricevi OK ma non hai fatto richiesta (NOT_INTERESTED) oppure stai gia' usando (USING)? Errore?
+					// ricevi OK ma non hai fatto richiesta (NOT_INTERESTED) o stai gia' usando (USING): lo scarti
+					// non ti interessa perche' tanto bastavano gia' gli OK che hai ricevuto (ce n'e' uno in piu' di scarto, dato che 2 case possono usare boost)
 					else
 					{
-						LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg OK da " + senderId + ": non sono in coda ne' interessato al boost... (?)");
+						LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg OK da " + senderId + ": ho gia' ricevuto abbastanza OK quindi lo scarto");
 					}
 					break;
 			}

@@ -1,7 +1,6 @@
 # TODO now
 
-- POWER BOOST 2 ALLA VOLTA
-
+- CASI PARTICOLARI POWER BOOST / TANTO TEST
 
 - caso in cui sei in attesa degli OK (stai per ottenere boost) ma un altro chiede BOOST?
   dovrebbe essere come se lo stai gia usando: accoda
@@ -9,6 +8,7 @@
 - caso in cui ti arrivano gli OK ma non sei in USING? cosa significa / come ci entri?
 
 
+- PORTA UNICA? UNICO SERVER CHE ASCOLTA E POI LANCIA I THREAD WORKER GIUSTI A SECOND DEL MSG?
 
 
 
@@ -56,7 +56,6 @@
 - StatLocaliService ha un lock obj che puo' diventare sync (si puo togliere e metti sync method)
 - AdminApp e' un orrore, serve refactor e metodi comuni
 
-- FILE CONFIG (tipo SERVER_URL in giro ovunque)
 - TOGLI / CONTROLLA i TODO e FIXME
 
 

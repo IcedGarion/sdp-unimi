@@ -119,7 +119,6 @@ public class StatsReceiverThread extends Thread
 
 								n++;
 							}
-							// FIXME: dopo questa stampa dovrebbe ripartire il menu' di CASAAPP
 							System.out.println("Consumo globale condominiale aggiornato a " + new Timestamp(timestampMax) + ": " + globalTot + " (" + n + " misure)");
 							CasaApp.refreshMenu();
 
