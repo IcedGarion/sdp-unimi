@@ -1,6 +1,52 @@
+
+
+
+
+
+
+
+// da togliere
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 package ClientCasa.P2P.GlobalStatistics;
 
 import ClientCasa.CasaApp;
+import ClientCasa.P2P.Message.P2PMessage;
 import ServerREST.beans.MeanMeasurement;
 import Shared.Configuration;
 
@@ -16,7 +62,6 @@ import java.util.logging.Logger;
 public class StatsReceiverWorkerThread extends Thread
 {
 	private static final Logger LOGGER = Logger.getLogger(StatsReceiverWorkerThread.class.getName());
-	private MeanMeasurement message;
 	private JAXBContext jaxbContext;
 	private Unmarshaller unmarshaller;
 	private Socket listenSocket;
@@ -44,15 +89,17 @@ public class StatsReceiverWorkerThread extends Thread
 	public void run()
 	{
 		// ricevere le statistiche locali da una casa (usando socket + jaxb) e le salva nell'ggetto condiviso CondominioStats
+		P2PMessage message;
 
 		try
 		{
-			message = (MeanMeasurement) unmarshaller.unmarshal(listenSocket.getInputStream());
+
+			message = (P2PMessage) unmarshaller.unmarshal(listenSocket.getInputStream());
 			listenSocket.close();
-			LOGGER.log(Level.FINE, "{ " + casaId + " } Statistic received from " + message.getCasaId());
+			LOGGER.log(Level.FINE, "{ " + casaId + " } Statistic received from " + message.getSenderId());
 
 			// salva la statistica appena ricevuta in un oggetto condiviso, così StatsReceiverThread poi le legge
-			condominioStats.addCasaStat(message);
+			condominioStats.addCasaStat(message.getMeasure());
 		}
 		catch(Exception e)
 		{

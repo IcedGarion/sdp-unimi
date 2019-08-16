@@ -1,33 +1,26 @@
 package ClientCasa.P2P.GlobalStatistics.Election;
 
-import Shared.MessageSenderThread;
-import ClientCasa.P2P.P2PMessage;
+import ClientCasa.P2P.Message.P2PMessage;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 import Shared.Configuration;
 import Shared.Http;
+import Shared.MessageSenderThread;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
-import java.net.Socket;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ElectionWorkerThread extends Thread
+public class ElectionWorkerThread
 {
 	private static final Logger LOGGER = Logger.getLogger(ElectionWorkerThread.class.getName());
-	private Socket listenSocket;
 	private String casaId;
-	private int casaElectionPort;
 	private Election electionObject;
 
-	public ElectionWorkerThread(Socket listenSocket, int casaElectionPort, Election electionObject)
+	public ElectionWorkerThread(Election electionObject)
 	{
-		this.listenSocket = listenSocket;
 		this.casaId = Configuration.CASA_ID;
-		this.casaElectionPort = casaElectionPort;
 		this.electionObject = electionObject;
 
 		// logger levels
@@ -39,11 +32,8 @@ public class ElectionWorkerThread extends Thread
 		LOGGER.setUseParentHandlers(false);
 	}
 
-	public void run()
+	public void run(P2PMessage electionMessage)
 	{
-		JAXBContext jaxbContext;
-		Unmarshaller unmarshaller;
-		P2PMessage electionMessage;
 		MessageSenderThread electionMessageSender;
 		Condominio condominio;
 		String senderIp, senderId;
@@ -51,14 +41,10 @@ public class ElectionWorkerThread extends Thread
 
 		try
 		{
-			jaxbContext = JAXBContext.newInstance(P2PMessage.class);
-			unmarshaller = jaxbContext.createUnmarshaller();
-
-			electionMessage = (P2PMessage) unmarshaller.unmarshal(listenSocket.getInputStream());
+			// gli arriva il messaggio P2P dal dispatcher
 			senderId = electionMessage.getSenderId();
-			senderIp = listenSocket.getInetAddress().getHostAddress();
+			senderIp = electionMessage.getSenderIp();
 			senderPort = electionMessage.getSenderPort();
-			listenSocket.close();
 
 			// decide cosa fare in base al messaggio:
 			switch(electionMessage.getMessage())
@@ -71,7 +57,7 @@ public class ElectionWorkerThread extends Thread
 						LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Ricevuto msg ELECTION da " + senderId + ": sono io il coord e glielo dico");
 
 						// risponde ELECTED: informa che e' lui il coord
-						electionMessageSender = new MessageSenderThread(casaId, senderIp, senderPort, new P2PMessage(casaId, casaElectionPort, "ELECTED"));
+						electionMessageSender = new MessageSenderThread(casaId, senderIp, senderPort, new P2PMessage(casaId, Configuration.CASA_PORT, "ELECTED", "ELECTION"));
 						electionMessageSender.start();
 
 						LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Risposto a " + senderId + " che sono io il coord");
@@ -95,7 +81,7 @@ public class ElectionWorkerThread extends Thread
 								LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Invio msg elezione al superiore " + c.getId());
 
 								// invia "ELECTION": chiede ai superiori di prendersi carico coordinatore
-								electionMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getElectionPort(), new P2PMessage(casaId, casaElectionPort, "ELECTION"));
+								electionMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getPort(), new P2PMessage(casaId, Configuration.CASA_PORT, "ELECTION", "ELECTION"));
 								electionMessageSender.start();
 								superiori++;
 							}
@@ -120,7 +106,7 @@ public class ElectionWorkerThread extends Thread
 									LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Invio ELECTED a " + c.getId());
 
 									// invia "ELECTED"
-									electionMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getElectionPort(), new P2PMessage(casaId, casaElectionPort, "ELECTED"));
+									electionMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getPort(), new P2PMessage(casaId, Configuration.CASA_PORT, "ELECTED", "ELECTION"));
 									electionMessageSender.start();
 								}
 							}

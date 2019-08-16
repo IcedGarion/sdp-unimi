@@ -16,24 +16,16 @@ public class Casa
 	@XmlElement(name = "ip")
 	private String ip;
 
-	@XmlElement(name = "statsPort")
-	private int statsPort;
-
-	@XmlElement(name = "electionPort")
-	private int electionPort;
-
-	@XmlElement(name = "boostPort")
-	private int boostPort;
+	@XmlElement(name = "port")
+	private int port;
 
 	public Casa() {}
 
-	public Casa(String id, String ip, int statsPort, int electionPort, int boostPort)
+	public Casa(String id, String ip, int port)
 	{
 		this.id = id;
 		this.ip = ip;
-		this.statsPort = statsPort;
-		this.electionPort = electionPort;
-		this.boostPort = boostPort;
+		this.port = port;
 	}
 
 	public String getId()
@@ -44,13 +36,10 @@ public class Casa
 	{
 		return ip;
 	}
-	public int getStatsPort()
+	public int getPort()
 	{
-		return statsPort;
+		return port;
 	}
-	public int getElectionPort() { return electionPort; }
-	public int getBoostPort() { return boostPort; }
-
 
 	// due case uguali solo se hanno stesso ID (il resto puo' cambiare)
 	@Override

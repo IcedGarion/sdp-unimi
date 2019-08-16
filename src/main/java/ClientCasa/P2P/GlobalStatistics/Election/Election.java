@@ -1,7 +1,7 @@
 package ClientCasa.P2P.GlobalStatistics.Election;
 
 import Shared.MessageSenderThread;
-import ClientCasa.P2P.P2PMessage;
+import ClientCasa.P2P.Message.P2PMessage;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 import Shared.Configuration;
@@ -21,16 +21,14 @@ public class Election
 	private static final Logger LOGGER = Logger.getLogger(Election.class.getName());
 	public enum ElectionOutcome	{ NEED_ELECTION, COORD, NOT_COORD };
 	private String casaId;
-	private int casaElectionPort;
 
 
 	// dati condivisi (con relativi metodi per accedere: stato (se sei coord)
 	public ElectionOutcome state;
 
-	public Election(int casaElectionPort)
+	public Election()
 	{
 		this.casaId = Configuration.CASA_ID;
-		this.casaElectionPort = casaElectionPort;
 		setState(ElectionOutcome.NEED_ELECTION);
 
 		// logger levels
@@ -77,7 +75,7 @@ public class Election
 				if(c.getId().compareTo(casaId) != 0)
 				{
 					// invia "ELECTION": chiede ai superiori di prendersi carico coordinatore
-					electionMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getElectionPort(), new P2PMessage(casaId, casaElectionPort, "ELECTION"));
+					electionMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getPort(), new P2PMessage(casaId, Configuration.CASA_PORT, "ELECTION", "ELECTION"));
 					electionMessageSender.start();
 				}
 			}
@@ -111,7 +109,7 @@ public class Election
 				if(c.getId().compareTo(casaId) != 0)
 				{
 					// invia "ELECTION": chiede ai superiori di prendersi carico coordinatore
-					electionMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getElectionPort(), new P2PMessage(casaId, casaElectionPort, "NEED_REELECTION"));
+					electionMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getPort(), new P2PMessage(casaId, Configuration.CASA_PORT, "NEED_REELECTION", "ELECTION"));
 					electionMessageSender.start();
 				}
 			}

@@ -1,6 +1,7 @@
 package ClientCasa.LocalStatistics;
 
 import ClientCasa.LocalStatistics.smartMeter.Measurement;
+import ClientCasa.P2P.Message.P2PMessage;
 import Shared.MessageSenderThread;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
@@ -23,6 +24,7 @@ public class MeanThread extends Thread
 
 	// id della casa che ha creato il buffer: serve per poi inserire in rest
 	private String casaId;
+	private int casaPort;
 	private JAXBContext jaxbContext;
 	private Marshaller marshaller;
 
@@ -30,6 +32,7 @@ public class MeanThread extends Thread
 	{
 		this.buffer = buffer;
 		this.casaId = Configuration.CASA_ID;
+		this.casaPort = Configuration.CASA_PORT;
 
 		// setup marshaller per invio statistiche
 		jaxbContext = JAXBContext.newInstance(MeanMeasurement.class);
@@ -107,7 +110,7 @@ public class MeanThread extends Thread
 					// BROADCAST: crea e lancia thread che invia messaggio statistica a ogni casa
 					for(Casa c : condominio.getCaselist())
 					{
-						localStatSender = new MessageSenderThread(casaId, c.getIp(), c.getStatsPort(), computedMeasure);
+						localStatSender = new MessageSenderThread(casaId, c.getIp(), c.getPort(), new P2PMessage(casaId, casaPort, computedMeasure, "STATS"));
 						localStatSender.start();
 					}
 

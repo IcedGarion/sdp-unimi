@@ -5,9 +5,12 @@ import ClientCasa.LocalStatistics.SimulatorBuffer;
 import ClientCasa.LocalStatistics.smartMeter.SmartMeterSimulator;
 import ClientCasa.P2P.Boost.PowerBoost;
 import ClientCasa.P2P.Boost.PowerBoostThread;
+import ClientCasa.P2P.Boost.PowerBoostWorkerThread;
 import ClientCasa.P2P.GlobalStatistics.Election.Election;
 import ClientCasa.P2P.GlobalStatistics.Election.ElectionThread;
+import ClientCasa.P2P.GlobalStatistics.Election.ElectionWorkerThread;
 import ClientCasa.P2P.GlobalStatistics.StatsReceiverThread;
+import ClientCasa.P2P.Message.GlobalMessageServer;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 import Shared.Configuration;
@@ -49,7 +52,7 @@ public class CasaApp
 		HttpURLConnection conn;
 		Level loggerLevel = null;
 		String serverURL = "", casaId = "", casaIp = "";
-		int casaStatsPort = 0, casaElectionPort = 0, casaBoostPort = 0;
+		int casaPort = 0;
 
 		// CONFIGURATIONS setup
 		try
@@ -59,9 +62,7 @@ public class CasaApp
 			serverURL = Configuration.SERVER_URL;
 			casaId = Configuration.CASA_ID;
 			casaIp = Configuration.CASA_IP;
-			casaStatsPort = Configuration.CASA_STATS_PORT;
-			casaElectionPort = Configuration.CASA_ELECTION_PORT;
-			casaBoostPort = Configuration.CASA_BOOST_PORT;
+			casaPort = Configuration.CASA_PORT;
 		}
 		catch(Exception e)
 		{
@@ -93,8 +94,9 @@ public class CasaApp
 
 		///////////////////////////////////////////////////
 		/*	REGISTRA LA CASA AL SERVER AMMINISTRATORE	*/
-		Casa myCasa = new Casa(casaId, casaIp, casaStatsPort, casaElectionPort, casaBoostPort);
+		Casa myCasa = new Casa(casaId, casaIp, casaPort);
 
+		// TODO: spostalo in HTTP
 		// POST /condominio/add: inserisce nuova casa
 		try
 		{
@@ -119,23 +121,27 @@ public class CasaApp
 		/*	PARTE RETE P2P	*/
 		// Prepara thread elezione e oggetto condiviso Election da passargli; lo passa anche a statsReceiver perche' deve sapere stato elezione
 		// ( per sapere chi e' coord e quindi chi manda le stats)
-		Election election = new Election(casaElectionPort);
+
+		//non sono più dei thread! cambia nome... sono solo oggetti
+		//	cambia anche i commenti qua
+		Election election = new Election();
 
 		// lancia thread "ascoltatore" elezione bully: riceve msg e risponde a dovere secondo alg BULLY
-		ElectionThread electionThread = new ElectionThread(casaElectionPort, election);
-		electionThread.start();
-		LOGGER.log(Level.FINE, "{ " + casaId + " } Election thread launched");
+		ElectionWorkerThread electionWorker = new ElectionWorkerThread(election);
 
 		// lancia thread che riceve le statistiche
-		StatsReceiverThread statsReceiver = new StatsReceiverThread(casaStatsPort, election);
-		statsReceiver.start();
-		LOGGER.log(Level.FINE, "{ " + casaId + " } Global statistics (StatsReceiver) thread launched");
+		StatsReceiverThread statsReceiver = new StatsReceiverThread(election);
 
 		// lancia thread che riceve richieste di power boost e si coordina
-		PowerBoost powerBoostState = new PowerBoost(casaBoostPort, simulator);
-		PowerBoostThread powerBoostThread = new PowerBoostThread(casaBoostPort, powerBoostState);
-		powerBoostThread.start();
-		LOGGER.log(Level.FINE, "{ " + casaId+ " } Power Boost thread launched");
+		PowerBoost powerBoost = new PowerBoost(simulator);
+		PowerBoostWorkerThread powerBoostWorker = new PowerBoostWorkerThread(powerBoost);
+
+
+		/*	AVVIA SERVER GLOBALE RICEZIONE MESSAGGI P2P		*/
+		// "attiva" i metodi di questi 3 componenti, che richiedono i messaggi P2P
+		GlobalMessageServer messageServer = new GlobalMessageServer(statsReceiver, electionWorker, powerBoostWorker);
+		messageServer.start();
+		LOGGER.log(Level.FINE, "{ " + casaId + " } Global message receiver serer launched");
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/*	INTERFACCIA CLI BOOST + EXIT	*/
@@ -169,11 +175,9 @@ public class CasaApp
 					}
 
 					// termina i suoi thread
-					// TODO: check se va terminato prima un thread di un altro (election / stat receiver? )
+					messageServer.interrupt();
 					mean.interrupt();
 					simulator.interrupt();
-					statsReceiver.interrupt();
-					electionThread.interrupt();
 
 					LOGGER.log(Level.INFO, "{ " + casaId + " } Stopping CasaApp...");
 					break;
@@ -182,7 +186,7 @@ public class CasaApp
 				else if(choice.equals("0"))
 				{
 					LOGGER.log(Level.INFO, "{ " + casaId + " } Power boost requested... (Please wait)");
-					powerBoostState.requestPowerBoost();
+					powerBoost.requestPowerBoost();
 				} else
 				{
 					System.out.println("Inserire 0/1");

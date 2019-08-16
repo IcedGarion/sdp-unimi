@@ -1,3 +1,36 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// da togliere
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 package ClientCasa.P2P.GlobalStatistics.Election;
 
 import ClientCasa.CasaApp;
@@ -51,8 +84,8 @@ public class ElectionThread extends Thread
 				{
 					// ascolta msg
 					listenSocket = welcomeSocket.accept();
-					electionWorker = new ElectionWorkerThread(listenSocket, casaElectionPort, electionObject);
-					electionWorker.start();
+					//electionWorker = new ElectionWorkerThread(listenSocket, casaElectionPort, electionObject);
+					//electionWorker.start();
 
 					// check TERMINAZIONE
 					if(interrupted())

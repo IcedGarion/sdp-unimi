@@ -123,7 +123,7 @@ public class AdminApp
 					System.out.println("Elenco case presenti nella rete:");
 					for(Casa casa : c.getCaselist())
 					{
-						System.out.println("ID casa: " + casa.getId() + "\nIP casa: " + casa.getIp() + ", STATISTICS PORT: " + casa.getStatsPort() + ", ELECTION PORT: " + casa.getElectionPort() + "\n");
+						System.out.println("ID casa: " + casa.getId() + "\nIP casa: " + casa.getIp() + ", PORT: " + casa.getPort() + "\n");
 					}
 
 					break;

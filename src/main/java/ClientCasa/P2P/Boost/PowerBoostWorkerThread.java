@@ -1,30 +1,25 @@
 package ClientCasa.P2P.Boost;
 
-import Shared.MessageSenderThread;
-import ClientCasa.P2P.P2PMessage;
+import ClientCasa.P2P.Message.P2PMessage;
 import Shared.Configuration;
+import Shared.MessageSenderThread;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
-import java.net.Socket;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PowerBoostWorkerThread extends Thread
+public class PowerBoostWorkerThread
 {
 	private static final Logger LOGGER = Logger.getLogger(PowerBoostWorkerThread.class.getName());
-	private Socket listenSocket;
 	private String casaId;
-	private int casaBoostPort;
 	private PowerBoost powerBoostObject;
 
-	public PowerBoostWorkerThread(Socket listenSocket, int casaBoostPort, PowerBoost powerBoostState)
+	public PowerBoostWorkerThread(PowerBoost powerBoostState)
 	{
-		this.listenSocket = listenSocket;
 		this.casaId = Configuration.CASA_ID;
-		this.casaBoostPort = casaBoostPort;
 		this.powerBoostObject = powerBoostState;
 
 		// logger levels
@@ -37,11 +32,10 @@ public class PowerBoostWorkerThread extends Thread
 	}
 
 	// RICART & AGRAWALA
-	public void run()
+	public void run(P2PMessage boostMessage)
 	{
 		JAXBContext jaxbContext;
 		Unmarshaller unmarshaller;
-		P2PMessage boostMessage;
 		MessageSenderThread boostMessageSender;
 		String senderId, senderIp;
 		int senderPort;
@@ -50,16 +44,10 @@ public class PowerBoostWorkerThread extends Thread
 		try
 		{
 			// legge e prepara campi msg ricevuto
-			jaxbContext = JAXBContext.newInstance(P2PMessage.class);
-			unmarshaller = jaxbContext.createUnmarshaller();
-
-			boostMessage = (P2PMessage) unmarshaller.unmarshal(listenSocket.getInputStream());
 			senderId = boostMessage.getSenderId();
-			senderIp = listenSocket.getInetAddress().getHostAddress();
+			senderIp = boostMessage.getSenderIp();
 			senderPort = boostMessage.getSenderPort();
 			senderTimestamp = boostMessage.getTimestamp();
-
-			listenSocket.close();
 
 			switch(boostMessage.getMessage())
 			{
@@ -94,7 +82,7 @@ public class PowerBoostWorkerThread extends Thread
 							LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg BOOST da " + senderId + ": timestamp della mia richiesta e' piu' recente, quindi rinuncio e rispondo OK");
 
 							// risponde OK
-							boostMessageSender = new MessageSenderThread(casaId, senderIp, senderPort, new P2PMessage(casaId, casaBoostPort, "OK"));
+							boostMessageSender = new MessageSenderThread(casaId, senderIp, senderPort, new P2PMessage(casaId, Configuration.CASA_PORT, "OK", "BOOST"));
 							boostMessageSender.start();
 						}
 					}
@@ -112,7 +100,7 @@ public class PowerBoostWorkerThread extends Thread
 						LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg BOOST da " + senderId + ": io non sono interessato al boost e quindi rispondo OK");
 
 						// risponde OK
-						boostMessageSender = new MessageSenderThread(casaId, senderIp, senderPort, new P2PMessage(casaId, casaBoostPort,"OK"));
+						boostMessageSender = new MessageSenderThread(casaId, senderIp, senderPort, new P2PMessage(casaId, Configuration.CASA_PORT,"OK", "BOOST"));
 						boostMessageSender.start();
 					}
 					break;

@@ -2,14 +2,13 @@ package ClientCasa.P2P.GlobalStatistics;
 
 import ClientCasa.CasaApp;
 import ClientCasa.P2P.GlobalStatistics.Election.Election;
+import ClientCasa.P2P.Message.P2PMessage;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 import ServerREST.beans.MeanMeasurement;
 import Shared.Configuration;
 import Shared.Http;
 
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.sql.Timestamp;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -21,7 +20,7 @@ import java.util.logging.Logger;
 
 	IL THREAD LANCIATO, StatsReceiverWorkerThread, salva le statistiche ricevute in CondominioStats;
  */
-public class StatsReceiverThread extends Thread
+public class StatsReceiverThread
 {
 	// stato elezione lo trova nell'oggetto election condiviso:
 	// all'inizio nessun coordinatore eletto -> "NEED_ELECTION"
@@ -30,14 +29,12 @@ public class StatsReceiverThread extends Thread
 	private static final Logger LOGGER = Logger.getLogger(StatsReceiverThread.class.getName());
 	private static final int DELAY = 100;
 	private String casaId;
-	private int statsPort;
 	private Election election;
 
 	// riceve anche oggetto Elezione con info su chi e' l'eletto e su come eleggerne un altro
-	public StatsReceiverThread(int statsPort, Election election)
+	public StatsReceiverThread(Election election)
 	{
 		this.casaId = Configuration.CASA_ID;
-		this.statsPort = statsPort;
 		this.election = election;
 
 		// logger levels
@@ -49,140 +46,115 @@ public class StatsReceiverThread extends Thread
 	}
 
 	// server concorrente
-	public void run()
+	public void run(P2PMessage measureMessage)
 	{
-		ServerSocket welcomeSocket;
-		Socket connectionSocket;
 		Condominio condominio;
 		StatsReceiverWorkerThread receiver;
 
 		// prepara oggetto condiviso (fra lui e i StatsReceiverWorkerThread) che contiene le stat ricevute
 		CondominioStats condominioStats = new CondominioStats();
 
-
 		try
 		{
-			// crea server socket in ascolto
-			welcomeSocket = new ServerSocket(statsPort);
 
-			// delega a nuovo thread la gestione della connessione in arrivo e si rimette in ascolto
-			while(true)
+			// Gli arriva un messaggio dal dispatcher contenente una MeanMeasure
+			LOGGER.log(Level.FINE, "{ " + casaId + " } Statistic received from " + measureMessage.getSenderId());
+
+			// salva la statistica appena ricevuta in un oggetto condiviso, così StatsReceiverThread poi le legge
+			condominioStats.addCasaStat(measureMessage.getMeasure());
+
+
+			// check se sono arrivate le statistiche da tutte le case
+			// scarica condominio
+			condominio = Http.getCondominio();
+
+			// confronta le stat ricevute fin ora con le case registrate (ci sono tutte per questo giro?)
+			if(condominio.getCaselist().size() == condominioStats.size())
 			{
-				try
+				boolean ciSonoTutte = true;
+
+				// check se anche gli id corrispondono
+				for(Casa casa : condominio.getCaselist())
 				{
-					connectionSocket = welcomeSocket.accept();
-					receiver = new StatsReceiverWorkerThread(connectionSocket, condominioStats);
-					receiver.start();
-					LOGGER.log(Level.FINE, "{ " + casaId + " } Received connection for GlobalStatistics: launching worker thread");
-
-					// da il tempo al thread di gestire la richiesta e salvare la statistica ricevuta
-					Thread.sleep(DELAY);
-
-					// check se sono arrivate le statistiche da tutte le case
-					// scarica condominio
-					condominio = Http.getCondominio();
-
-					// confronta le stat ricevute fin ora con le case registrate (ci sono tutte per questo giro?)
-					if(condominio.getCaselist().size() == condominioStats.size())
+					if(!condominioStats.contains(casa.getId()))
 					{
-						boolean ciSonoTutte = true;
-
-						// check se anche gli id corrispondono
-						for(Casa casa : condominio.getCaselist())
-						{
-							if(!condominioStats.contains(casa.getId()))
-							{
-								ciSonoTutte = false;
-								break;
-							}
-						}
-
-						// se ci sono tutte: calcola consumo complessivo e resetta le stat ricevute fin ora (pronto per prossimo giro di calcolo complessivo)
-						if(ciSonoTutte)
-						{
-							LOGGER.log(Level.FINE, "{ " + casaId + " } received all GlobalStatistics");
-
-							double globalTot = 0;
-							long timestampMin = Long.MAX_VALUE, timestampMax = Long.MIN_VALUE;
-							int n = 0;
-							MeanMeasurement globalComsumption;
-
-							// calcolo consumo complessivo
-							for(MeanMeasurement measurement : condominioStats.getMeasurements())
-							{
-								globalTot += measurement.getMean();
-
-								if(measurement.getEndTimestamp() > timestampMax)
-									timestampMax = measurement.getEndTimestamp();
-								if(measurement.getBeginTimestamp() < timestampMin)
-									timestampMin = measurement.getBeginTimestamp();
-
-								n++;
-							}
-							System.out.println("Consumo globale condominiale aggiornato a " + new Timestamp(timestampMax) + ": " + globalTot + " (" + n + " misure)");
-							CasaApp.refreshMenu();
-
-							globalComsumption = new MeanMeasurement("Condominio", globalTot, timestampMin, timestampMax);
-
-							// azzera per ricominziare il prossimo giro di calcolo complessivo
-							condominioStats.resetStats();
-
-
-							////////////////////////////////////////////////////////////////////////////////////////////////
-							//	ELEZIONE / INVIO STATISTICHE GLOBALI AL SERVER
-							// inizialmente non c'e' nessun coordinatore e si indice elezione;
-							// se invece, questa casa si e' unita dopo e il coord c'e' gia': fa comunque startElection
-							// il suo ElectionThread ricevera' un msg dal coord dicendogli che esiste, e il thread settera' lo stato di election a NOT_COORD
-							// elezione parte soltanto se "tutti" sono in NEED_ELECTION, cioè all'inizio, oppure quando esce coord
-							if(election.getState().equals(Election.ElectionOutcome.NEED_ELECTION))
-							{
-								LOGGER.log(Level.FINE, "{ " + casaId + " } Serve elezione per inviare la stat globale");
-
-								election.startElection();
-							}
-							// se c'e gia'/appena stata elezione e sei tu coord, invia le statistiche al server
-							else if(election.getState().equals(Election.ElectionOutcome.COORD))
-							{
-								LOGGER.log(Level.FINE, "{ " + casaId + " } Sono io il coord e sto mandando le stat globali al server");
-
-								// Manda la stat globale appena calcolata al server rest tramite metodo in CasaApp (conosce lei info su server)
-								Http.sendGlobalStat(globalComsumption);
-
-								LOGGER.log(Level.FINE, "{ " + casaId + " } Stat globali inviate");
-							}
-							// se invece non e' il primo giro (need election) / la casa non si e' appena unita (need election)
-							// allora in teoria c'e' gia' un coordinatore, e se non e' lui allora non fa piu' niente
-							else
-							{
-								LOGGER.log(Level.FINE, "{ " + casaId + " } Non sono io il coord: non mando stat globale al server");
-							}
-
-						}
-					}
-					// se manca ancora qualche casa a questo giro di loop, attende il prossimo (non fa niente)
-
-					// TODO: e se dopo molti giri ancora manca qualche casa? (qua andrebbe avanti all'infinito...)
-					// non dovrebbe mai succedere perche' tutti mandano in ordine;
-					// basterebbe anche solo aumentare il delay di attesa per il thread
-					// volendo si puo' aggiungere qua un timeout...
-
-					// check TERMINAZIONE
-					if(interrupted())
-					{
-						LOGGER.log(Level.INFO, "{ " + casaId + " } Stopping StatsReceiverThread... ");
-						return;
+						ciSonoTutte = false;
+						break;
 					}
 				}
-				catch(Exception e)
+
+				// se ci sono tutte: calcola consumo complessivo e resetta le stat ricevute fin ora (pronto per prossimo giro di calcolo complessivo)
+				if(ciSonoTutte)
 				{
-					LOGGER.log(Level.SEVERE, "{ " + casaId + " } Error in receiving global stats / election");
-					e.printStackTrace();
+					LOGGER.log(Level.FINE, "{ " + casaId + " } received all GlobalStatistics");
+
+					double globalTot = 0;
+					long timestampMin = Long.MAX_VALUE, timestampMax = Long.MIN_VALUE;
+					int n = 0;
+					MeanMeasurement globalComsumption;
+
+					// calcolo consumo complessivo
+					for(MeanMeasurement measurement : condominioStats.getMeasurements())
+					{
+						globalTot += measurement.getMean();
+
+						if(measurement.getEndTimestamp() > timestampMax)
+							timestampMax = measurement.getEndTimestamp();
+						if(measurement.getBeginTimestamp() < timestampMin)
+							timestampMin = measurement.getBeginTimestamp();
+
+						n++;
+					}
+					System.out.println("Consumo globale condominiale aggiornato a " + new Timestamp(timestampMax) + ": " + globalTot + " (" + n + " misure)");
+					CasaApp.refreshMenu();
+
+					globalComsumption = new MeanMeasurement("Condominio", globalTot, timestampMin, timestampMax);
+
+					// azzera per ricominziare il prossimo giro di calcolo complessivo
+					condominioStats.resetStats();
+
+
+					////////////////////////////////////////////////////////////////////////////////////////////////
+					//	ELEZIONE / INVIO STATISTICHE GLOBALI AL SERVER
+					// inizialmente non c'e' nessun coordinatore e si indice elezione;
+					// se invece, questa casa si e' unita dopo e il coord c'e' gia': fa comunque startElection
+					// il suo ElectionThread ricevera' un msg dal coord dicendogli che esiste, e il thread settera' lo stato di election a NOT_COORD
+					// elezione parte soltanto se "tutti" sono in NEED_ELECTION, cioè all'inizio, oppure quando esce coord
+					if(election.getState().equals(Election.ElectionOutcome.NEED_ELECTION))
+					{
+						LOGGER.log(Level.FINE, "{ " + casaId + " } Serve elezione per inviare la stat globale");
+
+						election.startElection();
+					}
+					// se c'e gia'/appena stata elezione e sei tu coord, invia le statistiche al server
+					else if(election.getState().equals(Election.ElectionOutcome.COORD))
+					{
+						LOGGER.log(Level.FINE, "{ " + casaId + " } Sono io il coord e sto mandando le stat globali al server");
+
+						// Manda la stat globale appena calcolata al server rest tramite metodo in CasaApp (conosce lei info su server)
+						Http.sendGlobalStat(globalComsumption);
+
+						LOGGER.log(Level.FINE, "{ " + casaId + " } Stat globali inviate");
+					}
+					// se invece non e' il primo giro (need election) / la casa non si e' appena unita (need election)
+					// allora in teoria c'e' gia' un coordinatore, e se non e' lui allora non fa piu' niente
+					else
+					{
+						LOGGER.log(Level.FINE, "{ " + casaId + " } Non sono io il coord: non mando stat globale al server");
+					}
+
 				}
 			}
+			// se manca ancora qualche casa a questo giro di loop, attende il prossimo (non fa niente)
+
+			// TODO: e se dopo molti giri ancora manca qualche casa? (qua andrebbe avanti all'infinito...)
+			// non dovrebbe mai succedere perche' tutti mandano in ordine;
+			// basterebbe anche solo aumentare il delay di attesa per il thread
+			// volendo si puo' aggiungere qua un timeout...
 		}
 		catch(Exception e)
 		{
-			LOGGER.log(Level.SEVERE, "{ " + casaId + " } Error in global stats connection");
+			LOGGER.log(Level.SEVERE, "{ " + casaId + " } Error in receiving global stats / election");
 			e.printStackTrace();
 		}
 	}

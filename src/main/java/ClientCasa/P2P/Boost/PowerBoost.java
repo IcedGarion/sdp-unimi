@@ -2,7 +2,7 @@ package ClientCasa.P2P.Boost;
 
 import ClientCasa.LocalStatistics.smartMeter.SmartMeterSimulator;
 import Shared.MessageSenderThread;
-import ClientCasa.P2P.P2PMessage;
+import ClientCasa.P2P.Message.P2PMessage;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 import Shared.Configuration;
@@ -27,7 +27,6 @@ public class PowerBoost
 	private Object boostLock;
 
 	private String casaId;
-	private int casaBoostPort;
 	private SmartMeterSimulator simulator;
 	private PowerBoostState state;
 
@@ -40,10 +39,9 @@ public class PowerBoost
 	// timestamp del messaggio di richiesta appena inviato
 	private long messageTimestamp;
 
-	public PowerBoost(int casaBoostPort, SmartMeterSimulator simulator)
+	public PowerBoost(SmartMeterSimulator simulator)
 	{
 		this.casaId = Configuration.CASA_ID;
-		this.casaBoostPort = casaBoostPort;
 		this.simulator = simulator;
 		this.state = PowerBoostState.NOT_INTERESTED;
 		this.caseAttive = 1;
@@ -156,7 +154,7 @@ public class PowerBoost
 			{
 				for(Casa c : condominio.getCaselist())
 				{
-					boostMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getBoostPort(), new P2PMessage(casaId, casaBoostPort, "BOOST", getMessageTimestamp()));
+					boostMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getPort(), new P2PMessage(casaId, Configuration.CASA_PORT, "BOOST", getMessageTimestamp(), "BOOST"));
 					boostMessageSender.start();
 				}
 
@@ -221,7 +219,7 @@ public class PowerBoost
 			senderPort = Integer.parseInt(richiesta[2]);
 
 			// risponde OK
-			boostMessageSender = new MessageSenderThread(casaId, senderIp, senderPort, new P2PMessage(casaId, casaBoostPort, "OK"));
+			boostMessageSender = new MessageSenderThread(casaId, senderIp, senderPort, new P2PMessage(casaId, Configuration.CASA_PORT, "OK", "BOOST"));
 			boostMessageSender.start();
 
 			LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Fine BOOST: mando OK a " + senderId);

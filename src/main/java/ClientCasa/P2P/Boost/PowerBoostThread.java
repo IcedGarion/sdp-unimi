@@ -1,3 +1,36 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// da togliere
+
+
+
+
+
+
+
+
+
+
+
+
+
 package ClientCasa.P2P.Boost;
 
 import ClientCasa.CasaApp;
@@ -49,8 +82,8 @@ public class PowerBoostThread extends Thread
 				try
 				{
 					connectionSocket = welcomeSocket.accept();
-					powerWorker = new PowerBoostWorkerThread(connectionSocket, boostPort, powerBoostState);
-					powerWorker.start();
+					//powerWorker = new PowerBoostWorkerThread(connectionSocket, boostPort, powerBoostState);
+					//powerWorker.start();
 					LOGGER.log(Level.FINE, "{ " + casaId + " } Received connection for Power Boost: launching worker thread");
 
 

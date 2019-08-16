@@ -1,6 +1,6 @@
 package Shared;
 
-import ClientCasa.P2P.P2PMessage;
+import ClientCasa.P2P.Message.P2PMessage;
 import ServerREST.beans.MeanMeasurement;
 import ServerREST.beans.Notifica;
 
@@ -36,17 +36,6 @@ public class MessageSenderThread extends Thread
 		handler.setLevel(Configuration.LOGGER_LEVEL);
 		LOGGER.addHandler(handler);
 		LOGGER.setUseParentHandlers(false);
-	}
-
-	public MessageSenderThread(String senderId, String ip, int port, MeanMeasurement message) throws JAXBException
-	{
-		this(senderId, ip, port);
-		this.message = message;
-
-		// setup marshaller per invio statistiche
-		jaxbContext = JAXBContext.newInstance(MeanMeasurement.class);
-		marshaller = jaxbContext.createMarshaller();
-		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 	}
 
 	public MessageSenderThread(String senderId, String ip, int port, P2PMessage message) throws JAXBException

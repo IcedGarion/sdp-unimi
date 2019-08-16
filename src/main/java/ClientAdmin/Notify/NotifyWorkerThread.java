@@ -1,7 +1,6 @@
 package ClientAdmin.Notify;
 
 import ClientAdmin.AdminApp;
-import ClientCasa.P2P.P2PMessage;
 import ServerREST.beans.Notifica;
 
 import javax.xml.bind.JAXBContext;

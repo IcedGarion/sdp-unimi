@@ -93,7 +93,7 @@ public class CondominioTest
 	@Test
 	public void testB_SimplePost() throws IOException, JAXBException
 	{
-		Casa newCasa = new Casa("CasaTestPost", "127.0.0.1", 8080, 8081, 8083);
+		Casa newCasa = new Casa("CasaTestPost", "127.0.0.1", 8080);
 
 		// POST /condominio/add: inserisce nuova casa
 		url = new URL(URL + "/condominio/add");
@@ -116,7 +116,7 @@ public class CondominioTest
 
 		// aggiunge altra casa
 		// POST /condominio/add: inserisce nuova casa
-		Casa newCasa2 = new Casa("CasaTestPost2", "127.0.0.1", 8080, 8081, 8083);
+		Casa newCasa2 = new Casa("CasaTestPost2", "127.0.0.1", 8080);
 		url = new URL(URL + "/condominio/add");
 		conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("POST");
@@ -142,7 +142,7 @@ public class CondominioTest
 	@Test
 	public void testC_SimpleConflictPost() throws IOException, JAXBException
 	{
-		Casa newCasa = new Casa("CasaConflictTest", "127.0.0.1", 8080, 8081, 8083);
+		Casa newCasa = new Casa("CasaConflictTest", "127.0.0.1", 8080);
 
 		// POST /condominio/add: inserisce nuova casa
 		url = new URL(URL + "/condominio/add");
@@ -182,7 +182,7 @@ public class CondominioTest
 	public void testD_SimpleDelete() throws IOException, JAXBException
 	{
 		// rimuove una di quelle appena aggiunte dal test su ^
-		Casa newCasa = new Casa("CasaConflictTest", "127.0.0.1", 8080, 8081, 8083);
+		Casa newCasa = new Casa("CasaConflictTest", "127.0.0.1", 8080);
 
 		// POST /condominio/delete
 		url = new URL(URL + "/condominio/delete");

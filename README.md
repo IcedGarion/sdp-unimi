@@ -1,5 +1,22 @@
 # TODO now
 
+
+Sistema i nomi thread e commenti
+
+Cambia nomi ai 3 (non piu' "Thread")
+
+In casaApp, non devi far partire messaggi prima che il server sia su! MeanThread per ultimo
+Insomma, pensa all'ordine di cose da fare (server msg - meanThread - registra casa - 
+
+
+
+
+
+
+
+
+
+
 ------- CASI PARTICOLARI POWER BOOST / TANTO TEST
 
 - caso in cui sei in attesa degli OK (stai per ottenere boost) ma un altro chiede BOOST?
