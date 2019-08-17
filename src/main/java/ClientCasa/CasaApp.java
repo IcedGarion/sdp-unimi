@@ -4,12 +4,10 @@ import ClientCasa.LocalStatistics.MeanThread;
 import ClientCasa.LocalStatistics.SimulatorBuffer;
 import ClientCasa.LocalStatistics.smartMeter.SmartMeterSimulator;
 import ClientCasa.P2P.Boost.PowerBoost;
-import ClientCasa.P2P.Boost.PowerBoostThread;
-import ClientCasa.P2P.Boost.PowerBoostWorkerThread;
+import ClientCasa.P2P.Boost.PowerBoostResponder;
 import ClientCasa.P2P.GlobalStatistics.Election.Election;
-import ClientCasa.P2P.GlobalStatistics.Election.ElectionThread;
-import ClientCasa.P2P.GlobalStatistics.Election.ElectionWorkerThread;
-import ClientCasa.P2P.GlobalStatistics.StatsReceiverThread;
+import ClientCasa.P2P.GlobalStatistics.Election.ElectionResponder;
+import ClientCasa.P2P.GlobalStatistics.StatsReceiverResponder;
 import ClientCasa.P2P.Message.GlobalMessageServer;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
@@ -20,7 +18,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -79,17 +76,39 @@ public class CasaApp
 
 		LOGGER.log(Level.INFO, "{ " + casaId + " } Started Casa Application with ID " + casaId);
 
-		///////////////////////////////////////////////////////////
-		/*	AVVIA THREAD SIMULATORE / SMART METER + MEAN THREAD	*/
+
+
+		/*	AVVIA THREAD SIMULATORE / SMART METER */
 		SimulatorBuffer myBuffer = new SimulatorBuffer();
 		SmartMeterSimulator simulator = new SmartMeterSimulator(myBuffer);
 		simulator.start();
 		LOGGER.log(Level.FINE, "{ " + casaId + " } Smart meted launched");
 
-		// avvia thread che invia periodicamente le medie
-		MeanThread mean = new MeanThread(myBuffer);
-		mean.start();
-		LOGGER.log(Level.FINE, "{ " + casaId+ " } Local statistic (MeanThread) thread launched");
+
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/*	PARTE RETE P2P	*/
+		// Prepara gestore elezione e oggetto condiviso Election da passargli; lo passa anche a statsReceiver perche' deve sapere stato elezione
+		// ( per sapere chi e' coord e quindi chi manda le stats)
+		Election election = new Election();
+
+		// crea gestore elezione bully: riceve msg e risponde a dovere secondo alg BULLY
+		ElectionResponder electionWorker = new ElectionResponder(election);
+
+		// crea gestore messaggi p2p che riceve le statistiche
+		StatsReceiverResponder statsReceiver = new StatsReceiverResponder(election);
+
+		// crea gestore messaggi p2p che riceve richieste di power boost e si coordina
+		PowerBoost powerBoost = new PowerBoost(simulator);
+		PowerBoostResponder powerBoostWorker = new PowerBoostResponder(powerBoost);
+
+
+		/*	AVVIA SERVER GLOBALE RICEZIONE MESSAGGI P2P		*/
+		// "attiva" i metodi di questi 3 componenti, che richiedono i messaggi P2P
+		GlobalMessageServer messageServer = new GlobalMessageServer(statsReceiver, electionWorker, powerBoostWorker);
+		messageServer.start();
+		LOGGER.log(Level.FINE, "{ " + casaId + " } Global message receiver serer launched");
+
 
 
 		///////////////////////////////////////////////////
@@ -117,31 +136,17 @@ public class CasaApp
 			LOGGER.log(Level.SEVERE, "Failed to connect to Admin Server ( POST " + serverURL + "/condominio/add )");
 		}
 
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		/*	PARTE RETE P2P	*/
-		// Prepara thread elezione e oggetto condiviso Election da passargli; lo passa anche a statsReceiver perche' deve sapere stato elezione
-		// ( per sapere chi e' coord e quindi chi manda le stats)
-
-		//non sono più dei thread! cambia nome... sono solo oggetti
-		//	cambia anche i commenti qua
-		Election election = new Election();
-
-		// lancia thread "ascoltatore" elezione bully: riceve msg e risponde a dovere secondo alg BULLY
-		ElectionWorkerThread electionWorker = new ElectionWorkerThread(election);
-
-		// lancia thread che riceve le statistiche
-		StatsReceiverThread statsReceiver = new StatsReceiverThread(election);
-
-		// lancia thread che riceve richieste di power boost e si coordina
-		PowerBoost powerBoost = new PowerBoost(simulator);
-		PowerBoostWorkerThread powerBoostWorker = new PowerBoostWorkerThread(powerBoost);
 
 
-		/*	AVVIA SERVER GLOBALE RICEZIONE MESSAGGI P2P		*/
-		// "attiva" i metodi di questi 3 componenti, che richiedono i messaggi P2P
-		GlobalMessageServer messageServer = new GlobalMessageServer(statsReceiver, electionWorker, powerBoostWorker);
-		messageServer.start();
-		LOGGER.log(Level.FINE, "{ " + casaId + " } Global message receiver serer launched");
+		///////////////////////////////////////////////////////////
+		// avvia thread che invia periodicamente le medie
+		MeanThread mean = new MeanThread(myBuffer);
+		mean.start();
+		LOGGER.log(Level.FINE, "{ " + casaId+ " } Local statistic (MeanThread) thread launched");
+
+
+
+
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/*	INTERFACCIA CLI BOOST + EXIT	*/

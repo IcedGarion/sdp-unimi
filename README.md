@@ -19,6 +19,13 @@ Insomma, pensa all'ordine di cose da fare (server msg - meanThread - registra ca
 
 ------- CASI PARTICOLARI POWER BOOST / TANTO TEST
 
+- BOOST: caso in cui 3 case: mandi boost, ricevi OK da una delle altre e vai, pero' DOPO ricevi il tuo msg di BOOST
+   (in pratica fa prima ad andare fuori BOOST e ricevere un OK, rispetto a ricevere il TUO BOOST).
+   allora non devi accodare a tua stessa richiesta, ma ignorare... (basta un IF nel case "BOOST" se sei USING e richiesta ha il tuo ID)
+
+   OPPURE lascia cosi', perche' tanto succede che: quando hai finito boost, ti rimandi da solo OK, ma questo viene ignorato perche' non hai
+   richiesto boost (magari aggiungi spiegazione nel LOG)
+
 - caso in cui sei in attesa degli OK (stai per ottenere boost) ma un altro chiede BOOST?
   dovrebbe essere come se lo stai gia usando: accoda
 

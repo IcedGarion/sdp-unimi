@@ -1,30 +1,35 @@
 package ClientCasa.P2P.Message;
 
-import ClientCasa.P2P.Boost.PowerBoostWorkerThread;
-import ClientCasa.P2P.GlobalStatistics.Election.ElectionWorkerThread;
-import ClientCasa.P2P.GlobalStatistics.StatsReceiverThread;
+import ClientCasa.P2P.Boost.PowerBoostResponder;
+import ClientCasa.P2P.GlobalStatistics.Election.ElectionResponder;
+import ClientCasa.P2P.GlobalStatistics.StatsReceiverResponder;
 import Shared.Configuration;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * 	RICEVE SOCKET DA SERVER CONCORRENTE: legge messaggio e decide, in base a un campo, a chi girarlo
+ * 	Ha mappa "dispatchTo" (campo msg) -> MessageResponder da chiamare
+ */
 public class GlobalMessageDispatcher extends Thread
 {
 	private static final Logger LOGGER = Logger.getLogger(GlobalMessageDispatcher.class.getName());
 	private Socket listenSocket;
-	private StatsReceiverThread statsReceiverComponent;
-	private ElectionWorkerThread electionComponent;
-	private PowerBoostWorkerThread powerBoostComponent;
+	private HashMap<String, MessageResponder> dispatchMap;
 
-	public GlobalMessageDispatcher(Socket connectionSocket, StatsReceiverThread statsReceiverComponent, ElectionWorkerThread electionComponent, PowerBoostWorkerThread powerBoostComponent)
+	public GlobalMessageDispatcher(Socket connectionSocket, StatsReceiverResponder statsReceiverComponent, ElectionResponder electionComponent, PowerBoostResponder powerBoostComponent)
 	{
 		this.listenSocket = connectionSocket;
-		this.statsReceiverComponent = statsReceiverComponent;
-		this.electionComponent = electionComponent;
-		this.powerBoostComponent = powerBoostComponent;
+
+		dispatchMap = new HashMap<>();
+		dispatchMap.put("STATS", statsReceiverComponent);
+		dispatchMap.put("ELECTION", electionComponent);
+		dispatchMap.put("BOOST", powerBoostComponent);
 	}
 
 	public void run()
@@ -32,6 +37,7 @@ public class GlobalMessageDispatcher extends Thread
 		JAXBContext jaxbContext;
 		Unmarshaller unmarshaller;
 		P2PMessage message;
+		MessageResponder responder;
 
 		try
 		{
@@ -43,19 +49,11 @@ public class GlobalMessageDispatcher extends Thread
 			message.setSenderIp(listenSocket.getInetAddress().getHostAddress());
 			listenSocket.close();
 
+			// LOGGER.log(Level.INFO, "P2P Message received from " + message.getSenderId() + ": [ " + message.getDispatchto() + " ] " + message.getMessage());
+
 			// decide quale metodo chiamare, fra i vari componenti del sistema, a seconda del messaggio
-			switch(message.getDispatchto())
-			{
-				case "BOOST":
-					powerBoostComponent.run(message);
-					break;
-				case "ELECTION":
-					electionComponent.run(message);
-					break;
-				case "STATS":
-					statsReceiverComponent.run(message);
-					break;
-			}
+			responder = dispatchMap.get(message.getDispatchto());
+			responder.respond(message);
 		}
 		catch(Exception e)
 		{

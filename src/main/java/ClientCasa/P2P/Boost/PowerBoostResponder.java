@@ -1,5 +1,6 @@
 package ClientCasa.P2P.Boost;
 
+import ClientCasa.P2P.Message.MessageResponder;
 import ClientCasa.P2P.Message.P2PMessage;
 import Shared.Configuration;
 import Shared.MessageSenderThread;
@@ -11,13 +12,13 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PowerBoostWorkerThread
+public class PowerBoostResponder implements MessageResponder
 {
-	private static final Logger LOGGER = Logger.getLogger(PowerBoostWorkerThread.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(PowerBoostResponder.class.getName());
 	private String casaId;
 	private PowerBoost powerBoostObject;
 
-	public PowerBoostWorkerThread(PowerBoost powerBoostState)
+	public PowerBoostResponder(PowerBoost powerBoostState)
 	{
 		this.casaId = Configuration.CASA_ID;
 		this.powerBoostObject = powerBoostState;
@@ -32,7 +33,7 @@ public class PowerBoostWorkerThread
 	}
 
 	// RICART & AGRAWALA
-	public void run(P2PMessage boostMessage)
+	public void respond(P2PMessage boostMessage)
 	{
 		JAXBContext jaxbContext;
 		Unmarshaller unmarshaller;

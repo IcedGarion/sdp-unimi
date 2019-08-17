@@ -1,5 +1,6 @@
 package ClientCasa.P2P.GlobalStatistics.Election;
 
+import ClientCasa.P2P.Message.MessageResponder;
 import ClientCasa.P2P.Message.P2PMessage;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
@@ -12,13 +13,13 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ElectionWorkerThread
+public class ElectionResponder implements MessageResponder
 {
-	private static final Logger LOGGER = Logger.getLogger(ElectionWorkerThread.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(ElectionResponder.class.getName());
 	private String casaId;
 	private Election electionObject;
 
-	public ElectionWorkerThread(Election electionObject)
+	public ElectionResponder(Election electionObject)
 	{
 		this.casaId = Configuration.CASA_ID;
 		this.electionObject = electionObject;
@@ -32,7 +33,7 @@ public class ElectionWorkerThread
 		LOGGER.setUseParentHandlers(false);
 	}
 
-	public void run(P2PMessage electionMessage)
+	public void respond(P2PMessage electionMessage)
 	{
 		MessageSenderThread electionMessageSender;
 		Condominio condominio;
@@ -41,6 +42,8 @@ public class ElectionWorkerThread
 
 		try
 		{
+			LOGGER.log(Level.INFO, "P2P Message received from " + electionMessage.getSenderId() + ": " + electionMessage.getMessage());
+
 			// gli arriva il messaggio P2P dal dispatcher
 			senderId = electionMessage.getSenderId();
 			senderIp = electionMessage.getSenderIp();

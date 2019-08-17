@@ -1,10 +1,8 @@
 package ClientCasa.P2P.Message;
 
-import ClientCasa.P2P.Boost.PowerBoost;
-import ClientCasa.P2P.Boost.PowerBoostWorkerThread;
-import ClientCasa.P2P.GlobalStatistics.Election.Election;
-import ClientCasa.P2P.GlobalStatistics.Election.ElectionWorkerThread;
-import ClientCasa.P2P.GlobalStatistics.StatsReceiverThread;
+import ClientCasa.P2P.Boost.PowerBoostResponder;
+import ClientCasa.P2P.GlobalStatistics.Election.ElectionResponder;
+import ClientCasa.P2P.GlobalStatistics.StatsReceiverResponder;
 import Shared.Configuration;
 
 import java.net.ServerSocket;
@@ -22,12 +20,12 @@ public class GlobalMessageServer extends Thread
 	private static final Logger LOGGER = Logger.getLogger(GlobalMessageServer.class.getName());
 
 	private int listenPort;
-	private StatsReceiverThread statsReceiverComponent;
-	private ElectionWorkerThread electionComponent;
-	private PowerBoostWorkerThread powerBoostComponent;
+	private StatsReceiverResponder statsReceiverComponent;
+	private ElectionResponder electionComponent;
+	private PowerBoostResponder powerBoostComponent;
 
 	// deve conoscere i 3 componenti a cui distribuire i messaggi che riceve
-	public GlobalMessageServer(StatsReceiverThread statsReceiver, ElectionWorkerThread electionWorker, PowerBoostWorkerThread powerBoostWorker)
+	public GlobalMessageServer(StatsReceiverResponder statsReceiver, ElectionResponder electionWorker, PowerBoostResponder powerBoostWorker)
 	{
 		this.listenPort = Configuration.CASA_PORT;
 		this.statsReceiverComponent = statsReceiver;

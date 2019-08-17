@@ -17,7 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 // oggetto condiviso con dati riguardanti lo stato del power boost ("sto usando"/no; coda di chi ha richiesto....)
-// Condiviso fra PowerBoostThread e PowerBoostWorker
+// condivso fra i vari thread che ricevono messaggi di boost
 public class PowerBoost
 {
 	private static final Logger LOGGER = Logger.getLogger(PowerBoost.class.getName());
@@ -145,7 +145,7 @@ public class PowerBoost
 			// se c'e' solo una casa (o 2), sa gia' per certo di poter richiedere subito BOOST
 			if(condominio.size() <= 2)
 			{
-				LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Sono l'unica casa attiva e quindi ottengo BOOST!");
+				LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Sono l'unica casa attiva (o siamo in 2) e quindi ottengo BOOST!");
 
 				// chiama metodo per fare POWER BOOST
 				beginPowerBoost();

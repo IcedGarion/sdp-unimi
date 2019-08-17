@@ -2,6 +2,7 @@ package ClientCasa.P2P.GlobalStatistics;
 
 import ClientCasa.CasaApp;
 import ClientCasa.P2P.GlobalStatistics.Election.Election;
+import ClientCasa.P2P.Message.MessageResponder;
 import ClientCasa.P2P.Message.P2PMessage;
 import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
@@ -15,27 +16,29 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /*
-	UN SERVER CONCORRENTE CHE GESTISCE LE RICHIESTE;
-	Riceve statistiche locali (check che riceve da TUTTE le case presenti), calcola consumo globale e stampa
-
-	IL THREAD LANCIATO, StatsReceiverWorkerThread, salva le statistiche ricevute in CondominioStats;
+	Riceve statistiche locali (check che riceve da TUTTE le case presenti), salva le statistiche ricevute in CondominioStats
+	e calcola consumo globale e stampa
  */
-public class StatsReceiverThread
+public class StatsReceiverResponder implements MessageResponder
 {
 	// stato elezione lo trova nell'oggetto election condiviso:
 	// all'inizio nessun coordinatore eletto -> "NEED_ELECTION"
 	// dopo una elezione uno puo' essere -> "COORD" / "NOT_COORD"
 
-	private static final Logger LOGGER = Logger.getLogger(StatsReceiverThread.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(StatsReceiverResponder.class.getName());
 	private static final int DELAY = 100;
 	private String casaId;
 	private Election election;
+	private CondominioStats condominioStats;
 
 	// riceve anche oggetto Elezione con info su chi e' l'eletto e su come eleggerne un altro
-	public StatsReceiverThread(Election election)
+	public StatsReceiverResponder(Election election)
 	{
 		this.casaId = Configuration.CASA_ID;
 		this.election = election;
+
+		// prepara oggetto condiviso (fra lui e gli altri thread uguali) che contiene le stat ricevute
+		condominioStats = new CondominioStats();
 
 		// logger levels
 		LOGGER.setLevel(Configuration.LOGGER_LEVEL);
@@ -45,22 +48,16 @@ public class StatsReceiverThread
 		LOGGER.setUseParentHandlers(false);
 	}
 
-	// server concorrente
-	public void run(P2PMessage measureMessage)
+	public void respond(P2PMessage measureMessage)
 	{
 		Condominio condominio;
-		StatsReceiverWorkerThread receiver;
-
-		// prepara oggetto condiviso (fra lui e i StatsReceiverWorkerThread) che contiene le stat ricevute
-		CondominioStats condominioStats = new CondominioStats();
 
 		try
 		{
-
 			// Gli arriva un messaggio dal dispatcher contenente una MeanMeasure
 			LOGGER.log(Level.FINE, "{ " + casaId + " } Statistic received from " + measureMessage.getSenderId());
 
-			// salva la statistica appena ricevuta in un oggetto condiviso, così StatsReceiverThread poi le legge
+			// salva la statistica appena ricevuta in un oggetto condiviso, così StatsReceiverResponder poi le legge
 			condominioStats.addCasaStat(measureMessage.getMeasure());
 
 
@@ -69,7 +66,7 @@ public class StatsReceiverThread
 			condominio = Http.getCondominio();
 
 			// confronta le stat ricevute fin ora con le case registrate (ci sono tutte per questo giro?)
-			if(condominio.getCaselist().size() == condominioStats.size())
+			if(condominio.getCaselist().size() <= condominioStats.size())
 			{
 				boolean ciSonoTutte = true;
 
@@ -90,12 +87,15 @@ public class StatsReceiverThread
 
 					double globalTot = 0;
 					long timestampMin = Long.MAX_VALUE, timestampMax = Long.MIN_VALUE;
-					int n = 0;
+					int n = 0, tot = condominio.getCaselist().size();
 					MeanMeasurement globalComsumption;
 
 					// calcolo consumo complessivo
 					for(MeanMeasurement measurement : condominioStats.getMeasurements())
 					{
+						if(n >= tot)
+							break;
+
 						globalTot += measurement.getMean();
 
 						if(measurement.getEndTimestamp() > timestampMax)
@@ -118,7 +118,7 @@ public class StatsReceiverThread
 					//	ELEZIONE / INVIO STATISTICHE GLOBALI AL SERVER
 					// inizialmente non c'e' nessun coordinatore e si indice elezione;
 					// se invece, questa casa si e' unita dopo e il coord c'e' gia': fa comunque startElection
-					// il suo ElectionThread ricevera' un msg dal coord dicendogli che esiste, e il thread settera' lo stato di election a NOT_COORD
+					// il suo ElectionResponder ricevera' un msg dal coord dicendogli che esiste, e il thread settera' lo stato di election a NOT_COORD
 					// elezione parte soltanto se "tutti" sono in NEED_ELECTION, cioè all'inizio, oppure quando esce coord
 					if(election.getState().equals(Election.ElectionOutcome.NEED_ELECTION))
 					{
