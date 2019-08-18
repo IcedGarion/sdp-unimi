@@ -6,6 +6,7 @@ import ServerREST.beans.CasaMeasurement;
 import ServerREST.beans.Condominio;
 import ServerREST.beans.MeanMeasurement;
 import Shared.Configuration;
+import Shared.Http;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -103,10 +104,7 @@ public class AdminApp
 				{
 					try
 					{
-						url = new URL(serverURL + "/condominio");
-						conn = (HttpURLConnection) url.openConnection();
-						conn.setRequestMethod("GET");
-						c = (Condominio) jaxbUnmarshallerCondominio.unmarshal(conn.getInputStream());
+						c = Http.getCondominio();
 					}
 					catch(Exception e)
 					{

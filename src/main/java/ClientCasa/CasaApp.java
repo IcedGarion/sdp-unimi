@@ -10,17 +10,12 @@ import ClientCasa.P2P.GlobalStatistics.Election.ElectionResponder;
 import ClientCasa.P2P.GlobalStatistics.StatsReceiverResponder;
 import ClientCasa.P2P.Message.GlobalMessageServer;
 import ServerREST.beans.Casa;
-import ServerREST.beans.Condominio;
 import Shared.Configuration;
+import Shared.Http;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,14 +36,8 @@ public class CasaApp
 	{
 		//////////////
 		/*	SETUP	*/
-		JAXBContext jaxbContext = JAXBContext.newInstance(Condominio.class);
-		Marshaller marshaller = jaxbContext.createMarshaller();
-		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-		URL url;
-		HttpURLConnection conn;
 		Level loggerLevel = null;
-		String serverURL = "", casaId = "", casaIp = "";
+		String casaId = "", casaIp = "";
 		int casaPort = 0;
 
 		// CONFIGURATIONS setup
@@ -56,7 +45,6 @@ public class CasaApp
 		{
 			Configuration.loadProperties();
 			loggerLevel = Configuration.LOGGER_LEVEL;
-			serverURL = Configuration.SERVER_URL;
 			casaId = Configuration.CASA_ID;
 			casaIp = Configuration.CASA_IP;
 			casaPort = Configuration.CASA_PORT;
@@ -114,27 +102,9 @@ public class CasaApp
 		///////////////////////////////////////////////////
 		/*	REGISTRA LA CASA AL SERVER AMMINISTRATORE	*/
 		Casa myCasa = new Casa(casaId, casaIp, casaPort);
+		Http.registerCasa(myCasa);
+		LOGGER.log(Level.INFO, "{ " + casaId + " } Casa registered to Admin Server");
 
-		// TODO: spostalo in HTTP
-		// POST /condominio/add: inserisce nuova casa
-		try
-		{
-			url = new URL(serverURL + "/condominio/add");
-			conn = (HttpURLConnection) url.openConnection();
-			conn.setRequestMethod("POST");
-			conn.setRequestProperty("content-type", "application/xml");
-			conn.setDoOutput(true);
-
-			// invia casa come xml body
-			marshaller.marshal(myCasa, conn.getOutputStream());
-
-			assert conn.getResponseCode() == 201: "CasaApp: Condominio register failed ( " + conn.getResponseCode() + " " + conn.getResponseMessage() + " )";
-			LOGGER.log(Level.INFO, "{ " + casaId + " } Casa registered to Admin Server with code: " + conn.getResponseCode() + " " + conn.getResponseMessage());
-		}
-		catch(Exception e)
-		{
-			LOGGER.log(Level.SEVERE, "Failed to connect to Admin Server ( POST " + serverURL + "/condominio/add )");
-		}
 
 
 
@@ -163,15 +133,8 @@ public class CasaApp
 				// termina tutti i thread + informa il server che la casa sta per uscire
 				if(choice.equals("1"))
 				{
-					// post per cancellare la casa
-					url = new URL(serverURL + "/condominio/delete");
-					conn = (HttpURLConnection) url.openConnection();
-					conn.setRequestMethod("POST");
-					conn.setRequestProperty("content-type", "application/xml");
-					conn.setDoOutput(true);
-					marshaller.marshal(myCasa, conn.getOutputStream());
-					assert conn.getResponseCode() == 204 : "Error in removing casa " + casaId;
-
+					// cancella casa dal condominio rest
+					Http.deleteCasa(myCasa);
 
 					// se sta per uscire ed era il coordinatore delle stat globali, dice a tutti che molla (nuova elezione poi)
 					if(election.getState().equals(Election.ElectionOutcome.COORD))

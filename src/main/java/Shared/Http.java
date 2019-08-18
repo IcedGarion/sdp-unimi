@@ -1,6 +1,7 @@
 package Shared;
 
 import ClientCasa.CasaApp;
+import ServerREST.beans.Casa;
 import ServerREST.beans.Condominio;
 import ServerREST.beans.MeanMeasurement;
 import ServerREST.beans.Notifica;
@@ -49,6 +50,72 @@ public class Http
 
 		return condominio;
 	}
+
+
+	/*	REGISTRA NUOVA CASA		*/
+	public static void registerCasa(Casa myCasa)
+	{
+		URL url;
+		HttpURLConnection conn;
+		JAXBContext jaxbContext;
+		Marshaller marshaller;
+
+		// POST /condominio/add: inserisce nuova casa
+		try
+		{
+			jaxbContext = JAXBContext.newInstance(Casa.class);
+			marshaller = jaxbContext.createMarshaller();
+
+			url = new URL(Configuration.SERVER_URL + "/condominio/add");
+			conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("content-type", "application/xml");
+			conn.setDoOutput(true);
+
+			// invia casa come xml body
+			marshaller.marshal(myCasa, conn.getOutputStream());
+
+			assert conn.getResponseCode() == 201: "CasaApp: Condominio register failed ( " + conn.getResponseCode() + " " + conn.getResponseMessage() + " )";
+		}
+		catch(Exception e)
+		{
+			LOGGER.log(Level.SEVERE, "Failed to connect to Admin Server");
+			e.printStackTrace();
+		}
+	}
+
+
+	/*	CANCELLA CASA DAL CONDOMINIO	*/
+	public static void deleteCasa(Casa myCasa)
+	{
+		URL url;
+		HttpURLConnection conn;
+		JAXBContext jaxbContext;
+		Marshaller marshaller;
+
+		try
+		{
+			jaxbContext = JAXBContext.newInstance(Casa.class);
+			marshaller = jaxbContext.createMarshaller();
+
+			// post per cancellare la casa
+			url = new URL(Configuration.SERVER_URL + "/condominio/delete");
+			conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("content-type", "application/xml");
+			conn.setDoOutput(true);
+			marshaller.marshal(myCasa, conn.getOutputStream());
+
+			assert conn.getResponseCode() == 204 : "Error in removing casa";
+
+		}
+		catch(Exception e)
+		{
+			LOGGER.log(Level.SEVERE, "Failed to connect to Admin Server");
+			e.printStackTrace();
+		}
+	}
+
 
 	/*	INVIA STAT GLOBALI */
 	public static void sendGlobalStat(MeanMeasurement globalConsumption)

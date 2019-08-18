@@ -1,20 +1,6 @@
 # TODO now
 
 
-Sistema i nomi thread e commenti
-
-Cambia nomi ai 3 (non piu' "Thread")
-
-In casaApp, non devi far partire messaggi prima che il server sia su! MeanThread per ultimo
-Insomma, pensa all'ordine di cose da fare (server msg - meanThread - registra casa - 
-
-
-
-
-
-
-
-
 
 
 ------- CASI PARTICOLARI POWER BOOST / TANTO TEST
@@ -31,9 +17,6 @@ Insomma, pensa all'ordine di cose da fare (server msg - meanThread - registra ca
 
 - caso in cui ti arrivano gli OK ma non sei in USING? cosa significa / come ci entri?
 
-
-------- PORTA UNICA? UNICO SERVER CHE ASCOLTA E POI LANCIA I THREAD WORKER GIUSTI A SECOND DEL MSG?
-------- DOCUMENTAZIONE / SLIDE
 
 
 
