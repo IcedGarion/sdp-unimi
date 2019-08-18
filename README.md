@@ -1,8 +1,5 @@
 # TODO now
 
-
-
-
 ------- CASI PARTICOLARI POWER BOOST / TANTO TEST
 
 - BOOST: caso in cui 3 case: mandi boost, ricevi OK da una delle altre e vai, pero' DOPO ricevi il tuo msg di BOOST
@@ -12,19 +9,28 @@
    OPPURE lascia cosi', perche' tanto succede che: quando hai finito boost, ti rimandi da solo OK, ma questo viene ignorato perche' non hai
    richiesto boost (magari aggiungi spiegazione nel LOG)
 
+E' stato lasciato cosi' ma da testare il caso.
+
 - caso in cui sei in attesa degli OK (stai per ottenere boost) ma un altro chiede BOOST?
   dovrebbe essere come se lo stai gia usando: accoda
 
 - caso in cui ti arrivano gli OK ma non sei in USING? cosa significa / come ci entri?
 
+----------------------------------------------------------
+
+
+## SCELTE / COSE DA CAMBIARE
+-> "una stat non deve contribuire piu di una volta nel calcolo globale -->> vai in CondominioStats e 
+   fai che quando arriva una nuova stat da x ma x esistevia gia (a questo giro di tot) allora non fa niente, invece di aggiornare!
+
+-> StatLocaliService ha un lock obj che puo' diventare sync (si puo togliere e metti sync method)
+   E anche altri service
+
+-> AdminApp e' fatta proprio male, codice ripetuto e non usa metodi comuni (Http)
 
 
 
-(una cosa da sistemare indietro, poi quando avrai finito election):
---------- "una stat non deve contribuire piu di una volta nel calcolo globale -->> vai in CondominioStats e 
-	   fai che quando arriva una nuova stat da x ma x esistevia gia (a questo giro di tot) allora non fa niente, invece di aggiornare!
 
-(guarda appunti e sistema caso election non coord: da aggiungere cose)
 
 
 
@@ -55,12 +61,7 @@
 
 
 # REFACTOR
-- Anche AdminApp dovrebbe usare la classe HTTP comune
-- StatLocaliService ha un lock obj che puo' diventare sync (si puo togliere e metti sync method)
-- AdminApp e' un orrore, serve refactor e metodi comuni
-
 - TOGLI / CONTROLLA i TODO e FIXME
-- PORTA UNICA
 
 
 

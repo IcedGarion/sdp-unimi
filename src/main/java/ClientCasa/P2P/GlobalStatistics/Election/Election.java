@@ -21,6 +21,7 @@ public class Election
 	private static final Logger LOGGER = Logger.getLogger(Election.class.getName());
 	public enum ElectionOutcome	{ NEED_ELECTION, COORD, NOT_COORD };
 	private String casaId;
+	private String[] coord;
 
 
 	// dati condivisi (con relativi metodi per accedere: stato (se sei coord)
@@ -30,6 +31,7 @@ public class Election
 	{
 		this.casaId = Configuration.CASA_ID;
 		setState(ElectionOutcome.NEED_ELECTION);
+		this.coord = new String[3];
 
 		// logger levels
 		LOGGER.setLevel(Configuration.LOGGER_LEVEL);
@@ -119,5 +121,18 @@ public class Election
 			LOGGER.log(Level.SEVERE, "{ " + casaId + " } Error occurred in coord leaving");
 			e.printStackTrace();
 		}
+	}
+
+	// Salva le info sul coordinatore: [0] id, [1] ip, [2] port
+	public synchronized void setCoord(String coordId, String coordIp, int coordPort)
+	{
+		this.coord[0] = coordId;
+		this.coord[1] = coordIp;
+		this.coord[2] = String.valueOf(coordPort);
+	}
+
+	public synchronized String[] getCoord()
+	{
+		return this.coord;
 	}
 }

@@ -50,6 +50,8 @@ public class PowerBoostResponder implements MessageResponder
 			senderPort = boostMessage.getSenderPort();
 			senderTimestamp = boostMessage.getTimestamp();
 
+			LOGGER.log(Level.INFO, "P2P Message received from " + senderId + ": " + boostMessage.getMessage());
+
 			switch(boostMessage.getMessage())
 			{
 				// qualcuno ha richesto power boost: 3 casi (stato)
@@ -91,6 +93,12 @@ public class PowerBoostResponder implements MessageResponder
 					// se sta usando il boost, non risponde e accoda la richiesta
 					else if(powerBoostObject.getState().equals(PowerBoost.PowerBoostState.USING))
 					{
+						// se riceve la sua stessa richiesta (in ritardo) quando ha gia' ottenuto boost: la ignora, non accora
+						if(senderId.equals(casaId))
+						{
+							LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg BOOST in ritardo da me stesso: lo ignoro");
+						}
+
 						LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg BOOST da " + senderId + ": sto usando il boost e quindi accodo la richiesta");
 
 						powerBoostObject.accodaRichiesta(senderId, senderIp, senderPort);

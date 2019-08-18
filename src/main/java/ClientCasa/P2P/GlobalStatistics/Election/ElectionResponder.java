@@ -39,15 +39,16 @@ public class ElectionResponder implements MessageResponder
 		Condominio condominio;
 		String senderIp, senderId;
 		int senderPort;
+		String[] coordInfo;
 
 		try
 		{
-			LOGGER.log(Level.INFO, "P2P Message received from " + electionMessage.getSenderId() + ": " + electionMessage.getMessage());
-
 			// gli arriva il messaggio P2P dal dispatcher
 			senderId = electionMessage.getSenderId();
 			senderIp = electionMessage.getSenderIp();
 			senderPort = electionMessage.getSenderPort();
+
+			LOGGER.log(Level.INFO, "P2P Message received from " + senderId + ": " + electionMessage.getMessage());
 
 			// decide cosa fare in base al messaggio:
 			switch(electionMessage.getMessage())
@@ -124,9 +125,24 @@ public class ElectionResponder implements MessageResponder
 					// OPPURE e' stata indetta una nuova elezione.
 					else
 					{
-						// TODO: migliorare il caso in cui non sei coord... non stai li a fare niente, ma prova a vedere se esiste coord..... vedi appunti!
+						// prova a contattare coord per sapere se e' vivo o serve nuova elezione
+						LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Non sono io il coord e quindi non rispondo a msg di election; coord esiste e gli rispondera' - Provo a contattare coordinatore");
 
-						LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Non sono io il coord e quindi non rispondo a msg di election; coord esiste gia' e gli rispondera'");
+						try
+						{
+							coordInfo = electionObject.getCoord();
+
+							// invia "COORD_ALIVE" al coordinatore salvato
+							electionMessageSender = new MessageSenderThread(casaId, coordInfo[1], Integer.parseInt(coordInfo[2]), new P2PMessage(casaId, Configuration.CASA_PORT, "COORD_ALIVE", "ELECTION"));
+							electionMessageSender.start();
+						}
+						catch(Exception e)
+						{
+							LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Il coord non e' piu' attivo: invio a tutti rielezione");
+							electionObject.coordLeaving();
+						}
+
+						LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Coord sembra essere online");
 					}
 					break;
 
@@ -138,6 +154,10 @@ public class ElectionResponder implements MessageResponder
 
 					// setta lo stato in modo che poi StatsReceiver sa come comportarsi (inviare al server la stat globale o NO)
 					electionObject.setState(Election.ElectionOutcome.NOT_COORD);
+
+					// salva anche ID del coordinatore appena eletto, per poi pingarlo se serve
+					electionObject.setCoord(senderId, senderIp, senderPort);
+
 					break;
 
 				// caso in cui coordinatore esce dalla rete: dice a tutti che se ne va e tutti quanti faranno poi nuova elezione
@@ -146,6 +166,26 @@ public class ElectionResponder implements MessageResponder
 
 					// setta lo stato in modo che poi StatsReceiver sa come comportarsi (servira' indire nuova elezione)
 					electionObject.setState(Election.ElectionOutcome.NEED_ELECTION);
+					break;
+				// un not coord vuole sapere se coord e' vivo: se lo e', manda OK; se non lo e' ci sara' nuova elezione
+				case "COORD_ALIVE":
+					// sono io coord: rispondo OK (verra' ignorato: viene controllato solo se la socket e' aperta
+					if(electionObject.getState().equals(Election.ElectionOutcome.COORD))
+					{
+						LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Ricevuto ALIVE da " + senderId + ": sono io il coord e sono vivo, mando OK");
+
+						electionMessageSender = new MessageSenderThread(casaId, senderIp, senderPort, new P2PMessage(casaId, Configuration.CASA_PORT, "OK", "ELECTION"));
+						electionMessageSender.start();
+					}
+					// se non sono coord ma mi arriva alive, qualcosa e' andato storto (qualcuno crede che sia coord chi non lo e'): rifa elezioine
+					else
+					{
+						LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Ricevuto ALIVE da " + senderId + ": non sono il coord ma qualcuno crede che io lo sia: meglio rifare election");
+						electionObject.coordLeaving();
+					}
+					break;
+				// caso in cui ricevi OK da coord dopo che hai chiesto ALIVE: ignora il messaggio
+				default:
 					break;
 			}
 		}
