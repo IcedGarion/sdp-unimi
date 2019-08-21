@@ -2,6 +2,17 @@
 
 ------- CASI PARTICOLARI POWER BOOST / TANTO TEST
 
+- boost: gli OK non arrivano MAI: sei REQUESTED ma non arrivano msg...
+  -> timeout? chi ha richiesto BOOST dopo un po' lo richiede ancora
+ si blocca tutto per semaforo e non puoi neanche richiederne un altro per ora
+
+( allora parte un timer quando richiedi boost: quando finisce timer fai check se sto boost ti e' stato concesso;
+  se ancora no, fai ripartire mandando nuovamente messaggio di boost)
+
+
+
+
+
 - BOOST: caso in cui 3 case: mandi boost, ricevi OK da una delle altre e vai, pero' DOPO ricevi il tuo msg di BOOST
    (in pratica fa prima ad andare fuori BOOST e ricevere un OK, rispetto a ricevere il TUO BOOST).
    allora non devi accodare a tua stessa richiesta, ma ignorare... (basta un IF nel case "BOOST" se sei USING e richiesta ha il tuo ID)
@@ -11,10 +22,13 @@
 
 E' stato lasciato cosi' ma da testare il caso.
 
-- caso in cui sei in attesa degli OK (stai per ottenere boost) ma un altro chiede BOOST?
-  dovrebbe essere come se lo stai gia usando: accoda
 
-- caso in cui ti arrivano gli OK ma non sei in USING? cosa significa / come ci entri?
+------- CASI PARTICOLARI ELECTION
+
+- coord appena caduto (3 case ora): in 2 fanno partire elezione, (0, 1):  2 legge election di 1, diventa coord e avvisa tutti.
+  MA c'e' ancora in giro ELECTION di 0: 1 riceve election e eventualmente (se ancora NEED_ELECTION) manda ancora a 2, che gli risponde ELCETED.
+  Altrimenti non lo rimanda neanche (se gia' NOT_COORD) e finisce.
+  -> tutto ok.
 
 ----------------------------------------------------------
 
@@ -28,28 +42,9 @@ E' stato lasciato cosi' ma da testare il caso.
 
 -> AdminApp e' fatta proprio male, codice ripetuto e non usa metodi comuni (Http)
 
+- TOGLI / CONTROLLA i TODO e FIXME
 
 
-
-
-
-
-
-# DOMANDE FATTE / COSE DA SISTEMARE POI
-- pool di thread opzionale, non serve per forza
-- bully algo va bene per elezione, tanto uscite sono controllate:
-  nel caso di uscita, avvisa il server e tutte le case (che si scaricano di nuovo la lista)
-  
-  MA POI VA RI-INDETTA ELEZIONE! 
-  DEVONO CAPIRE CHE SI E' IN "NEED_ELECTION" QUANDO UNO ESCE.... TIMEOUT SE NON RISPONDE NESSUN COORD? VEDI BULLY  
-	DA IMPLEMENTARE IN UN RAMO DI STATSRECEIVERSERVERTHREAD: se non sei coord (ma neanche in need_election, perche' c'e' gia' stata),
-	dovresti comunque cercare di pingare il coord per ssapere se indirne una nuova
-
-
-  ( QUANDO CASA ESCE, CHE SUCCEDE A STATS SENDER/ RECEIVER? CONTINUA A FUNZIONARE OPPURE SI BLOCCA IN ATTESA DELL'ULTIMA CASA
-  ( CHE NON MANDERA' MAI LA SUA STATISTICA?? -> ANDREBBE TOLTA LA CASA ANCHE DALL'OGGETTO CONDIVISO (HASHMAP)
-  ( ANDREBBE RI-AGGIORNATO IL CONDOMINIO E PASSATO AL STATSRECEIVER (seno' crede che ci sia ancora una casa in piu)
-   -> dovrebbe essere ok questa parte, perche' si scarica condominio gia' di suo ogni volta che manda / riceve stats
 
 
 # COSE DA TENERE SEMPRE A MENTE
@@ -58,11 +53,6 @@ E' stato lasciato cosi' ma da testare il caso.
 - Quando sei in debug, alcune richieste non arrivano a chi ascolta.
 - marshalling con socket deve chiudere la socket... altrimenti unmarshaller si blocca senza dire niente
 - Comunicazioni in broadcast non devono mai essere sequenziali! lancia thread che invia, ogni volta
-
-
-# REFACTOR
-- TOGLI / CONTROLLA i TODO e FIXME
-
 
 
 
@@ -237,70 +227,3 @@ riutilizzare un metodo gia' esistente.
 Quando una casa ottiene il boost, manda ad-hoc un messaggio HTTP al server; NotificheService un servizio apposta per ricevere la notifica di 
 boost dalla rete. Questo la riceve e inoltra alla ADMIN APP, come per entrata / uscita case.
 ======================================================================================================================================
-**APPUNTI**
-
-
-(segue le slide lab5)
-
-PARTE1
-
-- un thread per casa:
-	simulare dati che escono
-
-- client amministratore
-
-- server e' un server REST (jersey?):
-	bisogna risolvere tutti i problemi di syncro
-
-
-(c'e' una classe statistiche e una classe condominio lato server)
-
-PARTE2
-
-- Rete p2p fra le case:
-	architettura e protocolli
-	pensare a tutti i casi limite che possono succedere
-	(fault tolerance, es: una casa esce durante elezione)
-
-	CASI LIMITE VANNO PENSATI TUTTI E GESTITI; VENGONO VALUTATi
-
-PASSI
-- prova aggiunte / rimozione di case dalla rete
-- analisi sensori e comunicazione server
-- algoritmo di mutua esclusione
-
-
-....
-
-
-GESTIONE CASE
-
-Si vuole aggiungere / togliere case
-(casa e' IP + PORT. "esiste gia" = esiste gia un IP+PORT)
-Server AMMINISTRATORE gestisce (metodi syncronized non funzionano sempre, usa syncro statement SEMPRE)
-Va protetta la sincronizzazione sia in lettura che in scrittura
-
-
-GESTIONE STATISTICHE
-"ha senso bloccare ogni operazione (ad esempio
-aggiunta/rimozione di case) mentre vengono calcolate le
-statistiche?"
-  -> NO. Se usi una unica classe in cui metti strutture dati di case e di statistiche,
-  e poi fai tutti i syncronized methods, hai un solo lock e quindi una operazione blocca tutto
-  Quindi separa in 2 classi oppure usa i sync statement.
-
-Stessa cosa per:
-"Ha senso bloccare l’intera struttura dati con tutte le statistiche
-anche se vogliamo analizzare le statistiche di una specifica
-casa?" 
-  -> NO. Locka solo certe cose, cerca di tenere i lock al minimo.
-  Es, se leggi statistiche di una casa non serve bloccarle tutte
-
-
-JERSEY REMINDER
-non mettere come synchronized sui metodi annotati tipo @PATH.
-Usa SINGLETON su tutte le risorse che sono condivise. Es, strutture dati,
-statistiche globali e locali sono condivise e quindi singleton.
-(serve perche' jersey istanzia tante volte cose ???)
-
-

@@ -114,7 +114,6 @@ public class PowerBoost
 	{
 		Condominio condominio;
 		MessageSenderThread boostMessageSender;
-		PowerBoostState currentState;
 
 		try
 		{
@@ -139,9 +138,6 @@ public class PowerBoost
 			condominio = Http.getCondominio();
 			setCaseAttive(condominio.size());
 
-			// invia "BOOST" a tutti compreso se stesso, con anche timestamp
-			setMessageTimestamp(new Date().getTime());
-
 			// se c'e' solo una casa (o 2), sa gia' per certo di poter richiedere subito BOOST
 			if(condominio.size() <= 2)
 			{
@@ -152,6 +148,9 @@ public class PowerBoost
 			}
 			else
 			{
+				// invia "BOOST" a tutti compreso se stesso, con anche timestamp
+				setMessageTimestamp(new Date().getTime());
+
 				for(Casa c : condominio.getCaselist())
 				{
 					boostMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getPort(), new P2PMessage(casaId, Configuration.CASA_PORT, "BOOST", getMessageTimestamp(), "BOOST"));
@@ -160,6 +159,9 @@ public class PowerBoost
 
 				LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Inviato msg BOOST a tutte le " + getCaseAttive() + " case");
 			}
+
+			// TODO: fa partire thread timer di x secondi: se gli OK non arrivano mai, questo scade e manda altra richiesta boost
+			// se quando scade timer ce l'hai fatta a fare boost, non fa piu' niente.
 		}
 		catch(Exception e)
 		{

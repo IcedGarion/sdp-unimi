@@ -11,26 +11,25 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/*	Classe statica con metodi per gestire elezione.
-	Chi ha bisogno indice elezione e vede ritornarsi uno status: eletto coordinatore oppure no. Poi decide cosa fare in base a quello status
+/*	Classe statica con metodi per gestire elezione: chi ha bisogno indice elezione.
+    Ha anche metodi sync per gestire stato elezione.
 
-	Gli id casa possono essere stringhe arbitrarie e non per forza solo numeri. Confronto viene fatto da java compare su stringhe
+	Gli id casa possono essere stringhe arbitrarie e non per forza solo numeri. Confronto (>) viene fatto da java compare su stringhe
  */
 public class Election
 {
 	private static final Logger LOGGER = Logger.getLogger(Election.class.getName());
-	public enum ElectionOutcome	{ NEED_ELECTION, COORD, NOT_COORD };
+	public enum ElectionState { NEED_ELECTION, COORD, NOT_COORD };
 	private String casaId;
 	private String[] coord;
 
-
 	// dati condivisi (con relativi metodi per accedere: stato (se sei coord)
-	public ElectionOutcome state;
+	public ElectionState state;
 
 	public Election()
 	{
 		this.casaId = Configuration.CASA_ID;
-		setState(ElectionOutcome.NEED_ELECTION);
+		setState(ElectionState.NEED_ELECTION);
 		this.coord = new String[3];
 
 		// logger levels
@@ -41,11 +40,11 @@ public class Election
 		LOGGER.setUseParentHandlers(false);
 	}
 
-	public synchronized void setState(ElectionOutcome state)
+	public synchronized void setState(ElectionState state)
 	{
 		this.state = state;
 	}
-	public synchronized ElectionOutcome getState()
+	public synchronized ElectionState getState()
 	{
 		return this.state;
 	}
@@ -61,14 +60,11 @@ public class Election
 
 		try
 		{
-			// Thread vero elezione e' gia' attivato... E' lì che aspetta di rispondere a questo thread che invierà msg di inizio
-
-
-			/* INIZIA ELEZIONE: manda msg ELECTION a ~tutti; poi electionThread se ne occupa*/
+			/* INIZIA ELEZIONE: manda msg ELECTION a ~tutti; poi electionThread se ne occupa	*/
 			// lista case coinvolte in elezione
 			condominio = Http.getCondominio();
 
-			// manda msg elezione a TUTTI, tranne se stesso (informa tutti che e' entrato: se c'e' un coord gli risponde, se non c'e allora si fa elezione)
+			// manda msg elezione a tutti tranne se stesso (informa tutti che e' entrato: se c'e' un coord gli risponde, se non c'e allora si fa elezione)
 			// se e' l'unica casa a entrare qua (da sola), allora si autoproclama coord di se stesso e basta
 			for(Casa c: condominio.getCaselist())
 			{
@@ -85,7 +81,7 @@ public class Election
 			if(caseTot == 1)
 			{
 				LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Sono da solo e faccio io il coord");
-				setState(ElectionOutcome.COORD);
+				setState(ElectionState.COORD);
 			}
 		}
 		catch(Exception e)
@@ -105,12 +101,12 @@ public class Election
 		{
 			condominio = Http.getCondominio();
 
-			// manda msg elezione a TUTTI, tranne se stesso (informa tutti che sta per uscire)
+			// manda msg rielezione a TUTTI, tranne se stesso (informa tutti che sta per uscire)
 			for(Casa c : condominio.getCaselist())
 			{
 				if(c.getId().compareTo(casaId) != 0)
 				{
-					// invia "ELECTION": chiede ai superiori di prendersi carico coordinatore
+					// invia "NEED_REELECTION": chiede ai superiori di prendersi carico coordinatore
 					electionMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getPort(), new P2PMessage(casaId, Configuration.CASA_PORT, "NEED_REELECTION", "ELECTION"));
 					electionMessageSender.start();
 				}

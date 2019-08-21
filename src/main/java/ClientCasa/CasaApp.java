@@ -137,7 +137,7 @@ public class CasaApp
 					Http.deleteCasa(myCasa);
 
 					// se sta per uscire ed era il coordinatore delle stat globali, dice a tutti che molla (nuova elezione poi)
-					if(election.getState().equals(Election.ElectionOutcome.COORD))
+					if(election.getState().equals(Election.ElectionState.COORD))
 					{
 						election.coordLeaving();
 					}

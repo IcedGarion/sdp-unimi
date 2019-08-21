@@ -53,10 +53,10 @@ public class ElectionResponder implements MessageResponder
 			// decide cosa fare in base al messaggio:
 			switch(electionMessage.getMessage())
 			{
-				// e' stato contattato perhe' ha ID maggiore di qualcuno: contatta i superiori a sua volta / risponde se e' lui il coord
+				// e' stato contattato perche' ha ID maggiore di qualcuno: contatta i superiori a sua volta / risponde se e' lui il coord
 				case "ELECTION":
 					// se e' lui il coord vuol dire che e' entrata una nuova casa e vuole sapere chi e' il coord: gli risponde
-					if(electionObject.getState().equals(Election.ElectionOutcome.COORD))
+					if(electionObject.getState().equals(Election.ElectionState.COORD))
 					{
 						LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Ricevuto msg ELECTION da " + senderId + ": sono io il coord e glielo dico");
 
@@ -67,7 +67,7 @@ public class ElectionResponder implements MessageResponder
 						LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Risposto a " + senderId + " che sono io il coord");
 					}
 					// se invece anche secondo lui non c'e' un coord, allora ci sara' da indire elezione veramente: contatta i superiori
-					else if(electionObject.getState().equals(Election.ElectionOutcome.NEED_ELECTION))
+					else if(electionObject.getState().equals(Election.ElectionState.NEED_ELECTION))
 					{
 						LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Ricevuto msg ELECTION da " + senderId + ": non c'e ancora coord quindi inidico elezione ai superiori");
 
@@ -98,7 +98,7 @@ public class ElectionResponder implements MessageResponder
 
 
 							// setta lo stato in modo che poi StatsReceiver sa come comportarsi (inviare al server la stat globale (o no))
-							electionObject.setState(Election.ElectionOutcome.COORD);
+							electionObject.setState(Election.ElectionState.COORD);
 
 							// manda a tutti il messaggio che e' lui il coord
 							condominio = Http.getCondominio();
@@ -153,7 +153,7 @@ public class ElectionResponder implements MessageResponder
 					LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Ricevuto msg ELECTED da " + senderId + ": e' lui il coord e quindi mi proclamo NOT_COORD");
 
 					// setta lo stato in modo che poi StatsReceiver sa come comportarsi (inviare al server la stat globale o NO)
-					electionObject.setState(Election.ElectionOutcome.NOT_COORD);
+					electionObject.setState(Election.ElectionState.NOT_COORD);
 
 					// salva anche ID del coordinatore appena eletto, per poi pingarlo se serve
 					electionObject.setCoord(senderId, senderIp, senderPort);
@@ -165,12 +165,12 @@ public class ElectionResponder implements MessageResponder
 					LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Ricevuto msg NEED_REELECTION da " + senderId + ": il vecchio coord e' uscito e quindi serve nuova elezione: mi proclamo NEED_ELECTION");
 
 					// setta lo stato in modo che poi StatsReceiver sa come comportarsi (servira' indire nuova elezione)
-					electionObject.setState(Election.ElectionOutcome.NEED_ELECTION);
+					electionObject.setState(Election.ElectionState.NEED_ELECTION);
 					break;
 				// un not coord vuole sapere se coord e' vivo: se lo e', manda OK; se non lo e' ci sara' nuova elezione
 				case "COORD_ALIVE":
 					// sono io coord: rispondo OK (verra' ignorato: viene controllato solo se la socket e' aperta
-					if(electionObject.getState().equals(Election.ElectionOutcome.COORD))
+					if(electionObject.getState().equals(Election.ElectionState.COORD))
 					{
 						LOGGER.log(Level.INFO, "{ " + casaId + " } [ ELECTION ] Ricevuto ALIVE da " + senderId + ": sono io il coord e sono vivo, mando OK");
 

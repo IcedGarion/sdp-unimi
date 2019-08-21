@@ -89,7 +89,6 @@ public class PowerBoostResponder implements MessageResponder
 							boostMessageSender.start();
 						}
 					}
-					// TODO: se invece stava aspettando gli OK per il BOOST, ma qualcun altro lo richiede??? stessa cosa di "lo sta usando"?
 					// se sta usando il boost, non risponde e accoda la richiesta
 					else if(powerBoostObject.getState().equals(PowerBoost.PowerBoostState.USING))
 					{

@@ -120,14 +120,14 @@ public class StatsReceiverResponder implements MessageResponder
 					// se invece, questa casa si e' unita dopo e il coord c'e' gia': fa comunque startElection
 					// il suo ElectionResponder ricevera' un msg dal coord dicendogli che esiste, e il thread settera' lo stato di election a NOT_COORD
 					// elezione parte soltanto se "tutti" sono in NEED_ELECTION, cioè all'inizio, oppure quando esce coord
-					if(election.getState().equals(Election.ElectionOutcome.NEED_ELECTION))
+					if(election.getState().equals(Election.ElectionState.NEED_ELECTION))
 					{
 						LOGGER.log(Level.FINE, "{ " + casaId + " } Serve elezione per inviare la stat globale");
 
 						election.startElection();
 					}
 					// se c'e gia'/appena stata elezione e sei tu coord, invia le statistiche al server
-					else if(election.getState().equals(Election.ElectionOutcome.COORD))
+					else if(election.getState().equals(Election.ElectionState.COORD))
 					{
 						LOGGER.log(Level.FINE, "{ " + casaId + " } Sono io il coord e sto mandando le stat globali al server");
 
