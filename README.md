@@ -1,17 +1,14 @@
 # TODO now
 
-------- CASI PARTICOLARI POWER BOOST / TANTO TEST
+- BOOST timestamp uguali, confronta i nomi
+- Request boost resetta gli ok
+- coda di boost no duplicati
+- timeout di retry per power boost
 
-- boost: gli OK non arrivano MAI: sei REQUESTED ma non arrivano msg...
-  -> timeout? chi ha richiesto BOOST dopo un po' lo richiede ancora
- si blocca tutto per semaforo e non puoi neanche richiederne un altro per ora
-
-( allora parte un timer quando richiedi boost: quando finisce timer fai check se sto boost ti e' stato concesso;
-  se ancora no, fai ripartire mandando nuovamente messaggio di boost)
+- no sync method ma sync statement isolando bene pezzo per pezzo oppure no sync at all, tanto chiami sempre dei mini-metodi sync
 
 
-
-
+------- CASI PARTICOLARI POWER BOOST
 
 - BOOST: caso in cui 3 case: mandi boost, ricevi OK da una delle altre e vai, pero' DOPO ricevi il tuo msg di BOOST
    (in pratica fa prima ad andare fuori BOOST e ricevere un OK, rispetto a ricevere il TUO BOOST).

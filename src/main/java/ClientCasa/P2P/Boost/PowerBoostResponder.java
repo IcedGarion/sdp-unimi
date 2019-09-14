@@ -63,7 +63,9 @@ public class PowerBoostResponder implements MessageResponder
 						myMessageTimestamp = powerBoostObject.getMessageTimestamp();
 
 						// se la mia richiesta esiste (timestamp salvato != -1) ed e' piu vecchia, vado io: accoda l'altra richiesta e auto-invia OK
-						if(myMessageTimestamp != -1 && myMessageTimestamp <= senderTimestamp)
+						// OPPURE se i timestamp sono uguali, confronta i nomi
+						if((myMessageTimestamp != -1 && myMessageTimestamp <= senderTimestamp) ||
+								(myMessageTimestamp == senderTimestamp && casaId.compareTo(senderId) < 0))
 						{
 							// se l'altra richiesta era la MIA, non la accodo (perche' sto per usare boost: non voglio auto mandarmi OK una volta finito)
 							if(! senderId.equals(casaId))

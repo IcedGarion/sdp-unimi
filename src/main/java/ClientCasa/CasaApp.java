@@ -142,6 +142,10 @@ public class CasaApp
 						election.coordLeaving();
 					}
 
+					// se stava usando il power boost e lo hai interrotto, manda OK di rilascio a tutta la sua coda
+					// ( o anche se era in coda lui stesso )
+					powerBoost.deleteQueueWithOK();
+
 					// termina i suoi thread
 					messageServer.interrupt();
 					mean.interrupt();

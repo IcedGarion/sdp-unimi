@@ -77,7 +77,7 @@ public class MessageSenderThread extends Thread
 		catch(Exception e)
 		{
 			LOGGER.log(Level.SEVERE, "{ " + senderId + " } Unable to connect to " + ip + ": " + port);
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 	}
 }

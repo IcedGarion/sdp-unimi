@@ -9,9 +9,7 @@ import Shared.Configuration;
 import Shared.Http;
 
 import javax.xml.bind.JAXBException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,10 +19,14 @@ import java.util.logging.Logger;
 public class PowerBoost
 {
 	private static final Logger LOGGER = Logger.getLogger(PowerBoost.class.getName());
+	private static final int BOOST_TIMEOUT_RETRY = 8000;
 	public enum PowerBoostState { REQUESTED, USING, NOT_INTERESTED };
 
 	// lock per non richiedere 2 boost allo stesso tempo (stessa casa)
 	private Object boostLock;
+
+	// flag per il thread timeout che richiede dopo un po': se sei riuscito a ottenere boost, il timeout si ferma
+	private boolean boostObtained;
 
 	private String casaId;
 	private SmartMeterSimulator simulator;
@@ -32,6 +34,9 @@ public class PowerBoost
 
 	// coda di case che hanno richiesto boost mentre lo stavi usando
 	private List<String[]> queue;
+	// set di case messe in coda (per ricerca se c'è gia' uno in coda queue)
+	private Set<String> queued;
+
 	// numero case in gioco quando manda la prima richiesta boost
 	private int caseAttive;
 	// contatore degli OK
@@ -47,8 +52,10 @@ public class PowerBoost
 		this.caseAttive = 1;
 		this.OKCount = 0;
 		this.queue = new ArrayList<>();
+		this.queued = new HashSet<>();
 		this.messageTimestamp = -1;
 		this.boostLock = new Object();
+		this.boostObtained = false;
 
 		// logger levels
 		LOGGER.setLevel(Configuration.LOGGER_LEVEL);
@@ -68,6 +75,19 @@ public class PowerBoost
 		return this.state;
 	}
 
+	// thread timeout che continua a riprovare boost request
+	private PowerBoostWaiterThread timeoutThread;
+
+	public synchronized void setObtained(boolean x)
+	{
+		this.boostObtained = x;
+	}
+
+	public synchronized boolean getObtained()
+	{
+		return this.boostObtained;
+	}
+
 	// numero case quando manda la richiesta: serve poi per contare numero OK che ritornano (devono coincidere)
 	public synchronized void setCaseAttive(int caseAttive) { this.caseAttive = caseAttive; }
 
@@ -79,7 +99,7 @@ public class PowerBoost
 	public synchronized long getMessageTimestamp() { return this.messageTimestamp; }
 
 	// aggiungi / rimuovi casa dalla coda delle richieste (null se vuota)
-	private synchronized String[] deaccodaRichiesta()
+	public synchronized String[] deaccodaRichiesta()
 	{
 		// prende elemento in testa, rimuove e ritorna
 		String[] ret;
@@ -93,17 +113,30 @@ public class PowerBoost
 		{
 			return null;
 		}
+
+		// rimuove anche dal set degli accodati la stessa casa
+		queued.remove(ret[0]);
+
 		return ret;
 	}
 
 	public synchronized void accodaRichiesta(String senderId, String senderIp, int senderPort)
 	{
-		// inserisce in coda (una coda senderId, senderIp, senderPort) per poter poi mandare OK
-		queue.add(new String[] {senderId, senderIp, String.valueOf(senderPort)});
+		// non puoi accodare piu' di una volta la stessa casa
+		if(! queued.contains(senderId))
+		{
+			// aggiunge al set di case accodate
+			queued.add(senderId);
+
+			// inserisce in coda (una coda senderId, senderIp, senderPort) per poter poi mandare OK
+			queue.add(new String[]{senderId, senderIp, String.valueOf(senderPort)});
+		}
 	}
 
 	// aggiorna / check del numero di OK ricevuti dopo una richiesta di BOOST
 	public synchronized void incrOKCount() { this.OKCount = this.OKCount+1; }
+
+	public synchronized void resetOKCount() { this.OKCount = 0; }
 
 	public synchronized int getOKCount() { return this.OKCount; }
 
@@ -133,6 +166,12 @@ public class PowerBoost
 			// setta il proprio stato interno: ha richiesto il boost
 			setState(PowerBoostState.REQUESTED);
 
+			// setta obtained: ha richiesto boost ma non ancora ottenuto ( per thread timeout )
+			setObtained(false);
+
+			// resetta il conto degli OK (se sta riprovando piu' volte e mi arriva ok dalla stessa casa, non deve sommarsi)
+			resetOKCount();
+
 			// MANDA A TUTTI MSG BOOST REQUEST
 			// chiede elenco case e si salva il numero, per contare poi gli OK
 			condominio = Http.getCondominio();
@@ -160,8 +199,12 @@ public class PowerBoost
 				LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Inviato msg BOOST a tutte le " + getCaseAttive() + " case");
 			}
 
-			// TODO: fa partire thread timer di x secondi: se gli OK non arrivano mai, questo scade e manda altra richiesta boost
-			// se quando scade timer ce l'hai fatta a fare boost, non fa piu' niente.
+			// alla fine della richiesta, fa partire un timer che richiedera' di nuovo il boost fra x secondi, in caso non ci sia ancora riuscito
+			synchronized(this)
+			{
+				timeoutThread = new PowerBoostWaiterThread(this, BOOST_TIMEOUT_RETRY);
+				timeoutThread.start();
+			}
 		}
 		catch(Exception e)
 		{
@@ -177,25 +220,31 @@ public class PowerBoost
 		// setta stato, cosi' se riceve altre richieste BOOST nel frattempo, le accodera'
 		this.state = PowerBoost.PowerBoostState.USING;
 
-		System.out.println("{ " + casaId + " } POWER BOOST iniziato");
+		// azzera flag per il timeout thread ( deve smettere di provare perche' ce l'abbiamo fatta!)
+		this.boostObtained = true;
+		// interrompe anche il thread timeout, per sicurezza
+		this.timeoutThread.interrupt();
 
-		// informa il server amministratore inviando notifica PUSH
-		Http.notifyBoost(casaId);
+		System.out.println("{ " + casaId + " } POWER BOOST iniziato");
 
 		// fa partire il thread che inizia e finisce il boost
 		PowerBoostWaiterThread waiter = new PowerBoostWaiterThread(this, this.simulator);
 		waiter.start();
+
+		// informa il server amministratore inviando notifica PUSH
+		Http.notifyBoost(casaId);
 	}
 
 	// finito il power boost, rilascia la risorsa (sync perche' modifica tanti campi ed e' meglio farlo in modo "atomico"
 	public synchronized void endPowerBoost() throws JAXBException
 	{
-		// riazzera tutto per poter ricominciare: come da oggetto nuobo (costruttore)
 		String[] richiesta;
 		String senderId, senderIp;
 		int senderPort;
 		MessageSenderThread boostMessageSender;
 
+
+		// riazzera tutto per poter ricominciare: come da oggetto nuovo (costruttore)
 		System.out.println("{ " + casaId + " } POWER BOOST terminato");
 
 		// azzera timestamp utlima richiesta (-1)
@@ -212,6 +261,28 @@ public class PowerBoost
 		{
 			boostLock.notify();
 		}
+
+		// svuota coda di attesa, inviando OK a tutti i presenti
+		while((richiesta = deaccodaRichiesta()) != null)
+		{
+			senderId = richiesta[0];
+			senderIp = richiesta[1];
+			senderPort = Integer.parseInt(richiesta[2]);
+
+			// risponde OK
+			boostMessageSender = new MessageSenderThread(casaId, senderIp, senderPort, new P2PMessage(casaId, Configuration.CASA_PORT, "OK", "BOOST"));
+			boostMessageSender.start();
+
+			LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Fine BOOST: mando OK a " + senderId);
+		}
+	}
+
+	public synchronized void deleteQueueWithOK() throws JAXBException
+	{
+		String[] richiesta;
+		String senderId, senderIp;
+		int senderPort;
+		MessageSenderThread boostMessageSender;
 
 		// svuota coda di attesa, inviando OK a tutti i presenti
 		while((richiesta = deaccodaRichiesta()) != null)
