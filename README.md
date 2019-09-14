@@ -1,11 +1,12 @@
 # TODO now
 
-- BOOST timestamp uguali, confronta i nomi
-- Request boost resetta gli ok
-- coda di boost no duplicati
-- timeout di retry per power boost
+i sync!!!!!
+non puoi mettere sync a caso nella signature metodo, ma devi isolare i vari pezzetti
+cioe' mettendo synchronized(this) appena prima dei punti critici e uscire ubito il prima che puoi
+non puoi tenere impegnati tutti mentre per esempio mandi in giro dei messaggi perche' e' lento
+pero' allo stesso tempo, request/begin/end power boost devono essere abbastanza atomici, nessuno deve infilarsi in mezzo 
 
-- no sync method ma sync statement isolando bene pezzo per pezzo oppure no sync at all, tanto chiami sempre dei mini-metodi sync
+solo da testare le ultime modifiche
 
 
 ------- CASI PARTICOLARI POWER BOOST

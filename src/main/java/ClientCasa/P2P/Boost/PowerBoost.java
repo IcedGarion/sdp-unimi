@@ -78,11 +78,6 @@ public class PowerBoost
 	// thread timeout che continua a riprovare boost request
 	private PowerBoostWaiterThread timeoutThread;
 
-	public synchronized void setObtained(boolean x)
-	{
-		this.boostObtained = x;
-	}
-
 	public synchronized boolean getObtained()
 	{
 		return this.boostObtained;
@@ -162,46 +157,47 @@ public class PowerBoost
 				}
 			}
 
-			// ORA PUO INIZIARE
-			// setta il proprio stato interno: ha richiesto il boost
-			setState(PowerBoostState.REQUESTED);
-
-			// setta obtained: ha richiesto boost ma non ancora ottenuto ( per thread timeout )
-			setObtained(false);
-
-			// resetta il conto degli OK (se sta riprovando piu' volte e mi arriva ok dalla stessa casa, non deve sommarsi)
-			resetOKCount();
-
-			// MANDA A TUTTI MSG BOOST REQUEST
-			// chiede elenco case e si salva il numero, per contare poi gli OK
 			condominio = Http.getCondominio();
-			setCaseAttive(condominio.size());
 
-			// se c'e' solo una casa (o 2), sa gia' per certo di poter richiedere subito BOOST
-			if(condominio.size() <= 2)
-			{
-				LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Sono l'unica casa attiva (o siamo in 2) e quindi ottengo BOOST!");
-
-				// chiama metodo per fare POWER BOOST
-				beginPowerBoost();
-			}
-			else
-			{
-				// invia "BOOST" a tutti compreso se stesso, con anche timestamp
-				setMessageTimestamp(new Date().getTime());
-
-				for(Casa c : condominio.getCaselist())
-				{
-					boostMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getPort(), new P2PMessage(casaId, Configuration.CASA_PORT, "BOOST", getMessageTimestamp(), "BOOST"));
-					boostMessageSender.start();
-				}
-
-				LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Inviato msg BOOST a tutte le " + getCaseAttive() + " case");
-			}
-
-			// alla fine della richiesta, fa partire un timer che richiedera' di nuovo il boost fra x secondi, in caso non ci sia ancora riuscito
+			// ORA PUO INIZIARE
 			synchronized(this)
 			{
+				// setta il proprio stato interno: ha richiesto il boost
+				this.state = PowerBoostState.REQUESTED;
+
+				// setta obtained: ha richiesto boost ma non ancora ottenuto ( per thread timeout )
+				this.boostObtained = false;
+
+				// resetta il conto degli OK (se sta riprovando piu' volte e mi arriva ok dalla stessa casa, non deve sommarsi)
+				this.OKCount = 0;
+
+				// MANDA A TUTTI MSG BOOST REQUEST
+				// chiede elenco case e si salva il numero, per contare poi gli OK
+				this.caseAttive = condominio.size();
+
+				// se c'e' solo una casa (o 2), sa gia' per certo di poter richiedere subito BOOST
+				if(condominio.size() <= 2)
+				{
+					LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Sono l'unica casa attiva (o siamo in 2) e quindi ottengo BOOST!");
+
+					// chiama metodo per fare POWER BOOST
+					beginPowerBoost();
+				}
+				else
+				{
+					// invia "BOOST" a tutti compreso se stesso, con anche timestamp
+					this.messageTimestamp = new Date().getTime();
+
+					for(Casa c : condominio.getCaselist())
+					{
+						boostMessageSender = new MessageSenderThread(casaId, c.getIp(), c.getPort(), new P2PMessage(casaId, Configuration.CASA_PORT, "BOOST", getMessageTimestamp(), "BOOST"));
+						boostMessageSender.start();
+					}
+
+					LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Inviato msg BOOST a tutte le " + getCaseAttive() + " case");
+				}
+
+				// alla fine della richiesta, fa partire un timer che richiedera' di nuovo il boost fra x secondi, in caso non ci sia ancora riuscito
 				timeoutThread = new PowerBoostWaiterThread(this, BOOST_TIMEOUT_RETRY);
 				timeoutThread.start();
 			}
@@ -215,21 +211,25 @@ public class PowerBoost
 
 	// fa partire un thread che chiama il metodo del simulatore e, finito il tempo, chiama endPowerBoost
 	// serve un thread separato, altrimenti questo rimarrebbe qua ad aspettare 5 sec boost, tenendo impegnato il lock
-	public synchronized void beginPowerBoost() throws InterruptedException
+	public void beginPowerBoost() throws InterruptedException
 	{
-		// setta stato, cosi' se riceve altre richieste BOOST nel frattempo, le accodera'
-		this.state = PowerBoost.PowerBoostState.USING;
+		synchronized(this)
+		{
+			// setta stato, cosi' se riceve altre richieste BOOST nel frattempo, le accodera'
+			this.state = PowerBoost.PowerBoostState.USING;
 
-		// azzera flag per il timeout thread ( deve smettere di provare perche' ce l'abbiamo fatta!)
-		this.boostObtained = true;
-		// interrompe anche il thread timeout, per sicurezza
-		this.timeoutThread.interrupt();
+			// azzera flag per il timeout thread ( deve smettere di provare perche' ce l'abbiamo fatta!)
+			this.boostObtained = true;
 
-		System.out.println("{ " + casaId + " } POWER BOOST iniziato");
+			// interrompe anche il thread timeout, per sicurezza
+			this.timeoutThread.interrupt();
+		}
 
 		// fa partire il thread che inizia e finisce il boost
 		PowerBoostWaiterThread waiter = new PowerBoostWaiterThread(this, this.simulator);
 		waiter.start();
+
+		System.out.println("{ " + casaId + " } POWER BOOST iniziato");
 
 		// informa il server amministratore inviando notifica PUSH
 		Http.notifyBoost(casaId);
