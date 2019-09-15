@@ -36,7 +36,8 @@ public class PowerBoostWaiterThread extends Thread
 				// chiama il power boost vero del simulatore (continene SLEEP)
 				simulator.boost();
 
-				sleep(10000);
+				// DEBUG
+				// sleep(10000);
 
 				// richiama metodo di PowerBoost endBoost, che risistema tutto (rida' l'esecuzione dove doveva essere, dopo aver atteso)
 				powerBoostObj.endPowerBoost();

@@ -122,6 +122,8 @@ public class CasaApp
 		/*	INTERFACCIA CLI BOOST + EXIT	*/
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 		String choice;
+		CasaAppInputResponder responder = null;
+
 		while(true)
 		{
 			try
@@ -151,6 +153,11 @@ public class CasaApp
 					mean.interrupt();
 					simulator.interrupt();
 
+					if(responder != null)
+					{
+						responder.interrupt();
+					}
+
 					LOGGER.log(Level.INFO, "{ " + casaId + " } Stopping CasaApp...");
 					break;
 				}
@@ -158,8 +165,13 @@ public class CasaApp
 				else if(choice.equals("0"))
 				{
 					LOGGER.log(Level.INFO, "{ " + casaId + " } Power boost requested... (Please wait)");
-					powerBoost.requestPowerBoost(false);
-				} else
+
+					// siccome la richiesta di boost puo' essere bloccante ( vedi semaforo su richieste multiple in PowerBoost),
+					// allora fa fare la richiesta ad un altro thread
+					responder = new CasaAppInputResponder("REQUEST_BOOST", powerBoost);
+					responder.start();
+				}
+				else
 				{
 					System.out.println("Inserire 0/1");
 				}

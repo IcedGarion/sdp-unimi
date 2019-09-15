@@ -174,7 +174,15 @@ public class PowerBoost
 				{
 					LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Hai gia' richiesto il boost! Devi aspettare di terminare");
 
-					boostLock.wait();
+					try
+					{
+						boostLock.wait();
+					}
+					catch(InterruptedException e)
+					{
+						// era in wait per prossimo boost ma CasaApp ha deciso di uscire: niente
+						LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Avevi richiesto un altro boost ma ora stai uscendo... ");
+					}
 				}
 			}
 
