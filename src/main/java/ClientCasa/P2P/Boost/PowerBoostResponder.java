@@ -120,25 +120,34 @@ public class PowerBoostResponder implements MessageResponder
 					// gli OK sono da considerare soltanto se hai fatto la richiesta (REQUESTED)
 					if(powerBoostObject.getState().equals(PowerBoost.PowerBoostState.REQUESTED))
 					{
-						// aumenta contatore degli OK nell'oggetto condiviso (stato)
-						powerBoostObject.incrOKCount();
-
-						// usa il count settato all'inizio da PowerBoost, quando aveva mandato la prima richiesta boost: numero case attive in quel momento
-						// si aspetta di ricevere tanti OK quante le case attive quando aveva mandato la richiesta (meno 2: POSSONO USARE IL BOOST IN 2)
-						if(powerBoostObject.getOKCount() == powerBoostObject.getCaseAttive()-2)
+						// NON ACCETTA OK DUPLICATI: check se ha gia' ricevuto l'ok da quella casa a questo giro
+						// il conto di chi ha mandato OK viene azzerato ogni volta che si fa request
+						if(powerBoostObject.duplicatedOk(senderId))
 						{
-							// OK DA TUTTI: OTTIENE IL BOOST!
-							LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg OK da " + senderId + ": ottenuti tutti gli OK necessari: USA BOOST!");
-
-							// setta stato, cosi' se riceve altre richieste BOOST nel frattempo, le accodera' (in beginPowerBoost)
-
-							// chiama metodo simulatore per fare effettivamente POWER BOOST
-							powerBoostObject.beginPowerBoost();
+							LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg OK DUPLICATO da " + senderId + ": lui mi ha gia' mandato OK quindi lo ignoro");
 						}
 						else
 						{
-							// Non ha ancora ricevuto tutti gli OK necessari: non fa piu' niente... aspetta il prossimo
-							LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg OK da " + senderId + ": in attesa di altri OK (" + powerBoostObject.getOKCount() + " / " + (powerBoostObject.getCaseAttive()-2) + ")");
+							// aumenta contatore degli OK nell'oggetto condiviso (stato)
+							powerBoostObject.incrOKCount();
+
+							// usa il count settato all'inizio da PowerBoost, quando aveva mandato la prima richiesta boost: numero case attive in quel momento
+							// si aspetta di ricevere tanti OK quante le case attive quando aveva mandato la richiesta (meno 2: POSSONO USARE IL BOOST IN 2)
+							if(powerBoostObject.getOKCount() == powerBoostObject.getCaseAttive() - 2)
+							{
+								// OK DA TUTTI: OTTIENE IL BOOST!
+								LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg OK da " + senderId + ": ottenuti tutti gli OK necessari: USA BOOST!");
+
+								// setta stato, cosi' se riceve altre richieste BOOST nel frattempo, le accodera' (in beginPowerBoost)
+
+								// chiama metodo simulatore per fare effettivamente POWER BOOST
+								powerBoostObject.beginPowerBoost();
+							}
+							else
+							{
+								// Non ha ancora ricevuto tutti gli OK necessari: non fa piu' niente... aspetta il prossimo
+								LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg OK da " + senderId + ": in attesa di altri OK (" + powerBoostObject.getOKCount() + " / " + (powerBoostObject.getCaseAttive() - 2) + ")");
+							}
 						}
 					}
 					// ricevi OK ma non hai fatto richiesta (NOT_INTERESTED) o stai gia' usando (USING): lo scarti

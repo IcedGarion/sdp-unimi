@@ -41,6 +41,8 @@ public class PowerBoost
 	private int caseAttive;
 	// contatore degli OK
 	private int OKCount;
+	// mappa ok duplicati: segna chi mi ha mandato gia' l'ok a sto giro
+	private Set<String> receivedOkIds;
 	// timestamp del messaggio di richiesta appena inviato
 	private long messageTimestamp;
 
@@ -59,6 +61,7 @@ public class PowerBoost
 		this.messageTimestamp = -1;
 		this.boostLock = new Object();
 		this.boostObtained = false;
+		this.receivedOkIds = new HashSet<>();
 
 		// logger levels
 		LOGGER.setLevel(Configuration.LOGGER_LEVEL);
@@ -129,11 +132,27 @@ public class PowerBoost
 	}
 
 	// aggiorna / check del numero di OK ricevuti dopo una richiesta di BOOST
-	public synchronized void incrOKCount() { this.OKCount = this.OKCount+1; }
-
-	public synchronized void resetOKCount() { this.OKCount = 0; }
+	// fa anche check se ricevut
+	public synchronized void incrOKCount()
+	{
+		this.OKCount = this.OKCount+1;
+	}
 
 	public synchronized int getOKCount() { return this.OKCount; }
+
+	// a sto giro la casa 'senderId' mi ha gia' mandato il suo ok? se si, rispondo TRUE; se no, lo aggiungo e rispondo false
+	public synchronized boolean duplicatedOk(String senderId)
+	{
+		if(receivedOkIds.contains(senderId))
+		{
+			return true;
+		}
+		else
+		{
+			receivedOkIds.add(senderId);
+			return false;
+		}
+	}
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -172,6 +191,9 @@ public class PowerBoost
 
 				// resetta il conto degli OK (se sta riprovando piu' volte e mi arriva ok dalla stessa casa, non deve sommarsi)
 				this.OKCount = 0;
+
+				// resetta gli id di chi mi ha gia' risposto OK
+				this.receivedOkIds = new HashSet<>();
 
 				// MANDA A TUTTI MSG BOOST REQUEST
 				// chiede elenco case e si salva il numero, per contare poi gli OK
@@ -258,6 +280,9 @@ public class PowerBoost
 
 		// resetta il conto degli OK ricevuti (0)
 		this.OKCount = 0;
+
+		// resetta gli id chi ha gia' mandato ok
+		this.receivedOkIds = new HashSet<>();
 
 		// setta stato iniziale
 		this.state = PowerBoostState.NOT_INTERESTED;
