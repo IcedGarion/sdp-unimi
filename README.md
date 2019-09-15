@@ -1,12 +1,24 @@
 # TODO now
 
+- TESTARE MULTIPLE RICHIESTE BOOST DA TASTIERA
+- TESTARE MULTIPLE RICHIESTE BOOST DA TASTIERA
+- TESTARE MULTIPLE RICHIESTE BOOST DA TASTIERA
+- TESTARE MULTIPLE RICHIESTE BOOST DA TASTIERA
+
+c'e' sto inTimeout che va settato magari di nuovo a false solo in endPowerBoost, invce che begin....
+solo che se lo sposti poi input da tastiera non viene rimesso in lock...
+
+
+- I SYNC CONTROLLA MA DOVREBBERO ESSERE A POSTO
 i sync!!!!!
 non puoi mettere sync a caso nella signature metodo, ma devi isolare i vari pezzetti
 cioe' mettendo synchronized(this) appena prima dei punti critici e uscire ubito il prima che puoi
 non puoi tenere impegnati tutti mentre per esempio mandi in giro dei messaggi perche' e' lento
 pero' allo stesso tempo, request/begin/end power boost devono essere abbastanza atomici, nessuno deve infilarsi in mezzo 
 
+- TESTARE SOPRATTUTTO IL NUOVO TIMEOUT THREAD (metti sleep nel powero boost di molti secondi)
 solo da testare le ultime modifiche
+
 
 
 ------- CASI PARTICOLARI POWER BOOST

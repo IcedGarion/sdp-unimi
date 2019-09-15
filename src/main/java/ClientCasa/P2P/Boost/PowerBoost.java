@@ -44,6 +44,9 @@ public class PowerBoost
 	// timestamp del messaggio di richiesta appena inviato
 	private long messageTimestamp;
 
+	// thread timeout che continua a riprovare boost request
+	private PowerBoostWaiterThread timeoutThread;
+
 	public PowerBoost(SmartMeterSimulator simulator)
 	{
 		this.casaId = Configuration.CASA_ID;
@@ -74,9 +77,6 @@ public class PowerBoost
 	{
 		return this.state;
 	}
-
-	// thread timeout che continua a riprovare boost request
-	private PowerBoostWaiterThread timeoutThread;
 
 	public synchronized boolean getObtained()
 	{
@@ -135,10 +135,12 @@ public class PowerBoost
 
 	public synchronized int getOKCount() { return this.OKCount; }
 
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// INIZIO BOOST
 	// simile a Election.startElection(): avvisa tutti che serve boost; poi il thread rispondera' e gestira' lui
-	public void requestPowerBoost()
+	// param: chiama il ciclo di retry oppure l'utente?
+	public void requestPowerBoost(boolean timeoutThreadCaller)
 	{
 		Condominio condominio;
 		MessageSenderThread boostMessageSender;
@@ -148,8 +150,8 @@ public class PowerBoost
 			// check semaforo in modo che non puoi richiedere un altro boost mentre questo e' gia' attivo, ma dovrai aspettare
 			synchronized(boostLock)
 			{
-				// se ha gia' richiesto / sta gia' usando, deve aspettare
-				if(getState().equals(PowerBoostState.USING) || getState().equals(PowerBoostState.REQUESTED))
+				// se ha gia' richiesto / sta gia' usando, deve aspettare ( solo per input tastiera; se sei il timeout thread puoi riprovare )
+				if((! timeoutThreadCaller) && (getState().equals(PowerBoostState.USING) || getState().equals(PowerBoostState.REQUESTED)))
 				{
 					LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Hai gia' richiesto il boost! Devi aspettare di terminare");
 
@@ -198,8 +200,12 @@ public class PowerBoost
 				}
 
 				// alla fine della richiesta, fa partire un timer che richiedera' di nuovo il boost fra x secondi, in caso non ci sia ancora riuscito
-				timeoutThread = new PowerBoostWaiterThread(this, BOOST_TIMEOUT_RETRY);
-				timeoutThread.start();
+				// se e' la prima volta che chiedo da tastiera fai partire timeoutThread, altrimenti NO (sta gia' girando)
+				if(! timeoutThreadCaller)
+				{
+					timeoutThread = new PowerBoostWaiterThread(this, BOOST_TIMEOUT_RETRY);
+					timeoutThread.start();
+				}
 			}
 		}
 		catch(Exception e)

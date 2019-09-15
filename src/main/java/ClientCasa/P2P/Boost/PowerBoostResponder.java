@@ -50,7 +50,7 @@ public class PowerBoostResponder implements MessageResponder
 			senderPort = boostMessage.getSenderPort();
 			senderTimestamp = boostMessage.getTimestamp();
 
-			LOGGER.log(Level.INFO, "P2P Message received from " + senderId + ": " + boostMessage.getMessage());
+			LOGGER.log(Level.FINE, "P2P Message received from " + senderId + ": " + boostMessage.getMessage());
 
 			switch(boostMessage.getMessage())
 			{

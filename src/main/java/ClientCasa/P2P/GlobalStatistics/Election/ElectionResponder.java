@@ -48,7 +48,7 @@ public class ElectionResponder implements MessageResponder
 			senderIp = electionMessage.getSenderIp();
 			senderPort = electionMessage.getSenderPort();
 
-			LOGGER.log(Level.INFO, "P2P Message received from " + senderId + ": " + electionMessage.getMessage());
+			LOGGER.log(Level.FINE, "P2P Message received from " + senderId + ": " + electionMessage.getMessage());
 
 			// decide cosa fare in base al messaggio:
 			switch(electionMessage.getMessage())

@@ -36,6 +36,8 @@ public class PowerBoostWaiterThread extends Thread
 				// chiama il power boost vero del simulatore (continene SLEEP)
 				simulator.boost();
 
+				sleep(10000);
+
 				// richiama metodo di PowerBoost endBoost, che risistema tutto (rida' l'esecuzione dove doveva essere, dopo aver atteso)
 				powerBoostObj.endPowerBoost();
 			}
@@ -56,12 +58,22 @@ public class PowerBoostWaiterThread extends Thread
 			{
 				while(time < timeout)
 				{
+					System.out.println("TIMEOUT BOOST: provo a richiedere di nuovo BOOST fra " + step + " millisecondi ");
+
 					Thread.sleep(step);
 					time += step;
 
+					// se alla fine sei riuscito a ottenere boost a questo giro, fine
 					if(powerBoostObj.getObtained() || interrupted())
 					{
+						System.out.println("Stavo continuando a riprovare ma intanto il power boost e' stato ottenuto.");
 						break;
+					}
+
+					// chiedi di nuovo solo se non lo stai gia' usando
+					if(! powerBoostObj.getState().equals(PowerBoost.PowerBoostState.USING))
+					{
+						powerBoostObj.requestPowerBoost(true);
 					}
 				}
 			}

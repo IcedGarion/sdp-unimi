@@ -175,7 +175,7 @@ public class Http
 		catch(Exception e)
 		{
 			LOGGER.log(Level.SEVERE, "Failed to connect to Admin Server ( GET " + Configuration.SERVER_URL + "/statisticheLocali )");
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 	}
 

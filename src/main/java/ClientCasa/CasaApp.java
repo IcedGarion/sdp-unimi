@@ -158,7 +158,7 @@ public class CasaApp
 				else if(choice.equals("0"))
 				{
 					LOGGER.log(Level.INFO, "{ " + casaId + " } Power boost requested... (Please wait)");
-					powerBoost.requestPowerBoost();
+					powerBoost.requestPowerBoost(false);
 				} else
 				{
 					System.out.println("Inserire 0/1");
