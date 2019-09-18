@@ -11,6 +11,8 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+// TODO: dividi in multipli lock, uno per electionState e uno per coord
+
 /*	Classe statica con metodi per gestire elezione: chi ha bisogno indice elezione.
     Ha anche metodi sync per gestire stato elezione.
 

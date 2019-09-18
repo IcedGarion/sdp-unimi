@@ -14,6 +14,8 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+// TODO: dividi in multipli lock, ~ uno per attributo
+
 // oggetto condiviso con dati riguardanti lo stato del power boost ("sto usando"/no; coda di chi ha richiesto....)
 // condivso fra i vari thread che ricevono messaggi di boost
 public class PowerBoost
@@ -257,8 +259,9 @@ public class PowerBoost
 			// azzera flag per il timeout thread ( deve smettere di provare perche' ce l'abbiamo fatta!)
 			this.boostObtained = true;
 
-			// interrompe anche il thread timeout, per sicurezza
-			this.timeoutThread.interrupt();
+			// interrompe anche il thread timeout, per sicurezza ( se esiste )
+			if(timeoutThread != null)
+				this.timeoutThread.interrupt();
 		}
 
 		// fa partire il thread che inizia e finisce il boost

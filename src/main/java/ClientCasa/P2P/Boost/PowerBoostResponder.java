@@ -126,6 +126,11 @@ public class PowerBoostResponder implements MessageResponder
 						{
 							LOGGER.log(Level.INFO, "{ " + casaId + " } [ BOOST ] Ricevuto msg OK DUPLICATO da " + senderId + ": lui mi ha gia' mandato OK quindi lo ignoro");
 						}
+
+						// TODO: confrontare timetamp dell'OK con quello della mia ultima richiesta di boost, e ignorare se OK troppo vecchio?
+						// ( riguardava una vecchia richiesta )
+						// TODO: oppure usare un id richiesta
+
 						else
 						{
 							// aumenta contatore degli OK nell'oggetto condiviso (stato)
